@@ -1,4 +1,4 @@
-// Streaming JSON field scanner for NetEase API responses.
+// Streaming JSON field scanner for HTTP API responses.
 //
 // The responses are large (a user's playlist list is ~56 KB) while the fields
 // the device needs are a few hundred bytes. Bytes are fed as they arrive from
@@ -11,7 +11,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace netease {
+namespace json {
 
 class JsonScanner {
 public:
@@ -70,4 +70,4 @@ private:
     uint32_t high_surrogate_ = 0;
 };
 
-}  // namespace netease
+}  // namespace json

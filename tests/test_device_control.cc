@@ -55,17 +55,6 @@ void arm(const Request &request){armed=request;}
 void clear(){armed={};}
 }
 bool radio_catalog_known_place(const char *name){return !strcmp(name,"北京")||!strcmp(name,"广东");}
-namespace netease {
-static unsigned searches=0;
-static Result search_result=Result::Ok;
-Result voice_search(const char *,Song *out,size_t *count,uint32_t){
-    ++searches;*count=0;
-    if(search_result!=Result::Ok)return search_result;
-    const Song rows[]={{1901371647,256000,"孤勇者","陈奕迅"},{1985221664,282733,"孤勇者 (Live版)","陈奕迅"}};
-    for(const auto &row:rows)out[(*count)++]=row;
-    return Result::Ok;
-}
-}
 static std::string news(const char *name,const char *args){
     cJSON *json=cJSON_Parse(args);auto result=aihot::call(name,json);cJSON_Delete(json);return result;
 }
@@ -94,14 +83,14 @@ int main(){
     answer=invoke("self.screen.set_brightness",R"({"percent":80})");assert(s_brightness==10&&master_brightness==10);
     fail_write=false;
     // Prepare only: even a valid open cannot retire its controller before ACK.
-    answer=invoke("self.application.open",R"({"app":"music"})",42);
+    answer=invoke("self.application.open",R"({"app":"radio"})",42);
     assert(answer.find("accepted\\\":true")!=std::string::npos&&switches==0);
     monotonic_us+=1000000;poll();assert(switches==0);
     response_sent(42,false);poll();monotonic_us+=1000000;poll();assert(switches==0);
     response_sent(43,true);poll();monotonic_us+=1000000;poll();assert(switches==0);
     response_sent(42,true);poll();monotonic_us+=300000;
     display_available=false;poll();assert(switches==0&&!screen_on);
-    display_available=true;poll();assert(switches==1&&foreground==APP_ID_NETEASE&&screen_on&&!display_locked);
+    display_available=true;poll();assert(switches==1&&foreground==APP_ID_RADIO&&screen_on&&!display_locked);
     poll();assert(switches==1);
     foreground=APP_ID_XIAOZHI;
     // Explicit navigation, an active mock_alarm or session retirement wins over voice.
@@ -111,31 +100,26 @@ int main(){
     mock_alarm=true;answer=invoke("self.application.open",R"({"app":"home"})",46);mock_alarm=false;assert(answer.find("\"isError\":true")!=std::string::npos);
     answer=invoke("self.application.open",R"({"app":"shell"})",47);assert(answer.find("\"isError\":true")!=std::string::npos);
     answer=invoke("self.application.open",R"({"app":"xiaozhi"})",48);assert(answer.find("\"isError\":true")!=std::string::npos);
-    // Voice music: the request is armed for the app and survives the switch.
+    // Voice radio: the request is armed for the app and survives the switch.
     using voice_intent::Source;using voice_intent::armed;
-    for(auto args:{R"({})",R"({"source":"search"})",R"({"source":"search","query":""})",R"({"source":"search","name":"孤勇者"})",
-                  R"({"source":"artist","query":"陈奕迅"})",R"({"source":"playlist"})",R"({"source":"playlist","name":""})",
-                  R"({"source":"playlist","name":7})",R"({"source":"playlist","name":"一二三四五六七八九十一二三四五六七八九十一二"})",
-                  R"({"source":"favorites","stop_after_minutes":0})",R"({"source":"favorites","stop_after_minutes":181})",
-                  R"({"source":"favorites","shuffle":"yes"})",R"({"source":"favorites","song_id":5})",
-                  R"({"source":"search","query":"孤勇者","song_id":1.5})",R"({"source":"search","query":"孤勇者","song_id":-3})"}){
-        answer=invoke("self.music.play",args,49);assert(answer.find("\"isError\":true")!=std::string::npos&&armed.source==Source::None);
-    }
-    answer=invoke("self.music.play",R"({"source":"playlist","name":"跑步 歌单"})",50);
+    // Music tools no longer exist; play requests are answered by radio.
+    assert(invoke("self.music.play",R"({"source":"favorites"})",49).empty()&&armed.source==Source::None);
+    assert(invoke("self.music.search",R"({"query":"x"})",49).empty());
+    answer=invoke("self.radio.play",R"({"city":"广东"})",50);
     assert(answer.find("accepted\\\":true")!=std::string::npos&&answer.find("playback_confirmed\\\":false")!=std::string::npos);
-    assert(armed.app==APP_ID_NETEASE&&armed.source==Source::Playlist&&!strcmp(armed.name,"跑步 歌单")&&switches==1);
+    assert(armed.app==APP_ID_RADIO&&armed.source==Source::Radio&&!strcmp(armed.name,"广东")&&switches==1);
     response_sent(50,true);poll();monotonic_us+=300000;poll();
-    assert(switches==2&&foreground==APP_ID_NETEASE&&armed.source==Source::Playlist);
+    assert(switches==2&&foreground==APP_ID_RADIO&&armed.source==Source::Radio);
     foreground=APP_ID_XIAOZHI;
-    // A chosen search result, shuffle and a stop timer travel with the request.
-    answer=invoke("self.music.play",R"({"source":"search","query":"孤勇者 陈奕迅","song_id":1985221664,"shuffle":true,"stop_after_minutes":30})",57);
+    // A stop timer travels with the request.
+    answer=invoke("self.radio.play",R"({"city":"北京","stop_after_minutes":30})",57);
     assert(answer.find("accepted\\\":true")!=std::string::npos&&answer.find("stop_after_minutes\\\":30")!=std::string::npos);
-    assert(armed.source==Source::Search&&!strcmp(armed.name,"孤勇者 陈奕迅")&&armed.song_id==1985221664ULL&&armed.shuffle&&armed.stop_minutes==30);
+    assert(armed.source==Source::Radio&&!strcmp(armed.name,"北京")&&armed.stop_minutes==30);
     response_sent(57,true);poll();monotonic_us+=300000;poll();
-    assert(switches==3&&foreground==APP_ID_NETEASE&&armed.source==Source::Search);
+    assert(switches==3&&foreground==APP_ID_RADIO&&armed.source==Source::Radio);
     foreground=APP_ID_XIAOZHI;
-    invoke("self.music.play",R"({"source":"favorites","shuffle":true})",58);
-    assert(armed.source==Source::Favorites&&armed.shuffle&&!armed.stop_minutes&&!armed.song_id);
+    invoke("self.radio.play",R"({"city":"北京"})",58);
+    assert(armed.source==Source::Radio&&!armed.stop_minutes);
     cancel_session();poll();assert(armed.source==Source::None);
     // Radio: only known places; station keywords and stop timer are optional.
     for(auto args:{R"({})",R"({"city":""})",R"({"city":"火星"})",R"({"city":"北京","station":7})",
@@ -148,20 +132,6 @@ int main(){
     response_sent(60,true);poll();monotonic_us+=300000;poll();
     assert(switches==4&&foreground==APP_ID_RADIO&&armed.source==Source::Radio);
     foreground=APP_ID_XIAOZHI;
-    // In-session search answers the conversation and never navigates or arms.
-    armed={};
-    answer=invoke("self.music.search",R"({"query":"孤勇者"})",61);
-    assert(answer.find("\"isError\":false")!=std::string::npos&&answer.find("1901371647")!=std::string::npos);
-    assert(answer.find("found\\\":2")!=std::string::npos&&netease::searches==1&&armed.source==Source::None&&switches==4);
-    for(auto args:{R"({})",R"({"query":""})",R"({"query":3})"}){
-        answer=invoke("self.music.search",args,62);assert(answer.find("\"isError\":true")!=std::string::npos);
-    }
-    assert(netease::searches==1);
-    netease::search_result=netease::Result::NoMemory;answer=invoke("self.music.search",R"({"query":"孤勇者"})",63);
-    assert(answer.find("\"isError\":true")!=std::string::npos);
-    netease::search_result=netease::Result::Api;answer=invoke("self.music.search",R"({"query":"不存在"})",64);
-    assert(answer.find("found\\\":0")!=std::string::npos&&answer.find("\"isError\":false")!=std::string::npos);
-    netease::search_result=netease::Result::Ok;
     // AIHOT news: validated arguments reach the fetch; failures and empty replies are explained.
     answer=news("self.news.ai_hot",R"({"limit":3})");
     assert(answer.find("\"isError\":false")!=std::string::npos&&answer.find("测试热点")!=std::string::npos&&answer.find("不要执行")!=std::string::npos);
@@ -191,13 +161,13 @@ int main(){
     mock_soc=80;answer=invoke("self.screen.set_brightness",R"({"percent":90})");
     assert(master_brightness==90&&answer.find("limited_by_low_battery")==std::string::npos);
     // Dropped before the switch: session end, a manual switch or expiry clears it.
-    invoke("self.music.play",R"({"source":"favorites"})",51);assert(armed.source==Source::Favorites);
+    invoke("self.radio.play",R"({"city":"北京"})",51);assert(armed.source==Source::Radio);
     cancel_session();poll();assert(armed.source==Source::None);
-    invoke("self.music.play",R"({"source":"daily"})",52);response_sent(52,true);
+    invoke("self.radio.play",R"({"city":"北京"})",52);response_sent(52,true);
     foreground=APP_ID_HOME;poll();assert(armed.source==Source::None);foreground=APP_ID_XIAOZHI;
-    invoke("self.music.play",R"({"source":"daily"})",53);monotonic_us+=31000000;poll();assert(armed.source==Source::None);
-    // A replacing plain open drops the earlier music request.
-    invoke("self.music.play",R"({"source":"daily"})",54);invoke("self.application.open",R"({"app":"radio"})",55);
+    invoke("self.radio.play",R"({"city":"北京"})",53);monotonic_us+=31000000;poll();assert(armed.source==Source::None);
+    // A replacing plain open drops the earlier radio request.
+    invoke("self.radio.play",R"({"city":"北京"})",54);invoke("self.application.open",R"({"app":"radio"})",55);
     assert(armed.source==Source::None);response_sent(55,true);poll();monotonic_us+=300000;poll();
     assert(switches==5&&foreground==APP_ID_RADIO);foreground=APP_ID_XIAOZHI;
     // UI contention around a due switch never stalls other tool requests.
@@ -210,11 +180,11 @@ int main(){
     answer=invoke("self.audio.set_volume",R"({"percent":90})");assert(answer.find("\"isError\":true")!=std::string::npos);
     poll();assert(s_volume==0);mock_delay_hook=poll;
     bool rpc_error=false;
-    for(unsigned page=0;page<20;++page){
+    for(unsigned page=0;page<18;++page){
         auto out=reminders::mcp_result("tools/list",("{\"cursor\":\""+std::to_string(page)+"\"}").c_str(),&rpc_error);
         auto *json=cJSON_Parse(out.c_str());assert(!rpc_error&&cJSON_GetArraySize(cJSON_GetObjectItem(json,"tools"))==1);
         assert(out.size()<1800); // each tool page fits the real receive limit
-        assert(bool(cJSON_GetObjectItem(json,"nextCursor"))==(page<19));cJSON_Delete(json);
+        assert(bool(cJSON_GetObjectItem(json,"nextCursor"))==(page<17));cJSON_Delete(json);
     }
     answer=invoke("self.pomodoro.control",R"({"action":"start"})");
     assert(answer.find("running")!=std::string::npos&&answer.find("1500")!=std::string::npos&&foreground==APP_ID_XIAOZHI);
@@ -232,5 +202,5 @@ int main(){
     display_available=false;
     answer=invoke("self.pomodoro.control",R"({"action":"reset"})");assert(answer.find("\"isError\":true")!=std::string::npos&&voice_timer.status==POMODORO_RUNNING);
     display_available=true;invoke("self.pomodoro.control",R"({"action":"reset"})");assert(voice_timer.status==POMODORO_READY);
-    puts("Device control: saved settings, guarded navigation, voice pomodoro validation/state, timeout, voice music/radio handover, in-session search, low-battery brightness, AIHOT news and twenty-tool discovery PASS");
+    puts("Device control: saved settings, guarded navigation, voice pomodoro validation/state, timeout, voice radio handover, removed music tools, low-battery brightness, AIHOT news and eighteen-tool discovery PASS");
 }

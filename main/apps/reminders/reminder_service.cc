@@ -214,8 +214,7 @@ void poll() {
         // Alarms use a fixed level and ring even when master volume is 0.
         if(mono>=next_sound && !quiet) {sound=true;next_sound=mono+5000000;}
         const auto app=app_registry_get_active();
-        if((app!=APP_ID_NETEASE && app!=APP_ID_REMINDERS) ||
-           (app==APP_ID_NETEASE && sound && mono-began>3000000 && next_sound==began+5000000)) {
+        if(app!=APP_ID_REMINDERS) {
             if(return_app==APP_ID_COUNT && app!=APP_ID_LAUNCHER) return_app=app;
             app_registry_switch_to(APP_ID_REMINDERS);
         }

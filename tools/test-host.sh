@@ -138,20 +138,8 @@ python3 tests/test_public_build.py
 "${CC:-cc}" -std=c11 -Wall -Wextra -Werror -Itests/battery_mocks -Icomponents/bsp/include \
     tests/test_battery_driver.c components/bsp/src/bsp_battery.c -o "$test_dir/battery"
 "$test_dir/battery"
-python3 tests/test_netease_parse.py
 python3 tests/test_media_startup.py
-"${CXX:-c++}" -std=c++17 -Wall -Wextra -Werror -fsanitize=address,undefined \
-    -Itests/registry_mocks -Imain tests/test_netease_controls.cc -o "$test_dir/netease-controls"
-"$test_dir/netease-controls"
-"${CXX:-c++}" -std=c++17 -Wall -Wextra -Werror -fsanitize=address,undefined -Itests/registry_mocks -Imain \
-    tests/test_netease_intent.cc main/apps/netease/netease_json.cc -o "$test_dir/netease-intent"
-"$test_dir/netease-intent"
 "${CXX:-c++}" -std=c++17 -Wall -Wextra -Werror -fsanitize=address,undefined -Imain \
-    tests/test_aihot.cc main/apps/netease/netease_json.cc -o "$test_dir/aihot"
+    tests/test_aihot.cc main/json_scanner.cc -o "$test_dir/aihot"
 "$test_dir/aihot"
-"${CXX:-c++}" -std=c++17 -O1 -Wall -Wextra -Werror -fsanitize=address,undefined -Imain     tests/test_netease_dsp.cc -o "$test_dir/netease-dsp"
-"$test_dir/netease-dsp"
-"${CXX:-c++}" -std=c++17 -Wall -Wextra -Werror -fsanitize=address,undefined -Imain \
-    -Itests/registry_mocks tests/test_netease_performance.cc main/apps/netease/netease_json.cc -o "$test_dir/netease-performance"
-"$test_dir/netease-performance"
 echo "Host regression tests: PASS"

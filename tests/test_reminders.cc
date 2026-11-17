@@ -47,10 +47,11 @@ int main(){
     assert(get(first,&all[0])&&all[0].due>=time(nullptr)+299);
     assert(change(first,false,0,&error));assert(get(first,&all[0])&&all[0].status==Status::Done);
     assert(change(first,true,0,&error));assert(!get(first,&all[0]));
-    // Master mute does not silence alarms; music keeps the foreground.
+    // Master mute does not silence alarms; a playing app yields the foreground.
     {Guard g;auto r=records[1];r.due=time(nullptr)-1;assert(save(1,r,next_id));}
-    foreground=APP_ID_NETEASE; master_volume=0;monotonic_us+=1000000;
-    poll();poll();assert(alarm_active()&&sound_pending()&&foreground==APP_ID_NETEASE);
+    const unsigned rings_before=rings;
+    foreground=APP_ID_RADIO; master_volume=0;monotonic_us+=1000000;
+    poll();poll();assert(alarm_active()&&foreground==APP_ID_REMINDERS&&rings>rings_before);
     assert(intercept_key(BSP_BTN_OK,BTN_EVT_CLICK));poll();master_volume=80;
     // A reboot backlog is retained as missed and does not ring.
     {Guard g;auto r=records[1];r.status=Status::Pending;r.due=time(nullptr)-600;assert(save(1,r,next_id));}

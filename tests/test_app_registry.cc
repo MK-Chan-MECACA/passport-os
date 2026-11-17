@@ -1,7 +1,6 @@
 #include "registry_platform.h"
 #include <cstring>
 #include "../main/launcher/app_registry.cc"
-#include "apps/netease/netease_controls.h"
 #include "launcher/ok_gesture.h"
 static int starts,stops,keys;
 static lv_obj_t *screens[APP_ID_COUNT]{};
@@ -18,14 +17,15 @@ static void stop(){++stops;auto &screen=screens[app_registry_get_active()];if(sc
 static bool prepare(){return mock_ready;}
 static bool key_opens_launcher=false;
 static void key(uint8_t,app_btn_event_t,uint16_t){++keys;if(key_opens_launcher)app_registry_switch_to(APP_ID_LAUNCHER);}
-static netease::Page music_page=netease::Page::Lists;
-static int music_back_calls=0;
-static bool music_back(){++music_back_calls;if(music_page==netease::Page::Lists)return false;music_page=netease::back_page(music_page,true);return true;}
-static passport_app_t app(passport_app_id_t id){passport_app_t a{};a.id=id;a.name="test";a.start=start;a.stop=stop;a.on_key=key;a.prepare_stop=prepare;if(id==APP_ID_NETEASE)a.on_back=music_back;return a;}
+// Lists page depth: 0 = top level; Back consumes one level until the top.
+static int lists_depth=0;
+static int lists_back_calls=0;
+static bool lists_back(){++lists_back_calls;if(!lists_depth)return false;--lists_depth;return true;}
+static passport_app_t app(passport_app_id_t id){passport_app_t a{};a.id=id;a.name="test";a.start=start;a.stop=stop;a.on_key=key;a.prepare_stop=prepare;if(id==APP_ID_LISTS)a.on_back=lists_back;return a;}
 const passport_app_t g_radio_app=app(APP_ID_RADIO),g_voice_app=app(APP_ID_VOICE),g_xiaozhi_app=app(APP_ID_XIAOZHI),
  g_wifi_app=app(APP_ID_WIFI),g_settings_app=app(APP_ID_SETTINGS),g_home_app=app(APP_ID_HOME),g_game_app=app(APP_ID_GAME),
  g_tetris_app=app(APP_ID_TETRIS),g_stopwatch_app=app(APP_ID_STOPWATCH),g_sound_jump_app=app(APP_ID_SOUND_JUMP),g_muse_app=app(APP_ID_MUSE),g_pomodoro_app=app(APP_ID_POMODORO),
- g_netease_app=app(APP_ID_NETEASE),g_reminders_app=app(APP_ID_REMINDERS),g_lists_app=app(APP_ID_LISTS);
+ g_reminders_app=app(APP_ID_REMINDERS),g_lists_app=app(APP_ID_LISTS);
 static bool mock_reminder_active=false;
 namespace reminders {
  bool alarm_active(){return mock_reminder_active;}
@@ -52,7 +52,7 @@ int main(){
   s_active_id.store(static_cast<passport_app_id_t>(id));
   s_screen_on.store(true);assert(!app_registry_background_idle());
   s_screen_on.store(false);
-  const bool streaming=id==APP_ID_RADIO||id==APP_ID_NETEASE||id==APP_ID_VOICE||id==APP_ID_XIAOZHI||id==APP_ID_MUSE;
+  const bool streaming=id==APP_ID_RADIO||id==APP_ID_VOICE||id==APP_ID_XIAOZHI||id==APP_ID_MUSE;
   assert(app_registry_background_idle()==!streaming);
  }
  s_active_id.store(APP_ID_LAUNCHER);s_screen_on.store(true);
@@ -129,28 +129,30 @@ int main(){
  app_registry_dispatch_key(BSP_BTN_UP,BTN_EVT_RELEASE,0);
  assert(feedback_count==1);
  // Internal Back precedes the app-level exit, without restarting audio/UI.
- app_registry_switch_to(APP_ID_NETEASE);music_page=netease::Page::Player;
- const int music_starts=starts,music_stops=stops;
+ app_registry_switch_to(APP_ID_LISTS);lists_depth=2;
+ const int lists_starts=starts,lists_stops=stops;
  app_registry_dispatch_key(BSP_BTN_OK,BTN_EVT_LONG,0);
- assert(music_page==netease::Page::Tracks&&app_registry_get_active()==APP_ID_NETEASE);
+ assert(lists_depth==1&&app_registry_get_active()==APP_ID_LISTS);
  app_registry_dispatch_key(BSP_BTN_OK,BTN_EVT_LONG_UP,0);
  app_registry_dispatch_key(BSP_BTN_OK,BTN_EVT_RELEASE,0);
- assert(music_back_calls==1&&starts==music_starts&&stops==music_stops);
+ assert(lists_back_calls==1&&starts==lists_starts&&stops==lists_stops);
  app_registry_dispatch_key(BSP_BTN_OK,BTN_EVT_LONG,0);
- assert(music_page==netease::Page::Lists&&app_registry_get_active()==APP_ID_NETEASE);
+ assert(lists_depth==0&&app_registry_get_active()==APP_ID_LISTS);
  app_registry_dispatch_key(BSP_BTN_OK,BTN_EVT_LONG_UP,0);
- assert(starts==music_starts&&stops==music_stops);
+ assert(starts==lists_starts&&stops==lists_stops);
  // Once a cooperative shutdown is pending, do not call into its old model.
  mock_ready=false;app_registry_switch_to(APP_ID_LAUNCHER);
- const int back_before_shutdown=music_back_calls;
+ const int back_before_shutdown=lists_back_calls;
  app_registry_dispatch_key(BSP_BTN_OK,BTN_EVT_LONG,0);
- assert(music_back_calls==back_before_shutdown);
+ assert(lists_back_calls==back_before_shutdown);
  mock_ready=true;app_registry_process_pending_switch();
- app_registry_switch_to(APP_ID_NETEASE);music_page=netease::Page::Lists;
+ app_registry_switch_to(APP_ID_LISTS);lists_depth=0;
  app_registry_dispatch_key(BSP_BTN_OK,BTN_EVT_LONG,0);
  assert(app_registry_get_active()==APP_ID_LAUNCHER);
  app_registry_dispatch_key(BSP_BTN_OK,BTN_EVT_LONG_UP,0);
  app_registry_switch_to(APP_ID_HOME);
+ // Lists, unlike audio apps, plays Back sounds; later checks count from one.
+ assert(feedback_count>1);feedback_count=1;
  // Clean-launch policy is covered at the end; these flows start from a fresh heap.
  
  feedback_ready=false;app_registry_switch_to(APP_ID_RADIO);
@@ -218,7 +220,7 @@ int main(){
  assert(!mock_reminder_active&&app_registry_get_active()==APP_ID_XIAOZHI);
  // Slow audio/network shutdown and a busy LVGL lock cannot start the new
  // app before the old one has released its resources.
- app_registry_switch_to(APP_ID_NETEASE);mock_ready=false;
+ app_registry_switch_to(APP_ID_RADIO);mock_ready=false;
  const int a=starts,b=stops,requests=conversation_requests;
  app_registry_dispatch_key(BSP_BTN_OK,BTN_EVT_DOUBLE,600);
  for(int i=0;i<20;++i)app_registry_process_pending_switch();
@@ -239,7 +241,7 @@ int main(){
  app_registry_switch_to(APP_ID_WIFI);app_registry_complete_setup();assert(app_registry_get_active()==APP_ID_HOME);
  // Superseding a deferred shortcut cancels its auto-listen intent. A later
  // ordinary menu entry must stay silent.
- app_registry_switch_to(APP_ID_NETEASE);mock_ready=false;
+ app_registry_switch_to(APP_ID_RADIO);mock_ready=false;
  const int cancelled=conversation_requests;
  app_registry_dispatch_key(BSP_BTN_OK,BTN_EVT_DOUBLE,600);
  app_registry_switch_to(APP_ID_HOME);mock_ready=true;app_registry_process_pending_switch();

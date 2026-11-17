@@ -12,11 +12,6 @@ public:
     RadioSource(Cancelled cancelled, void *context, void *workspace = nullptr, size_t workspace_bytes = 0)
         : cancelled_(cancelled), context_(context), workspace_(workspace), workspace_bytes_(workspace_bytes) {}
     ~RadioSource();
-    // Optional client identity and request buffer for long signed URLs (the
-    // NetEase CDN); call before open(). Radio keeps the 512 B default.
-    void set_client(const char *agent, const char *referer, int tx_bytes) {
-        agent_ = agent; referer_ = referer; tx_bytes_ = tx_bytes;
-    }
     // offset > 0 asks for "Range: bytes=offset-"; check status() for 206.
     bool open(const char *url, uint32_t offset = 0);
     int read(uint8_t *data, size_t size);

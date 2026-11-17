@@ -23,7 +23,6 @@ typedef enum {
     APP_ID_SOUND_JUMP,
     APP_ID_MUSE,
     APP_ID_POMODORO,
-    APP_ID_NETEASE,
     APP_ID_REMINDERS,
     APP_ID_LISTS,
     APP_ID_COUNT
@@ -38,7 +37,7 @@ typedef enum {
     BTN_EVT_DOUBLE, // resolved by ADC task; reserved for global OK shortcut
 } app_btn_event_t;
 
-typedef struct {
+typedef struct passport_app {
     passport_app_id_t id;
     const char *name;           // 中文显示名称
     const char *en_name;        // 英文标签

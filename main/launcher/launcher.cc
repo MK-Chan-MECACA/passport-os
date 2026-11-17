@@ -160,25 +160,6 @@ constexpr IconGlyph kIconGlyphs[] = {
         ".................",
         ".................",
     }},
-    {APP_ID_NETEASE, {  // beamed notes
-        ".................",
-        ".................",
-        ".....###########.",
-        ".....###########.",
-        ".....#.........#.",
-        ".....#.........#.",
-        ".....#.........#.",
-        ".....#.........#.",
-        ".....#.........#.",
-        ".....#.........#.",
-        ".....#.........#.",
-        "..####......####.",
-        ".#...#.....#...#.",
-        ".#...#.....#...#.",
-        "..###.......###..",
-        ".................",
-        ".................",
-    }},
     {APP_ID_VOICE, {  // microphone
         ".................",
         ".................",
@@ -411,7 +392,6 @@ void update_card_content() {
             case APP_ID_VOICE: case APP_ID_TETRIS: color = UI_SECONDARY; break;
             case APP_ID_XIAOZHI: case APP_ID_STOPWATCH: case APP_ID_LISTS: color = UI_SUCCESS; break;
             case APP_ID_REMINDERS: color = UI_WARNING; break;
-            case APP_ID_NETEASE: color = UI_DANGER; break;
             default: break;
         }
     }

@@ -1,11 +1,9 @@
 #include "device_control.h"
-#include "apps/netease/netease_voice_search.h"
 #include "apps/radio/radio_catalog.h"
 #include <apps/xiaozhi/xiaozhi_ui.h>
 #include <cJSON.h>
 #include <cstring>
 #include <memory>
-#include <new>
 
 namespace device_control {
 namespace {
@@ -14,14 +12,12 @@ R"({"name":"self.pomodoro.control","description":"Control or query the device's 
 R"({"name":"self.device.get_status","description":"Read this device's saved speaker volume, screen brightness and current app. Volume and brightness are percentages. Use the actual tool result; do not guess device state.","inputSchema":{"type":"object","properties":{}}})",
 R"({"name":"self.audio.set_volume","description":"Change AND persist this device's master speaker volume. Use exactly one of percent (absolute 0..100) or delta (signed percentage points -100..100). For louder/quieter without an amount use delta +10/-10. Zero mutes speech and media; timer and reminder alarms still ring at their fixed alert level. Only claim saved on saved=true; report the returned volume_percent. No external player or server setting is needed.","inputSchema":{"type":"object","properties":{"percent":{"type":"integer","minimum":0,"maximum":100},"delta":{"type":"integer","minimum":-100,"maximum":100}}}})",
 R"({"name":"self.screen.set_brightness","description":"Change AND persist this device's screen brightness. Use exactly one of percent (absolute 10..100) or delta (signed percentage points -100..100). For brighter/dimmer without an amount use delta +10/-10. Values clamp to 10..100 to keep the display readable. Only claim saved on saved=true; report brightness_percent. Survives reboot and screen sleep/wake.","inputSchema":{"type":"object","properties":{"percent":{"type":"integer","minimum":10,"maximum":100},"delta":{"type":"integer","minimum":-100,"maximum":100}}}})",
-R"({"name":"self.application.open","description":"Open a built-in device app on explicit request. music=网易云音乐; radio=城市收音机; reminders=备忘提醒; lists=文字清单; pomodoro=番茄时钟; settings=设置; home=首页; launcher=应用列表; stopwatch=秒表; tetris=俄罗斯方块; sound_jump=声音跳一跳; game=你在狗叫什么; muse=Muse; voice=随身AI语音; xiaozhi=小智. Ask which app if ambiguous. Opens its screen only. Switching exits this Xiaozhi conversation after the tool reply; do not promise continued background voice control.","inputSchema":{"type":"object","properties":{"app":{"type":"string","enum":["music","radio","reminders","lists","pomodoro","settings","home","launcher","stopwatch","tetris","sound_jump","game","muse","voice","xiaozhi"]}},"required":["app"]}})",
-R"({"name":"self.music.search","description":"Search the user's own NetEase Cloud Music (网易云音乐) library on THIS device while staying in this conversation. Call it FIRST for any request naming a song or an artist, and NEVER use search_music or any built-in cloud music tool instead. Returns up to 5 results (song_id, name, artist) in relevance order. If the first result matches the request (title, and singer when given), immediately call self.music.play with source=search, the same query and its song_id, and tell the user which song and singer will play. Only if several versions are equally plausible (original/live/cover) and the user gave no hint, briefly ask which one. NetEase lacks some artists' originals (e.g. 周杰伦): then say only a cover is available and play it if the user agrees.","inputSchema":{"type":"object","properties":{"query":{"type":"string","maxLength":20}},"required":["query"]}})",
-R"({"name":"self.music.play","description":"Play music on THIS device from the user's own logged-in NetEase Cloud Music (网易云音乐) account, which has the user's full library and membership. For EVERY request to play a song, an artist or music use this tool (after self.music.search for a song or artist) and NEVER search_music, play_music or any built-in cloud music tool. source=search: the searched query plus song_id of the chosen result; the other results follow. source=favorites: 我喜欢的音乐; daily: 每日推荐; playlist: the user's own or saved playlist, or a chart 热歌榜/新歌榜/飙升榜/原创榜, given as name. shuffle=true for 随机播放. stop_after_minutes pauses playback later, e.g. 半小时后停 = 30. Exits this Xiaozhi conversation after the reply; open Xiaozhi again for more voice control. Except for a chosen search result the playing song is unknown: do not name one. Favorites, daily and personal playlists need the device logged in.","inputSchema":{"type":"object","properties":{"source":{"type":"string","enum":["search","favorites","daily","playlist"]},"query":{"type":"string","maxLength":20},"song_id":{"type":"integer","minimum":1},"name":{"type":"string","maxLength":20},"shuffle":{"type":"boolean"},"stop_after_minutes":{"type":"integer","minimum":1,"maximum":180}},"required":["source"]}})",
-R"({"name":"self.radio.play","description":"Play live internet radio for a Chinese city or province in this device's 城市收音机 app, e.g. 打开北京的电台 = city 北京. station: optional keywords of a station name such as 交通 or 音乐; otherwise the most popular local station plays. stop_after_minutes pauses the radio later, e.g. 半小时后停 = 30. Exits this Xiaozhi conversation after the reply. Stations come from a public directory, so do not promise a particular one; the result shows on screen.","inputSchema":{"type":"object","properties":{"city":{"type":"string","maxLength":16},"station":{"type":"string","maxLength":10},"stop_after_minutes":{"type":"integer","minimum":1,"maximum":180}},"required":["city"]}})"
+R"({"name":"self.application.open","description":"Open a built-in device app on explicit request. radio=城市收音机; reminders=备忘提醒; lists=文字清单; pomodoro=番茄时钟; settings=设置; home=首页; launcher=应用列表; stopwatch=秒表; tetris=俄罗斯方块; sound_jump=声音跳一跳; game=你在狗叫什么; muse=Muse; voice=随身AI语音; xiaozhi=小智. Ask which app if ambiguous. Opens its screen only. Switching exits this Xiaozhi conversation after the tool reply; do not promise continued background voice control.","inputSchema":{"type":"object","properties":{"app":{"type":"string","enum":["radio","reminders","lists","pomodoro","settings","home","launcher","stopwatch","tetris","sound_jump","game","muse","voice","xiaozhi"]}},"required":["app"]}})",
+R"({"name":"self.radio.play","description":"Play live internet radio for a Chinese city or province in this device's 城市收音机 app, e.g. 打开北京的电台 = city 北京. station: optional keywords of a station name such as 交通 or 音乐; otherwise the most popular local station plays. stop_after_minutes pauses the radio later, e.g. 半小时后停 = 30. This device has no music library: for any request to play music or a song, offer live radio with this tool instead. Exits this Xiaozhi conversation after the reply. Stations come from a public directory, so do not promise a particular one; the result shows on screen.","inputSchema":{"type":"object","properties":{"city":{"type":"string","maxLength":16},"station":{"type":"string","maxLength":10},"stop_after_minutes":{"type":"integer","minimum":1,"maximum":180}},"required":["city"]}})"
 };
 struct App {const char *key; passport_app_id_t id;};
 constexpr App apps[] = {
-    {"music",APP_ID_NETEASE},{"radio",APP_ID_RADIO},{"reminders",APP_ID_REMINDERS},
+    {"radio",APP_ID_RADIO},{"reminders",APP_ID_REMINDERS},
     {"lists",APP_ID_LISTS},{"pomodoro",APP_ID_POMODORO},{"settings",APP_ID_SETTINGS},{"home",APP_ID_HOME},
     {"launcher",APP_ID_LAUNCHER},{"stopwatch",APP_ID_STOPWATCH},{"tetris",APP_ID_TETRIS},
     {"sound_jump",APP_ID_SOUND_JUMP},{"game",APP_ID_GAME},{"muse",APP_ID_MUSE},
@@ -59,45 +55,18 @@ const char *const timer_states[] = {"ready","running","paused","finished"};
 // Copies a text argument; error names what is missing in words the user hears.
 bool text_field(const cJSON *args,const char *key,bool required,char *out,size_t capacity,const char **error) {
     const cJSON *value=cJSON_GetObjectItemCaseSensitive(args,key);
-    const bool city=!std::strcmp(key,"city"),list=!std::strcmp(key,"name"),station=!std::strcmp(key,"station");
+    const bool city=!std::strcmp(key,"city");
     if (!value && !required) return true;
     if (!cJSON_IsString(value) || !value->valuestring[0]) {
-        *error=city?"请说出要播放的城市或省份":list?"请说出要播放的歌单名称":station?"电台名称必须是文字":"请说出要播放的歌名或歌手";
+        *error=city?"请说出要播放的城市或省份":"电台名称必须是文字";
         return false;
     }
     if (std::strlen(value->valuestring)>=capacity) {
-        *error=city?"城市名称太长":list?"歌单名称太长":station?"电台名称太长":"歌名或歌手太长";
+        *error=city?"城市名称太长":"电台名称太长";
         return false;
     }
     std::strcpy(out,value->valuestring);
     return true;
-}
-// Runs on the Xiaozhi control task and returns results to the conversation;
-// the search itself uses its own short-lived task.
-std::string search(const cJSON *args) {
-    char query[voice_intent::kNameBytes];
-    const char *error=nullptr;
-    if (!text_field(args,"query",true,query,sizeof(query),&error)) return fail(error);
-    std::unique_ptr<netease::Song[]> songs(new (std::nothrow) netease::Song[netease::kVoiceSearchResults]);
-    if (!songs) return fail("设备内存暂时不足，可直接用 self.music.play 的 source=search 播放");
-    size_t count=0;
-    switch (netease::voice_search(query,songs.get(),&count,8000)) {
-        case netease::Result::Ok:case netease::Result::Api:break;  // Api: nothing matched
-        case netease::Result::NoMemory:return fail("设备内存暂时不足，可直接用 self.music.play 的 source=search 播放");
-        case netease::Result::Cancelled:return fail("搜索超时，可直接用 self.music.play 的 source=search 播放");
-        default:return fail("网络错误，搜索失败，请稍后再试");
-    }
-    Json value(cJSON_CreateObject(),cJSON_Delete);
-    cJSON_AddStringToObject(value.get(),"query",query);
-    cJSON_AddNumberToObject(value.get(),"found",static_cast<double>(count));
-    cJSON *results=cJSON_AddArrayToObject(value.get(),"results");
-    for (size_t i=0;i<count;++i) {
-        cJSON *item=cJSON_CreateObject();cJSON_AddItemToArray(results,item);
-        cJSON_AddNumberToObject(item,"song_id",static_cast<double>(songs[i].id));
-        cJSON_AddStringToObject(item,"name",songs[i].name);
-        cJSON_AddStringToObject(item,"artist",songs[i].artist);
-    }
-    return reply(value.get(),false);
 }
 }
 size_t tool_count(){return sizeof(schemas)/sizeof(schemas[0]);}
@@ -109,8 +78,7 @@ std::string call(const char *name,const cJSON *args,uint64_t token) {
     else if (!std::strcmp(name,"self.screen.set_brightness")) request.action=Action::Brightness;
     else if (!std::strcmp(name,"self.application.open")) request.action=Action::Open;
     else if (!std::strcmp(name,"self.pomodoro.control")) request.action=Action::Pomodoro;
-    else if (!std::strcmp(name,"self.music.play") || !std::strcmp(name,"self.radio.play")) request.action=Action::Handover;
-    else if (!std::strcmp(name,"self.music.search")) return cJSON_IsObject(args)?search(args):fail("请说出要搜索的歌名或歌手");
+    else if (!std::strcmp(name,"self.radio.play")) request.action=Action::Handover;
     else return {};
     if (!cJSON_IsObject(args)) return fail("请提供有效的设备控制参数");
     request.token=token;
@@ -159,36 +127,10 @@ std::string call(const char *name,const cJSON *args,uint64_t token) {
             if (!integer(stop,1,voice_intent::kMaxStopMinutes)) return fail("定时停止请用1到180分钟的整数");
             media.stop_minutes=static_cast<uint16_t>(stop->valueint);
         }
-        if (!std::strcmp(name,"self.radio.play")) {
-            media.app=APP_ID_RADIO;media.source=Source::Radio;
-            if (!text_field(args,"city",true,media.name,sizeof(RadioLocation::city),&error) ||
-                !text_field(args,"station",false,media.detail,sizeof(media.detail),&error)) return fail(error);
-            if (!radio_catalog_known_place(media.name)) return fail("没有这个城市或省份的电台目录，请说中国的城市或省份名");
-        } else {
-            media.app=APP_ID_NETEASE;
-            const auto *source=cJSON_GetObjectItemCaseSensitive(args,"source");
-            const auto *shuffle=cJSON_GetObjectItemCaseSensitive(args,"shuffle");
-            const auto *song=cJSON_GetObjectItemCaseSensitive(args,"song_id");
-            if (!cJSON_IsString(source)) return fail("请指定搜索歌曲，或播放我喜欢的音乐、每日推荐、某个歌单");
-            if (!std::strcmp(source->valuestring,"search")) media.source=Source::Search;
-            else if (!std::strcmp(source->valuestring,"favorites")) media.source=Source::Favorites;
-            else if (!std::strcmp(source->valuestring,"daily")) media.source=Source::Daily;
-            else if (!std::strcmp(source->valuestring,"playlist")) media.source=Source::Playlist;
-            else return fail("不支持的音乐来源");
-            if (shuffle && !cJSON_IsBool(shuffle)) return fail("随机播放参数必须是 true 或 false");
-            media.shuffle=cJSON_IsTrue(shuffle);
-            const bool search=media.source==Source::Search;
-            if ((search && !text_field(args,"query",true,media.name,sizeof(media.name),&error)) ||
-                (media.source==Source::Playlist && !text_field(args,"name",true,media.name,sizeof(media.name),&error)))
-                return fail(error);
-            if (song) {
-                // NetEase ids exceed int; JSON numbers stay exact below 2^53.
-                if (!search || !cJSON_IsNumber(song) || song->valuedouble<1 || song->valuedouble>9007199254740991.0 ||
-                    song->valuedouble!=static_cast<double>(static_cast<uint64_t>(song->valuedouble)))
-                    return fail("song_id 只能配合搜索结果使用，且必须是搜索返回的编号");
-                media.song_id=static_cast<uint64_t>(song->valuedouble);
-            }
-        }
+        media.app=APP_ID_RADIO;media.source=Source::Radio;
+        if (!text_field(args,"city",true,media.name,sizeof(RadioLocation::city),&error) ||
+            !text_field(args,"station",false,media.detail,sizeof(media.detail),&error)) return fail(error);
+        if (!radio_catalog_known_place(media.name)) return fail("没有这个城市或省份的电台目录，请说中国的城市或省份名");
     }
     const Result result=execute(request);
     switch(result.error) {
@@ -229,9 +171,8 @@ std::string call(const char *name,const cJSON *args,uint64_t token) {
         cJSON_AddStringToObject(value.get(),"target_app",app_key(handover?request.handover.app:request.app));
         cJSON_AddStringToObject(value.get(),"state","switch_after_tool_response");
         if (handover) {
-            // The app resolves the request after login or directory lookup; nothing plays yet.
+            // Radio resolves the request after the directory lookup; nothing plays yet.
             cJSON_AddBoolToObject(value.get(),"playback_confirmed",false);
-            if (request.handover.shuffle) cJSON_AddBoolToObject(value.get(),"shuffle",true);
             if (request.handover.stop_minutes) cJSON_AddNumberToObject(value.get(),"stop_after_minutes",request.handover.stop_minutes);
         }
     } else if (request.action!=Action::Status) {

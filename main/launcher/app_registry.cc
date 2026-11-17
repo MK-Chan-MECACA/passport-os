@@ -42,7 +42,6 @@ extern const passport_app_t g_stopwatch_app;
 extern const passport_app_t g_sound_jump_app;
 extern const passport_app_t g_muse_app;
 extern const passport_app_t g_pomodoro_app;
-extern const passport_app_t g_netease_app;
 extern const passport_app_t g_reminders_app;
 extern const passport_app_t g_lists_app;
 
@@ -55,7 +54,6 @@ namespace {
 const passport_app_t *s_apps[] = {
     &g_xiaozhi_app,
     &g_radio_app,
-    &g_netease_app,
     &g_voice_app,
     &g_muse_app,
     &g_pomodoro_app,
@@ -103,7 +101,6 @@ struct SwitchGuard {
 WifiPowerSaveLevel power_save_level_for(passport_app_id_t id) {
     switch (id) {
         case APP_ID_RADIO:
-        case APP_ID_NETEASE:
         case APP_ID_VOICE:
         case APP_ID_XIAOZHI:
         case APP_ID_MUSE:
@@ -133,8 +130,6 @@ struct HeapNeed {
 HeapNeed heap_need(passport_app_id_t id) {
     switch (id) {
         case APP_ID_RADIO: return {24 * 1024, 48 * 1024};
-        // Same MP3 decoder as Radio; logged-in requests add TLS only while it is closed.
-        case APP_ID_NETEASE: return {24 * 1024, 48 * 1024};
         case APP_ID_XIAOZHI: return {16 * 1024, 64 * 1024};
         case APP_ID_MUSE: return {20 * 1024, 44 * 1024};
         default: return {0, 0};
@@ -149,7 +144,7 @@ bool s_heap_strained = false;
 bool s_fresh_heap = false;
 
 bool heavy_app(passport_app_id_t id) {
-    return id == APP_ID_RADIO || id == APP_ID_NETEASE || id == APP_ID_XIAOZHI || id == APP_ID_MUSE;
+    return id == APP_ID_RADIO || id == APP_ID_XIAOZHI || id == APP_ID_MUSE;
 }
 
 // 在旧应用 stop() 之后调用:此时测到的才是新应用可用的堆。

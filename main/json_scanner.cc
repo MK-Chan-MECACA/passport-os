@@ -1,8 +1,8 @@
-#include "apps/netease/netease_json.h"
+#include "json_scanner.h"
 
 #include <cstring>
 
-namespace netease {
+namespace json {
 
 namespace {
 bool space(char c) { return c == ' ' || c == '\t' || c == '\r' || c == '\n'; }
@@ -220,4 +220,4 @@ bool JsonScanner::step(char c) {
     return false;
 }
 
-}  // namespace netease
+}  // namespace json

@@ -5,7 +5,7 @@
 // buffer, so memory stays fixed. Pure code: the host tests feed real replies.
 #pragma once
 
-#include "apps/netease/netease_json.h"
+#include "json_scanner.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -15,7 +15,7 @@
 
 namespace aihot {
 
-using netease::JsonScanner;
+using json::JsonScanner;
 
 constexpr size_t kTextBytes = 2048;   // whole tool reply text
 constexpr size_t kTitleBytes = 150;   // ~50 Chinese characters

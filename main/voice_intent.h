@@ -1,6 +1,6 @@
-// A voice request for a media app, handed over across the Xiaozhi exit.
+// A voice request for the Radio app, handed over across the Xiaozhi exit.
 //
-// Xiaozhi and the media apps share the audio workspace, so the request outlives
+// Xiaozhi and Radio share the audio workspace, so the request outlives
 // the Xiaozhi session and may cross the clean-launch restart that app_registry
 // uses to defragment the heap. Freshness is pure so host tests can cover it.
 #pragma once
@@ -12,22 +12,20 @@
 
 namespace voice_intent {
 
-enum class Source : uint8_t { None, Favorites, Daily, Playlist, Search, Radio };
+enum class Source : uint8_t { None, Radio };
 
 constexpr size_t kNameBytes = 64;
 constexpr size_t kDetailBytes = 32;
 constexpr uint16_t kMaxStopMinutes = 180;
-// Long enough for exit, a possible restart, Wi-Fi and login; short enough that
+// Long enough for exit, a possible restart, Wi-Fi and the directory lookup; short enough that
 // a dropped request never starts playback on a later manual visit.
 constexpr int64_t kLifetimeUs = 45LL * 1000 * 1000;
 
 struct Request {
     passport_app_id_t app = APP_ID_COUNT;
     Source source = Source::None;
-    bool shuffle = false;
     uint16_t stop_minutes = 0;  // pause playback after this long; 0 = never
-    uint64_t song_id = 0;       // Search: start from this result
-    char name[kNameBytes] = {};      // playlist name, search keywords or radio city
+    char name[kNameBytes] = {};      // radio city
     char detail[kDetailBytes] = {};  // Radio: station name keywords
 };
 

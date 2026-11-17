@@ -1,7 +1,6 @@
 #include "apps/aihot/aihot_news.h"
 
 #include "apps/aihot/aihot_format.h"
-#include "apps/netease/netease_catalog.h"
 #include "apps/xiaozhi/xiaozhi_store.h"
 #include "esp_crt_bundle.h"
 #include "esp_heap_caps.h"
@@ -15,6 +14,25 @@
 #include <atomic>
 #include <cstdio>
 #include <new>
+
+namespace {
+// RFC 3986 unreserved characters pass through; everything else is %XX.
+bool url_encode(const char *in, char *out, size_t capacity) {
+    static constexpr char kHex[] = "0123456789ABCDEF";
+    size_t n = 0;
+    for (; *in; ++in) {
+        const unsigned char c = static_cast<unsigned char>(*in);
+        const bool plain = (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') ||
+                           c == '-' || c == '_' || c == '.' || c == '~';
+        if (n + (plain ? 1 : 3) >= capacity) return false;
+        if (plain) out[n++] = static_cast<char>(c);
+        else { out[n++] = '%'; out[n++] = kHex[c >> 4]; out[n++] = kHex[c & 15]; }
+    }
+    if (!capacity) return false;
+    out[n] = 0;
+    return true;
+}
+}  // namespace
 
 namespace aihot {
 namespace {
@@ -75,7 +93,7 @@ bool url(const Query &q, char *out, size_t capacity) {
         // Keywords search all items, by default over the week; the latest
         // selection defaults to the past day.
         char keywords[3 * 63 + 1] = "";
-        if (q.text[0] && !netease::url_encode(q.text, keywords, sizeof(keywords))) return false;
+        if (q.text[0] && !url_encode(q.text, keywords, sizeof(keywords))) return false;
         const bool week = q.days ? q.days == 7 : q.text[0] != 0;
         n = std::snprintf(out, capacity, "https://aihot.news/api/v1/items?mode=%s&window=%s&limit=%u%s%s%s%s",
                           q.text[0] ? "all" : "selected", week ? "7d" : "24h", limit,
