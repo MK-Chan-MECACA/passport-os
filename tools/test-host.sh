@@ -140,6 +140,6 @@ python3 tests/test_public_build.py
 "$test_dir/battery"
 python3 tests/test_media_startup.py
 "${CXX:-c++}" -std=c++17 -Wall -Wextra -Werror -fsanitize=address,undefined -Imain \
-    tests/test_aihot.cc main/json_scanner.cc -o "$test_dir/aihot"
-"$test_dir/aihot"
+    tests/test_technews.cc main/json_scanner.cc -o "$test_dir/technews"
+"$test_dir/technews"
 echo "Host regression tests: PASS"

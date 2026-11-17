@@ -1,12 +1,10 @@
-#include "apps/aihot/aihot_news.h"
+#include "apps/technews/technews.h"
 
-#include "apps/aihot/aihot_format.h"
-#include "apps/xiaozhi/xiaozhi_store.h"
+#include "apps/technews/technews_format.h"
 #include "esp_crt_bundle.h"
 #include "esp_heap_caps.h"
 #include "esp_http_client.h"
 #include "esp_log.h"
-#include "esp_random.h"
 #include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -34,11 +32,10 @@ bool url_encode(const char *in, char *out, size_t capacity) {
 }
 }  // namespace
 
-namespace aihot {
+namespace technews {
 namespace {
 
-constexpr char kTag[] = "aihot";
-constexpr char kNs[] = "aihot";
+constexpr char kTag[] = "technews";
 // TLS handshake (certificate verify) plus the scanner and collector frames.
 constexpr uint32_t kTaskStack = 7168;
 // The Xiaozhi session keeps ~72 KiB free (largest ~61 KiB, measured): a second
@@ -46,6 +43,8 @@ constexpr uint32_t kTaskStack = 7168;
 constexpr size_t kNeedFree = 40 * 1024;
 constexpr size_t kNeedLargest = 16 * 1024;
 constexpr int64_t kRequestDeadlineUs = 9 * 1000 * 1000;
+// Only the fields the reply uses, no highlight markup: keeps replies ~2 KB.
+constexpr char kFields[] = "attributesToRetrieve=title,points&attributesToHighlight=none";
 
 std::atomic<bool> s_busy{false};
 std::atomic<bool> s_cancel{false};
@@ -63,65 +62,40 @@ void release(Job *job) {
     if (job->released.exchange(true, std::memory_order_acq_rel)) delete job;
 }
 
-// AIHOT asks clients for an anonymous actor id in the User-Agent. Like the
-// browser, each device makes its own random one; no account is involved.
-void user_agent(char *out, size_t capacity) {
-    std::string actor = store_get_string(kNs, "actor", "");
-    if (actor.size() != 36) {
-        uint8_t b[16];
-        for (int i = 0; i < 16; i += 4) {
-            const uint32_t r = esp_random();
-            std::memcpy(b + i, &r, 4);
-        }
-        b[6] = (b[6] & 0x0F) | 0x40;  // UUID version 4
-        b[8] = (b[8] & 0x3F) | 0x80;
-        char id[37];
-        std::snprintf(id, sizeof(id), "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
-                      b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11], b[12], b[13], b[14], b[15]);
-        actor = id;
-        store_set_string(kNs, "actor", actor);
-    }
-    std::snprintf(out, capacity, "aihot-api/2.0.0 aihot-actor/%s", actor.c_str());
-}
+unsigned limit_of(const Query &q) { return q.limit ? q.limit : q.kind == Kind::Hot ? kMaxHot : 5; }
 
 bool url(const Query &q, char *out, size_t capacity) {
-    const unsigned limit = q.kind == Kind::Hot ? (q.limit ? q.limit : kMaxHot) : (q.limit ? q.limit : 5);
     int n = 0;
-    if (q.kind == Kind::Hot) n = std::snprintf(out, capacity, "https://aihot.news/api/v1/hot-topics");
-    else if (q.kind == Kind::Daily) n = std::snprintf(out, capacity, "https://aihot.news/api/v1/dailies/latest");
-    else {
-        // Keywords search all items, by default over the week; the latest
-        // selection defaults to the past day.
-        char keywords[3 * 63 + 1] = "";
-        if (q.text[0] && !url_encode(q.text, keywords, sizeof(keywords))) return false;
-        const bool week = q.days ? q.days == 7 : q.text[0] != 0;
-        n = std::snprintf(out, capacity, "https://aihot.news/api/v1/items?mode=%s&window=%s&limit=%u%s%s%s%s",
-                          q.text[0] ? "all" : "selected", week ? "7d" : "24h", limit,
-                          q.category[0] ? "&category=" : "", q.category, q.text[0] ? "&q=" : "", keywords);
+    if (q.kind == Kind::Hot) {
+        n = std::snprintf(out, capacity, "https://hn.algolia.com/api/v1/search?tags=front_page&hitsPerPage=%u&%s",
+                          limit_of(q), kFields);
+    } else {
+        // Newest stories with some traction whose title has the keywords as
+        // whole words: without the title restriction and prefixNone, "AI"
+        // would also match "Airlines".
+        char keywords[3 * 63 + 1];
+        if (!url_encode(q.text[0] ? q.text : "AI", keywords, sizeof(keywords))) return false;
+        n = std::snprintf(out, capacity,
+                          "https://hn.algolia.com/api/v1/search_by_date?query=%s&tags=story&numericFilters=points%%3E50"
+                          "&restrictSearchableAttributes=title&queryType=prefixNone&typoTolerance=false&hitsPerPage=%u&%s",
+                          keywords, limit_of(q), kFields);
     }
     return n > 0 && static_cast<size_t>(n) < capacity;
 }
 
 Result get(Job &job) {
     const Query &q = job.query;
-    char address[320];
+    char address[512];
     if (!url(q, address, sizeof(address))) return Result::Parse;
-    char agent[96];
-    user_agent(agent, sizeof(agent));
-    const unsigned limit = q.limit ? q.limit : (q.kind == Kind::Hot ? kMaxHot : 5);
     Writer out{job.text, sizeof(job.text)};
-    HotCollector hot{out, limit};
-    NewsCollector news{out, limit};
-    DailyCollector daily{out};
-    JsonScanner scanner(q.kind == Kind::Hot ? HotCollector::sink : q.kind == Kind::News ? NewsCollector::sink : DailyCollector::sink,
-                        q.kind == Kind::Hot ? static_cast<void *>(&hot) : q.kind == Kind::News ? static_cast<void *>(&news)
-                                                                                                : static_cast<void *>(&daily));
+    HitCollector hits{out, limit_of(q)};
+    JsonScanner scanner(HitCollector::sink, &hits);
     esp_http_client_config_t cfg{};
     cfg.url = address;
     cfg.timeout_ms = 6000;
     cfg.buffer_size = 1024;
-    cfg.buffer_size_tx = 512;
-    cfg.user_agent = agent;
+    cfg.buffer_size_tx = 768;  // the request line (up to 512 bytes) must fit whole
+    cfg.user_agent = "PassportOS-MY";
     cfg.disable_auto_redirect = true;
     cfg.keep_alive_enable = false;
     cfg.crt_bundle_attach = esp_crt_bundle_attach;
@@ -182,7 +156,7 @@ Result fetch(const Query &query, std::string *text, uint32_t timeout_ms) {
     if (!job) { s_busy.store(false); return Result::NoMemory; }
     job->query = query;
     s_cancel.store(false, std::memory_order_release);
-    if (xTaskCreate(task, "aihot", kTaskStack, job, 4, nullptr) != pdPASS) {
+    if (xTaskCreate(task, "technews", kTaskStack, job, 4, nullptr) != pdPASS) {
         delete job;
         s_busy.store(false);
         return Result::NoMemory;
@@ -201,4 +175,4 @@ Result fetch(const Query &query, std::string *text, uint32_t timeout_ms) {
     return result;
 }
 
-}  // namespace aihot
+}  // namespace technews

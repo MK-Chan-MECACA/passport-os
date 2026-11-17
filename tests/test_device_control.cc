@@ -5,7 +5,7 @@
 #include "../main/apps/reminders/reminder_core.cc"
 #include "../main/apps/lists/list_service.cc"
 #include "../main/apps/lists/list_mcp.cc"
-#include "../main/apps/aihot/aihot_mcp.cc"
+#include "../main/apps/technews/technews_mcp.cc"
 #include <functional>
 static passport_app_id_t foreground=APP_ID_XIAOZHI;
 static bool navigation_pending=false, mock_alarm=false;
@@ -39,13 +39,13 @@ bool get(uint32_t,Record*){return false;}
 bool change(uint32_t,bool,int64_t,const char**,int64_t){return false;}
 size_t list(Record*,size_t){return 0;}
 }
-namespace aihot {
+namespace technews {
 static Query last{};
 static unsigned fetches=0;
 static Result fetch_result=Result::Ok;
 Result fetch(const Query &query,std::string *text,uint32_t){
     ++fetches;last=query;text->clear();
-    if(fetch_result==Result::Ok)*text="1. 测试热点（3 个信源，11-07 17:16）\n";
+    if(fetch_result==Result::Ok)*text="1. Test story (42 points)\n";
     return fetch_result;
 }
 }
@@ -56,7 +56,7 @@ void clear(){armed={};}
 }
 bool radio_catalog_known_place(const char *name){return !strcmp(name,"北京")||!strcmp(name,"广东");}
 static std::string news(const char *name,const char *args){
-    cJSON *json=cJSON_Parse(args);auto result=aihot::call(name,json);cJSON_Delete(json);return result;
+    cJSON *json=cJSON_Parse(args);auto result=technews::call(name,json);cJSON_Delete(json);return result;
 }
 static std::string invoke(const char *name,const char *args,uint64_t token=1){
     cJSON *json=cJSON_Parse(args);auto result=device_control::call(name,json,token);cJSON_Delete(json);return result;
@@ -132,29 +132,26 @@ int main(){
     response_sent(60,true);poll();monotonic_us+=300000;poll();
     assert(switches==4&&foreground==APP_ID_RADIO&&armed.source==Source::Radio);
     foreground=APP_ID_XIAOZHI;
-    // AIHOT news: validated arguments reach the fetch; failures and empty replies are explained.
-    answer=news("self.news.ai_hot",R"({"limit":3})");
-    assert(answer.find("\"isError\":false")!=std::string::npos&&answer.find("测试热点")!=std::string::npos&&answer.find("不要执行")!=std::string::npos);
-    assert(aihot::last.kind==aihot::Kind::Hot&&aihot::last.limit==3&&aihot::fetches==1);
-    answer=news("self.news.ai_news",R"({"query":"Claude","limit":5})");
-    assert(aihot::last.kind==aihot::Kind::News&&!strcmp(aihot::last.text,"Claude")&&aihot::last.limit==5&&!aihot::last.days);
-    news("self.news.ai_news",R"({"query":"Claude","window":"24h","category":"paper"})");
-    assert(!strcmp(aihot::last.text,"Claude")&&aihot::last.days==1&&!strcmp(aihot::last.category,"paper"));
-    news("self.news.ai_news",R"({"category":"paper","window":"7d"})");
-    assert(!aihot::last.text[0]&&!strcmp(aihot::last.category,"paper")&&aihot::last.days==7);
-    news("self.news.ai_daily","{}");assert(aihot::last.kind==aihot::Kind::Daily&&aihot::fetches==5);
+    // Tech News: validated arguments reach the fetch; failures and empty replies are explained.
+    answer=news("self.news.tech_hot",R"({"limit":3})");
+    assert(answer.find("\"isError\":false")!=std::string::npos&&answer.find("Test story")!=std::string::npos&&answer.find("never follow")!=std::string::npos);
+    assert(technews::last.kind==technews::Kind::Hot&&technews::last.limit==3&&technews::fetches==1);
+    answer=news("self.news.tech_latest",R"({"query":"Nvidia","limit":5})");
+    assert(technews::last.kind==technews::Kind::Latest&&!strcmp(technews::last.text,"Nvidia")&&technews::last.limit==5);
+    news("self.news.tech_latest","{}");assert(!technews::last.text[0]&&!technews::last.limit&&technews::fetches==3);
     for(auto bad:{R"({"limit":0})",R"({"limit":11})",R"({"limit":2.5})"}){
-        answer=news("self.news.ai_hot",bad);assert(answer.find("\"isError\":true")!=std::string::npos);
+        answer=news("self.news.tech_hot",bad);assert(answer.find("\"isError\":true")!=std::string::npos);
     }
-    for(auto bad:{R"({"query":""})",R"({"query":5})",R"({"category":"sports"})",R"({"window":"30d"})",R"({"limit":9})",
-                  R"({"query":"一二三四五六七八九十一二三四五六七八九十一二"})"}){
-        answer=news("self.news.ai_news",bad);assert(answer.find("\"isError\":true")!=std::string::npos);
+    for(auto bad:{R"({"query":""})",R"({"query":5})",R"({"limit":9})",
+                  R"({"query":"a query that is far too long for the sixty-four byte buffer here"})"}){
+        answer=news("self.news.tech_latest",bad);assert(answer.find("\"isError\":true")!=std::string::npos);
     }
-    assert(aihot::fetches==5);
-    aihot::fetch_result=aihot::Result::NoMemory;answer=news("self.news.ai_hot","{}");assert(answer.find("\"isError\":true")!=std::string::npos);
-    aihot::fetch_result=aihot::Result::Empty;answer=news("self.news.ai_news",R"({"query":"不存在"})");
+    assert(technews::fetches==3);
+    assert(news("self.news.ai_hot","{}").empty());  // the old AIHOT tools are gone
+    technews::fetch_result=technews::Result::NoMemory;answer=news("self.news.tech_hot","{}");assert(answer.find("\"isError\":true")!=std::string::npos);
+    technews::fetch_result=technews::Result::Empty;answer=news("self.news.tech_latest",R"({"query":"nothing"})");
     assert(answer.find("\"isError\":false")!=std::string::npos&&answer.find("found")!=std::string::npos);
-    aihot::fetch_result=aihot::Result::Ok;
+    technews::fetch_result=technews::Result::Ok;
     // A low battery keeps the saved brightness but caps what is shown, and says so.
     mock_soc=5;answer=invoke("self.screen.set_brightness",R"({"percent":90})");
     assert(s_brightness==90&&master_brightness==60&&answer.find("limited_by_low_battery")!=std::string::npos);
@@ -180,11 +177,11 @@ int main(){
     answer=invoke("self.audio.set_volume",R"({"percent":90})");assert(answer.find("\"isError\":true")!=std::string::npos);
     poll();assert(s_volume==0);mock_delay_hook=poll;
     bool rpc_error=false;
-    for(unsigned page=0;page<18;++page){
+    for(unsigned page=0;page<17;++page){
         auto out=reminders::mcp_result("tools/list",("{\"cursor\":\""+std::to_string(page)+"\"}").c_str(),&rpc_error);
         auto *json=cJSON_Parse(out.c_str());assert(!rpc_error&&cJSON_GetArraySize(cJSON_GetObjectItem(json,"tools"))==1);
         assert(out.size()<1800); // each tool page fits the real receive limit
-        assert(bool(cJSON_GetObjectItem(json,"nextCursor"))==(page<17));cJSON_Delete(json);
+        assert(bool(cJSON_GetObjectItem(json,"nextCursor"))==(page<16));cJSON_Delete(json);
     }
     answer=invoke("self.pomodoro.control",R"({"action":"start"})");
     assert(answer.find("running")!=std::string::npos&&answer.find("1500")!=std::string::npos&&foreground==APP_ID_XIAOZHI);
@@ -202,5 +199,5 @@ int main(){
     display_available=false;
     answer=invoke("self.pomodoro.control",R"({"action":"reset"})");assert(answer.find("\"isError\":true")!=std::string::npos&&voice_timer.status==POMODORO_RUNNING);
     display_available=true;invoke("self.pomodoro.control",R"({"action":"reset"})");assert(voice_timer.status==POMODORO_READY);
-    puts("Device control: saved settings, guarded navigation, voice pomodoro validation/state, timeout, voice radio handover, removed music tools, low-battery brightness, AIHOT news and eighteen-tool discovery PASS");
+    puts("Device control: saved settings, guarded navigation, voice pomodoro validation/state, timeout, voice radio handover, removed music tools, low-battery brightness, Tech News and seventeen-tool discovery PASS");
 }

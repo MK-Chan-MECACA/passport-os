@@ -1,7 +1,7 @@
 #include "reminder_service.h"
 #include "device_control.h"
 #include "apps/lists/list_service.h"
-#include "apps/aihot/aihot_mcp.h"
+#include "apps/technews/technews_mcp.h"
 #include "apps/voice/time_sync.h"
 #include <cJSON.h>
 #include <ctime>
@@ -79,7 +79,7 @@ std::string mcp_result(const char *method,const char *json,bool *rpc_error,uint6
     Json params(cJSON_Parse(json),cJSON_Delete);
     if(!std::strcmp(method,"tools/list")) {
         const unsigned reminder_tools=sizeof(tools)/sizeof(tools[0]);
-        const unsigned total_tools=reminder_tools+device_control::tool_count()+lists::tool_count()+aihot::tool_count();
+        const unsigned total_tools=reminder_tools+device_control::tool_count()+lists::tool_count()+technews::tool_count();
         unsigned page=0;const auto *cursor=cJSON_GetObjectItem(params.get(),"cursor");
         bool valid=!cursor||cJSON_IsString(cursor);
         if(cJSON_IsString(cursor)&&cursor->valuestring[0]) {
@@ -90,7 +90,7 @@ std::string mcp_result(const char *method,const char *json,bool *rpc_error,uint6
         const unsigned control_end=reminder_tools+device_control::tool_count();
         const unsigned lists_end=control_end+lists::tool_count();
         const char *schema=page<reminder_tools?tools[page]:page<control_end?device_control::tool_schema(page-reminder_tools):
-            page<lists_end?lists::tool_schema(page-control_end):aihot::tool_schema(page-lists_end);
+            page<lists_end?lists::tool_schema(page-control_end):technews::tool_schema(page-lists_end);
         std::string out="{\"tools\":[";out+=schema;out+="]";
         if(page+1<total_tools)out+=",\"nextCursor\":\""+std::to_string(page+1)+"\"";
         return out+"}";
@@ -103,7 +103,7 @@ std::string mcp_result(const char *method,const char *json,bool *rpc_error,uint6
     const std::string device_reply=device_control::call(tool,args,token);
     if (!device_reply.empty()) return device_reply;
     const std::string list_reply=lists::call(tool,args);if(!list_reply.empty())return list_reply;
-    const std::string news_reply=aihot::call(tool,args);if(!news_reply.empty())return news_reply;
+    const std::string news_reply=technews::call(tool,args);if(!news_reply.empty())return news_reply;
     Json value(cJSON_CreateObject(),cJSON_Delete);
     if(!std::strcmp(tool,"self.reminder.get_context")) {
         const bool ready=clock_ready();char now[32]{};
