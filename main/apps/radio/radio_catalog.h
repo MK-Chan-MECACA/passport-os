@@ -14,8 +14,8 @@ struct RadioLocation {
 using RadioCatalogCancelled = bool (*)();
 
 // Locates the radio from its public network address and loads playable MP3
-// stations for the detected city. If the directory has no city result, it
-// automatically falls back to the surrounding state.
+// and AAC stations for the detected city, topped up from the surrounding state
+// and then the whole country.
 std::size_t radio_catalog_discover(RadioStation *stations, std::size_t capacity,
                                    RadioLocation *location,
                                    RadioCatalogCancelled cancelled = nullptr);
@@ -31,7 +31,7 @@ std::size_t radio_catalog_discover_city(const char *city, RadioStation *stations
                                         RadioLocation *location);
 
 // Preferred profile location skips IP geolocation; empty city uses IP instead.
-// Sparse local results are topped up with state results and curated presets.
+// Sparse local results are topped up with state, country and curated presets.
 // Voice requests may pass station keywords (including "" for any local station):
 // stop directory lookups once that station is found, then add presets locally.
 std::size_t radio_catalog_discover_location(const RadioLocation &preferred,

@@ -224,15 +224,6 @@ void url_encode(const char *source, char *target, std::size_t capacity) {
     target[out] = '\0';
 }
 
-void normalize_stream_url(const char *source, char *target, std::size_t capacity) {
-    if (starts_with(source, "https://") &&
-        (contains(source, ".qtfm.cn/") || contains(source, ".qingting.fm/"))) {
-        std::snprintf(target, capacity, "http://%s", source + 8);
-    } else {
-        copy_text(target, capacity, source);
-    }
-}
-
 bool duplicate_url(const RadioStation *stations, std::size_t count, const char *url) {
     for (std::size_t i = 0; i < count; ++i) {
         if (std::strcmp(stations[i].url, url) == 0) return true;
@@ -240,7 +231,7 @@ bool duplicate_url(const RadioStation *stations, std::size_t count, const char *
     return false;
 }
 
-// Chinese FM broadcasting occupies 87.0-108.0 MHz. Station names in the public
+// FM broadcasting occupies 87.0-108.0 MHz. Station names in the public
 // directory spell the frequency in three ways, so they are tried in order of
 // confidence: an explicit "FM" prefix, a bare decimal such as "94.7", and
 // finally a compact form such as "971" that stations use as a brand. The last
@@ -255,7 +246,7 @@ bool in_band(long decihz) {
 
 bool is_digit(char value) { return value >= '0' && value <= '9'; }
 
-// Reads "94.7" or "1017" style digits at `text` and returns tenths of a MHz.
+// Reads "94.7", "94,7" or "1017" style digits at `text` and returns tenths of a MHz.
 // Digit runs without a decimal point are ambiguous: "971" is 97.1 MHz while
 // "101" is 101.0 MHz. Both readings are tried and the one inside the broadcast
 // band wins, checking the tenths reading first because it is far more common.
@@ -267,7 +258,7 @@ long read_decihz(const char *text, std::size_t *consumed) {
     long value = 0;
     for (std::size_t i = 0; i < whole; ++i) value = value * 10 + (text[i] - '0');
 
-    if (text[whole] == '.' && is_digit(text[whole + 1])) {
+    if ((text[whole] == '.' || text[whole] == ',') && is_digit(text[whole + 1])) {
         if (whole > 3 || is_digit(text[whole + 2])) return 0;
         *consumed = whole + 2;
         return value * 10 + (text[whole + 1] - '0');
@@ -294,7 +285,7 @@ uint16_t parse_frequency(const char *name) {
 
     for (const char *p = name; *p; ++p) {
         if (!is_digit(*p)) continue;
-        const bool starts_run = p == name || (!is_digit(p[-1]) && p[-1] != '.');
+        const bool starts_run = p == name || (!is_digit(p[-1]) && p[-1] != '.' && p[-1] != ',');
         if (!starts_run) continue;
         std::size_t consumed = 0;
         const long value = read_decihz(p, &consumed);
@@ -319,12 +310,14 @@ void append_station(const char *json, const char *description,
     const char *url = json_string(entry, "url_resolved");
     if (!url[0]) url = json_string(entry, "url");
     const char *codec = json_string(entry, "codec");
-    // MP3 URLs need not end in .mp3; use declared codec, excluding AAC and HLS.
-    const bool mp3 = same_name(codec, "MP3") || (!codec[0] && contains(url, ".mp3"));
-    if (name[0] && url[0] && mp3 && enabled(entry, "lastcheckok", true) &&
+    // URLs need not end in .mp3/.aac; trust the declared codec. same_name()
+    // ignores '+', so "AAC+" matches "AAC". The player re-checks the bytes.
+    const bool playable = same_name(codec, "MP3") || same_name(codec, "AAC") ||
+                          (!codec[0] && contains(url, ".mp3"));
+    if (name[0] && url[0] && playable && !contains(url, ".m4a") && enabled(entry, "lastcheckok", true) &&
         !enabled(entry, "hls", false) && std::strlen(url) < sizeof(stations[0].url)) {
         RadioStation candidate = {};
-        normalize_stream_url(url, candidate.url, sizeof(candidate.url));
+        copy_text(candidate.url, sizeof(candidate.url), url);
         if ((starts_with(candidate.url, "http://") || starts_with(candidate.url, "https://")) &&
             !duplicate_url(stations, count, candidate.url)) {
             copy_text(candidate.name, sizeof(candidate.name), name);
@@ -372,9 +365,13 @@ void query_directory(const DirectoryServers &servers, const RadioLocation &locat
                      const char *field, const char *value, const char *description,
                      RadioStation *stations, std::size_t capacity, std::size_t &count,
                      RadioCatalogCancelled stop) {
-    if (cancelled(stop) || count >= capacity || !value[0] || !servers.count) return;
-    char encoded[160] = {}, country[16] = {};
-    url_encode(value, encoded, sizeof(encoded));
+    if (cancelled(stop) || count >= capacity || (field && !value[0]) || !servers.count) return;
+    char filter[176] = {}, country[16] = {};  // "&name=<encoded>", empty for the whole country
+    if (field) {
+        const int prefix = std::snprintf(filter, sizeof(filter), "&%s=", field);
+        if (prefix > 0 && static_cast<std::size_t>(prefix) < sizeof(filter))
+            url_encode(value, filter + prefix, sizeof(filter) - prefix);
+    }
     url_encode(location.country_code, country, sizeof(country));
     auto *object = static_cast<char *>(std::malloc(kObjectCapacity));
     if (!object) return;
@@ -383,9 +380,9 @@ void query_directory(const DirectoryServers &servers, const RadioLocation &locat
         const std::size_t i = (start + step) % servers.count;
         char url[384];
         std::snprintf(url, sizeof(url),
-            "http://%s/json/stations/search?countrycode=%s&%s=%s&codec=MP3"
-            "&hidebroken=true&bitrateMax=96&order=clickcount&reverse=true&limit=12",
-            servers.hosts[i], country, field, encoded);
+            "http://%s/json/stations/search?countrycode=%s%s"
+            "&hidebroken=true&bitrateMax=96&order=clickcount&reverse=true&limit=20",
+            servers.hosts[i], country, filter);
         esp_http_client_config_t config = {};
         config.url = url;
         config.timeout_ms = kHttpTimeoutMs;
@@ -452,17 +449,15 @@ std::size_t discover_for_location(RadioStation *stations, std::size_t capacity,
         return false;
     };
     const char *query = location->search_city[0] ? location->search_city : location->city;
-    query_directory(servers, *location, "name", query, "当地电台 · 网络直播", stations, capacity, count, stop);
+    query_directory(servers, *location, "name", query, "Local · Online", stations, capacity, count, stop);
     if (!voice_ready() && province && count < capacity && !same_name(query, province->name)) {
-        // Many stations put the state in their name, not state metadata.
-        query_directory(servers, *location, "name", province->name, "省内电台 · 网络直播",
+        // Stations put the state in their name; the directory's state field is
+        // blank for most Malaysian entries, so it is not queried.
+        query_directory(servers, *location, "name", province->name, "State · Online",
                         stations, capacity, count, stop);
     }
-    if (!voice_ready() && province && count < capacity) {
-        query_directory(servers, *location, "state", province->name, "省内电台 · 网络直播",
-                        stations, capacity, count, stop);
-    } else if (!voice_ready() && location->region[0] && count < capacity) {
-        query_directory(servers, *location, "state", location->region, "地区电台 · 网络直播",
+    if (!voice_ready() && count < capacity) {
+        query_directory(servers, *location, nullptr, "", "Malaysia · Online",
                         stations, capacity, count, stop);
     }
     if (cancelled(stop)) return 0;

@@ -28,7 +28,7 @@ One commit per step on branch `my-edition`. Run the relevant host tests after ea
 
 1. Remove NetEase. (done)
 2. Malaysian city catalog (GeoNames generator, `cities.json.gz`, radio state map). (done: 530 places, 16 states/FTs, 10 KB gzip. Profile accepts only `MY`. City names are GeoNames English, so the city capital is listed as "Malacca"; "Melaka" resolves as the state. Directory query flow and on-screen/phone labels are left for steps 3, 5 and 6.)
-3. Radio: `countrycode=MY`, MP3 + AAC/AAC+, Malaysian presets.
+3. Radio: `countrycode=MY`, MP3 + AAC/AAC+, Malaysian presets. (done: queries are city name → state name → whole country; the directory's `state` field is no longer queried. `.m4a` and HLS entries are skipped. Six MP3 presets from RTM/BFM/Star (Traxx, BFM, Nasional, Klasik, ai FM, 988), live-checked 2026-11-17; Minnal FM (Tamil) has no MP3 mount so is not a preset. Frequencies with a decimal comma ("101,1") now parse. AAC on hardware still unverified.)
 4. Replace the `aihot.news` client with Tech News on HN Algolia (in place, reusing `main/json_scanner`).
 5. English UI strings and Latin-only fonts.
 6. Setup pages and connectivity fallback.

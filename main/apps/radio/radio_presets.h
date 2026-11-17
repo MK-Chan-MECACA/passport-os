@@ -11,11 +11,13 @@ inline constexpr RadioStation kRadioPresets[] = {
     {"MANGORADIO", "德国 · MP3测试", "https://mangoradio.stream.laut.fm/mangoradio", 0},
     {"中国之声", "MP3回归测试", "http://lhttp.qingting.fm/live/15318317/64k.mp3", 0},
 #else
-    {"中国之声", "推荐电台 · 新闻综合", "http://lhttp.qingting.fm/live/15318317/64k.mp3", 0},
-    {"怀旧音乐", "推荐电台 · 经典老歌", "http://lhttp.qingting.fm/live/4804/64k.mp3", 0},
-    {"清晨音乐", "推荐电台 · 轻松旋律", "http://lhttp.qingting.fm/live/4915/64k.mp3", 0},
-    {"两广之声", "推荐电台 · 粤语音乐", "http://lhttp.qingting.fm/live/20500149/64k.mp3", 0},
-    {"羊城交通", "推荐电台 · 城市资讯", "http://lhttp.qingting.fm/live/1262/64k.mp3", 0},
-    {"第一财经", "推荐电台 · 财经资讯", "http://lhttp.qingting.fm/live/276/64k.mp3", 0},
+    // MP3 (96 kbps) only: AAC needs ~23 KiB of decoder heap, and presets are the
+    // fallback when everything else failed. Frequencies differ by region, so 0.
+    {"Traxx FM", "Featured · English music", "http://playerservices.streamtheworld.com/api/livestream-redirect/TRAXX_FM.mp3", 0},
+    {"BFM 89.9", "Featured · Business news", "http://playerservices.streamtheworld.com/api/livestream-redirect/BFM.mp3", 0},
+    {"Nasional FM", "Featured · Malay", "http://playerservices.streamtheworld.com/api/livestream-redirect/NASIONAL_FM.mp3", 0},
+    {"Klasik FM", "Featured · Malay classics", "http://playerservices.streamtheworld.com/api/livestream-redirect/RADIO_KLASIK.mp3", 0},
+    {"ai FM", "Featured · Chinese", "http://playerservices.streamtheworld.com/api/livestream-redirect/AI_FM.mp3", 0},
+    {"988 FM", "Featured · Chinese", "http://playerservices.streamtheworld.com/api/livestream-redirect/988_FM.mp3", 0},
 #endif
 };
