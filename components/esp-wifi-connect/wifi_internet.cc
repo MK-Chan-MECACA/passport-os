@@ -45,7 +45,7 @@ void WifiManager::InternetWorker(void *arg) {
         InternetStatus result = InternetStatus::NoInternet;
         // Two independent endpoints, no redirects or portal body allocation.
         for (const char *url : {"http://connectivitycheck.gstatic.com/generate_204",
-                               "http://www.qualcomm.cn/generate_204"}) {
+                               "http://cp.cloudflare.com/generate_204"}) {
             esp_http_client_config_t config{};
             config.url = url; config.timeout_ms = 5000;
             config.disable_auto_redirect = true; config.buffer_size = 512;
