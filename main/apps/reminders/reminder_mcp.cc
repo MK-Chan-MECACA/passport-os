@@ -66,7 +66,7 @@ void record_json(cJSON *v,const Record &r) {
 }
 const char *const tools[]={
 R"({"name":"self.reminder.get_context","description":"Get the physical device's current local date/time, UTC offset and clock readiness. MUST call before resolving tomorrow, tonight, weekdays or absolute dates. Do not guess current time.","inputSchema":{"type":"object","properties":{}}})",
-R"({"name":"self.reminder.create","description":"Save a timed reminder after an explicit request. Use exactly one of delay_seconds or due_local. Call get_context before resolving dates. repeat defaults once; daily, weekdays (Mon-Fri, no holiday calendar), weekly require due_local for the FIRST future occurrence matching the rule. weekly also requires weekday 1=Mon..7=Sun. Completion/missed recurring occurrences advance to the next date, keeping one record. Schedule uses the creation UTC offset. Clarify ambiguous dates. Only confirm saved=true and actual returned time/rule. Device must stay powered; no audio stored. Untimed notes belong in checklist tools.","inputSchema":{"type":"object","properties":{"title":{"type":"string","description":"At most 95 UTF-8 bytes, about 30 Chinese characters"},"delay_seconds":{"type":"integer","minimum":5,"maximum":31622400},"due_local":{"type":"string"},"repeat":{"type":"string","enum":["once","daily","weekdays","weekly"]},"weekday":{"type":"integer","minimum":1,"maximum":7}},"required":["title"]}})",
+R"({"name":"self.reminder.create","description":"Save a timed reminder after an explicit request. Use exactly one of delay_seconds or due_local. Call get_context before resolving dates. repeat defaults once; daily, weekdays (Mon-Fri, no holiday calendar), weekly require due_local for the FIRST future occurrence matching the rule. weekly also requires weekday 1=Mon..7=Sun. Completion/missed recurring occurrences advance to the next date, keeping one record. Schedule uses the creation UTC offset. Clarify ambiguous dates. Only confirm saved=true and actual returned time/rule. Device must stay powered; no audio stored. Untimed notes belong in checklist tools.","inputSchema":{"type":"object","properties":{"title":{"type":"string","description":"At most 95 UTF-8 bytes"},"delay_seconds":{"type":"integer","minimum":5,"maximum":31622400},"due_local":{"type":"string"},"repeat":{"type":"string","enum":["once","daily","weekdays","weekly"]},"weekday":{"type":"integer","minimum":1,"maximum":7}},"required":["title"]}})",
 R"({"name":"self.reminder.list","description":"List saved text reminders, five per page. Use before deleting or completing by id. Follow next_offset to read more.","inputSchema":{"type":"object","properties":{"offset":{"type":"integer","minimum":0,"maximum":20}}}})",
 R"({"name":"self.reminder.complete","description":"Complete one occurrence after explicit request. Read list first; use id and its due_unix as expected_due. expected_due is REQUIRED for repeating reminders and prevents completing the next occurrence on retry. Repeating reminders advance to next date; one-time reminders become done. Never guess IDs/timestamps.","inputSchema":{"type":"object","properties":{"id":{"type":"integer","minimum":1},"expected_due":{"type":"integer"}},"required":["id"]}})",
 R"({"name":"self.reminder.delete","description":"Delete a reminder only on explicit request. For repeating reminders this cancels the WHOLE recurring schedule, not only today; clarify if ambiguous. Read list for id first.","inputSchema":{"type":"object","properties":{"id":{"type":"integer","minimum":1}},"required":["id"]}})",
@@ -112,38 +112,38 @@ std::string mcp_result(const char *method,const char *json,bool *rpc_error,uint6
         cJSON_AddNumberToObject(value.get(),"utc_offset_minutes",time_sync_tz_offset_sec()/60);
         cJSON_AddNumberToObject(value.get(),"capacity",kCapacity);
     }else if(!std::strcmp(tool,"self.reminder.create")) {
-        if(!fields(args,{"title","delay_seconds","due_local","repeat","weekday"}))return fail("存在无效或重复的提醒参数");
+        if(!fields(args,{"title","delay_seconds","due_local","repeat","weekday"}))return fail("Invalid or duplicate reminder arguments");
         const auto *title=cJSON_GetObjectItem(args,"title");
         const auto *delay=cJSON_GetObjectItem(args,"delay_seconds");
         const auto *local=cJSON_GetObjectItem(args,"due_local");
-        if(!cJSON_IsString(title)||bool(delay)==bool(local))return fail("请提供事项和唯一一种时间；时间不明确时先询问用户");
+        if(!cJSON_IsString(title)||bool(delay)==bool(local))return fail("Give a title and exactly one time; ask the user if the time is unclear");
         int64_t due=0;
-        if(delay){if(!integer(delay,5,kMaxAhead))return fail("延迟必须为五秒到一年之间的整数秒");due=time(nullptr)+static_cast<int64_t>(delay->valuedouble);}
-        else if(!cJSON_IsString(local)||!parse_local(local->valuestring,time_sync_tz_offset_sec(),&due))return fail("日期格式错误，请使用设备本地 YYYY-MM-DD HH:MM");
+        if(delay){if(!integer(delay,5,kMaxAhead))return fail("delay_seconds must be whole seconds from 5 s to one year");due=time(nullptr)+static_cast<int64_t>(delay->valuedouble);}
+        else if(!cJSON_IsString(local)||!parse_local(local->valuestring,time_sync_tz_offset_sec(),&due))return fail("Bad date; use device-local YYYY-MM-DD HH:MM");
         RepeatRule rule{};
-        if(!rule_arg(args,due,&rule)||(rule.days&&delay))return fail("重复提醒需匹配规则的未来首次日期；每周需指定周几，工作日为周一至周五");
+        if(!rule_arg(args,due,&rule)||(rule.days&&delay))return fail("A repeat needs a future first date matching its rule; weekly needs weekday; weekdays means Mon-Fri");
         uint32_t id=0;const char *error=nullptr;
         if(!create_repeating(title->valuestring,due,rule,&id,&error))return fail(error);
-        Record saved{};if(!get(id,&saved))return fail("保存结果读取失败，请查询提醒列表");
+        Record saved{};if(!get(id,&saved))return fail("Saved state unreadable; list reminders to confirm");
         cJSON_AddBoolToObject(value.get(),"saved",true);record_json(value.get(),saved);
     }else if(!std::strcmp(tool,"self.reminder.update")) {
-        if(!fields(args,{"id","title","due_local","repeat","weekday"}))return fail("存在无效或重复的修改参数");
+        if(!fields(args,{"id","title","due_local","repeat","weekday"}))return fail("Invalid or duplicate update arguments");
         const auto *id=cJSON_GetObjectItemCaseSensitive(args,"id"),*title=cJSON_GetObjectItemCaseSensitive(args,"title");
         const auto *local=cJSON_GetObjectItemCaseSensitive(args,"due_local"),*repeat=cJSON_GetObjectItemCaseSensitive(args,"repeat");
         const auto *weekday=cJSON_GetObjectItemCaseSensitive(args,"weekday");
-        if(!integer(id,1,UINT32_MAX)||(!title&&!local&&!repeat)||(title&&!cJSON_IsString(title))||(weekday&&!repeat))return fail("请提供有效编号及要修改的内容或时间");
+        if(!integer(id,1,UINT32_MAX)||(!title&&!local&&!repeat)||(title&&!cJSON_IsString(title))||(weekday&&!repeat))return fail("Give a valid id plus the title or time to change");
         int64_t due=0;
-        if((repeat&&!local)||(local&&(!cJSON_IsString(local)||!parse_local(local->valuestring,time_sync_tz_offset_sec(),&due))))return fail("请提供有效的未来首次提醒日期");
-        RepeatRule rule{};if(repeat&&!rule_arg(args,due,&rule))return fail("重复规则与首次提醒日期不一致");
+        if((repeat&&!local)||(local&&(!cJSON_IsString(local)||!parse_local(local->valuestring,time_sync_tz_offset_sec(),&due))))return fail("Give a valid future first due_local");
+        RepeatRule rule{};if(repeat&&!rule_arg(args,due,&rule))return fail("Repeat rule does not match the first date");
         const char *error=nullptr;const uint32_t number=static_cast<uint32_t>(id->valuedouble);
         if(!update(number,title?title->valuestring:nullptr,due,repeat?&rule:nullptr,&error))return fail(error);
-        Record saved{};if(!get(number,&saved))return fail("请查询确认修改结果");
+        Record saved{};if(!get(number,&saved))return fail("List reminders to confirm the change");
         cJSON_AddBoolToObject(value.get(),"saved",true);record_json(value.get(),saved);
     }else if(!std::strcmp(tool,"self.reminder.list")) {
         const auto *offset=cJSON_GetObjectItem(args,"offset");
         if(offset&&!integer(offset,0,kCapacity))return fail("Invalid list offset");
         // Bounded heap buffer; don't put 2240 B on the voice control stack.
-        std::unique_ptr<Record[]> rows(new(std::nothrow) Record[kCapacity]);if(!rows)return fail("内存不足，请稍后重试");
+        std::unique_ptr<Record[]> rows(new(std::nothrow) Record[kCapacity]);if(!rows)return fail("Low memory. Try again later");
         const size_t n=list(rows.get(),kCapacity),start=offset?static_cast<size_t>(offset->valuedouble):0;
         cJSON_AddNumberToObject(value.get(),"total",n);cJSON *items=cJSON_AddArrayToObject(value.get(),"reminders");
         for(size_t i=start;i<n&&i<start+5;++i) {
@@ -156,10 +156,10 @@ std::string mcp_result(const char *method,const char *json,bool *rpc_error,uint6
         const auto *id=cJSON_GetObjectItem(args,"id");if(!integer(id,1,UINT32_MAX))return fail("Invalid reminder id");
         const char *error=nullptr;
         const uint32_t number=static_cast<uint32_t>(id->valuedouble);Record before{};
-        if(!get(number,&before))return fail("这条提醒已不存在");
+        if(!get(number,&before))return fail("This reminder no longer exists");
         const bool erase=!std::strcmp(tool,"self.reminder.delete");
         const auto *expected=cJSON_GetObjectItemCaseSensitive(args,"expected_due");
-        if((expected&&!integer(expected,1700000000,4102444800LL))||(!erase&&before.repeat.days&&!expected))return fail("重复提醒请先查询并提供 due_unix 作为 expected_due，避免误完成下一次");
+        if((expected&&!integer(expected,1700000000,4102444800LL))||(!erase&&before.repeat.days&&!expected))return fail("For a repeating reminder, list first and pass its due_unix as expected_due so the next occurrence is not completed by mistake");
         if(!change(number,erase,0,&error,expected?static_cast<int64_t>(expected->valuedouble):0))return fail(error);
         cJSON_AddBoolToObject(value.get(),"success",true);
         if(!erase){Record after{};if(get(number,&after))record_json(value.get(),after);}

@@ -37,7 +37,7 @@ void draw() {
         case Page::Keyboard:
             radio_ui_show_wifi_keyboard(p.ssid.c_str(), p.password.size(), p.keyboard, p.selected, p.error); break;
         case Page::Connecting:
-            radio_ui_show_wifi_connecting(p.ssid.c_str(), "正在连接，请稍等"); break;
+            radio_ui_show_wifi_connecting(p.ssid.c_str(), "Connecting, please wait"); break;
         case Page::Success:
             radio_ui_show_wifi_success(p.ssid.c_str()); break;
         case Page::Saved: {
@@ -63,7 +63,7 @@ void refresh_scan() {
     p.networks.clear();
     WifiNetworkView saved{};
     saved.rssi = -128;
-    std::snprintf(saved.ssid, sizeof(saved.ssid), "%s", "已存网络");
+    std::snprintf(saved.ssid, sizeof(saved.ssid), "%s", "Saved networks");
     p.networks.push_back(saved);
     for (const auto &ap : aps) {
         if (!ap.ssid[0]) continue;
@@ -76,7 +76,7 @@ void refresh_scan() {
     }
     WifiNetworkView back{};
     back.rssi = -128;
-    std::snprintf(back.ssid, sizeof(back.ssid), "%s", "返回");
+    std::snprintf(back.ssid, sizeof(back.ssid), "%s", "Back");
     p.networks.push_back(back);
     p.selected = return_selected ? p.networks.size() - 1 : 0;
     if (!saved_selected && !return_selected) {
@@ -89,7 +89,7 @@ void refresh_scan() {
 
 void connect() {
     auto &p = *s_picker;
-    if (p.secure && p.password.size() < 8) { p.error = "密码至少 8 位"; draw(); return; }
+    if (p.secure && p.password.size() < 8) { p.error = "Password: 8+ chars"; draw(); return; }
     p.page = Page::Connecting; p.result = 1; draw();
     if (xTaskCreate([](void *arg) {
         auto *p = static_cast<Picker *>(arg);
@@ -117,7 +117,7 @@ bool wifi_picker_open() {
         else {
             const int reason = WifiManager::GetInstance().LastConfigDisconnectReason();
             p.error = reason == WIFI_REASON_AUTH_FAIL || reason == WIFI_REASON_4WAY_HANDSHAKE_TIMEOUT || reason == WIFI_REASON_HANDSHAKE_TIMEOUT
-                ? "密码错误，请修改" : reason == WIFI_REASON_NO_AP_FOUND ? "未找到网络，请重试" : "连接超时，请重试";
+                ? "Wrong password, edit it" : reason == WIFI_REASON_NO_AP_FOUND ? "Network not found, retry" : "Timed out, try again";
             p.page = Page::Keyboard; p.selected = 0;
         }
         draw();

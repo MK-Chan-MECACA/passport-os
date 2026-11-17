@@ -47,22 +47,22 @@ void wifi_setup_start(void) {
     lv_obj_remove_flag(s_screen, LV_OBJ_FLAG_SCROLLABLE);
     ui_pixel_background(s_screen);
     auto *top=ui_pixel_top_bar(s_screen);
-    auto *name=ui_pixel_label(top,"手机设置",&buddy_font_16,UI_TEXT);lv_obj_align(name,LV_ALIGN_LEFT_MID,12,0);
+    auto *name=ui_pixel_label(top,"Phone setup",&buddy_font_16,UI_TEXT);lv_obj_align(name,LV_ALIGN_LEFT_MID,12,0);
     s_battery=ui_pixel_battery_create(top,UI_STATUS_BATTERY_X,6,UI_TEXT,&lv_font_montserrat_14);
     ui_pixel_battery_set(&s_battery,bsp_battery_soc());s_battery_tick=lv_tick_get();
-    auto *welcome = line(s_required?"欢迎使用 AI Passport OS":"用手机完成设置",44,UI_TEXT,&ui_font_20);
+    auto *welcome = line(s_required?"Welcome to Passport":"Set up by phone",44,UI_TEXT,&ui_font_20);
     // The complete product name needs slightly more than the usual 216px row.
     lv_obj_set_pos(welcome, 8, 44);
     lv_obj_set_width(welcome, 224);
-    line("1 连接设备热点",84,UI_TEXT_DIM);
+    line("1 Join the device hotspot",84,UI_TEXT_DIM);
     auto *ssid = line(wifi.GetApSsid().c_str(),110,UI_ACCENT,&ui_font_20);
     lv_obj_set_pos(ssid, 8, 110);
     lv_obj_set_width(ssid, 224);
-    line("2 手机浏览器打开",158,UI_TEXT_DIM);
+    line("2 Open in phone browser",158,UI_TEXT_DIM);
     line("192.168.4.1",190,UI_ACCENT,&ui_digits_32);
-    s_status=line(err==ESP_OK?"提示无互联网时选保留":"服务未启动，确定重试",242,UI_TEXT_DIM);
+    s_status=line(err==ESP_OK?"Phone says offline? Keep it":"Service down. OK to retry",242,UI_TEXT_DIM);
     lv_obj_set_height(s_status,22);lv_label_set_long_mode(s_status,LV_LABEL_LONG_DOT);
-    ui_pixel_footer(s_screen,"配网、资料、名片一起设置",s_required?"长按确定跳过配网":"长按确定返回首页",&buddy_font_16);
+    ui_pixel_footer(s_screen,"Wi-Fi, profile, card in one go",s_required?"Hold OK: Skip Wi-Fi":"Hold OK: Home",&buddy_font_16);
     lv_screen_load(s_screen);
     bsp_lvgl_unlock();
     app_registry_keep_awake();
@@ -83,7 +83,7 @@ void wifi_setup_on_key(uint8_t btn, app_btn_event_t event, uint16_t) {
     if (btn == BSP_BTN_OK && event == BTN_EVT_CLICK && !home_upload_active()) {
         const auto err = home_upload_start();
         bsp_lvgl_lock(-1);
-        ui_pixel_label_set_text(s_status, err == ESP_OK ? "请在手机浏览器刷新页面" : "启动失败，请重启设备");
+        ui_pixel_label_set_text(s_status, err == ESP_OK ? "Refresh the phone page" : "Start failed. Restart device");
         bsp_lvgl_unlock();
     }
 }
@@ -105,16 +105,16 @@ void wifi_setup_tick(void) {
     }
     if (bsp_lvgl_lock(50)) {
         if(s_screen&&lv_tick_get()-s_battery_tick>=5000){ui_pixel_battery_set(&s_battery,bsp_battery_soc());s_battery_tick=lv_tick_get();}
-        if (s_status) ui_pixel_label_set_text(s_status, home_upload_busy() ? "正在连接，请保持热点" :
-                    home_upload_network_verified() ? "联网成功，手机继续设置" :
-                    home_upload_active() ? "提示无互联网时选保留" : "服务未启动，确定重试");
+        if (s_status) ui_pixel_label_set_text(s_status, home_upload_busy() ? "Connecting, keep hotspot on" :
+                    home_upload_network_verified() ? "Online. Continue on phone" :
+                    home_upload_active() ? "Phone says offline? Keep it" : "Service down. OK to retry");
         bsp_lvgl_unlock();
     }
 }
 
 const passport_app_t g_wifi_app = {
-    .id = APP_ID_WIFI, .name = "手机设置", .en_name = "PHONE SETUP",
-    .desc = "配网、资料与名片", .tag = "SYSTEM", .theme_color = 0x181B1C,
+    .id = APP_ID_WIFI, .name = "Phone setup", .en_name = "PHONE SETUP",
+    .desc = "Wi-Fi, profile and card", .tag = "SYSTEM", .theme_color = 0x181B1C,
     .init = wifi_setup_init, .start = wifi_setup_start,
     .stop = wifi_setup_stop, .on_key = wifi_setup_on_key,
 };

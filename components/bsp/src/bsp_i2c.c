@@ -19,12 +19,12 @@ esp_err_t bsp_i2c_init(void) {
     };
     esp_err_t e = i2c_new_master_bus(&cfg, &s_bus);
     if (e != ESP_OK) {
-        ESP_LOGE(TAG, "I2C 总线创建失败 (%s) —— 检查 SDA=GPIO%d / SCL=GPIO%d 是否被别的外设占用",
+        ESP_LOGE(TAG, "I2C bus creation failed (%s) — check SDA=GPIO%d / SCL=GPIO%d are not used by another peripheral",
                  esp_err_to_name(e), BSP_I2C_SDA, BSP_I2C_SCL);
         s_bus = NULL;
         return e;
     }
-    ESP_LOGI(TAG, "I2C 就绪 SDA=GPIO%d SCL=GPIO%d", BSP_I2C_SDA, BSP_I2C_SCL);
+    ESP_LOGI(TAG, "I2C ready SDA=GPIO%d SCL=GPIO%d", BSP_I2C_SDA, BSP_I2C_SCL);
     return ESP_OK;
 }
 
@@ -43,21 +43,21 @@ esp_err_t bsp_i2c_scan(void) {
     // I2C_STATUS_DONE("in order not influence next time transaction"),NACK 不留残留;
     // 它临时设的 100kHz 时序也会被下一次设备事务按各自的 scl_speed_hz 覆盖。
     if (!s_bus) {
-        ESP_LOGE(TAG, "请先成功调用 bsp_i2c_init()");
+        ESP_LOGE(TAG, "call bsp_i2c_init() successfully first");
         return ESP_ERR_INVALID_STATE;
     }
-    ESP_LOGI(TAG, "I2C 扫描开始:");
+    ESP_LOGI(TAG, "I2C scan start:");
     int found = 0;
     for (uint8_t addr = 0x08; addr <= 0x77; addr++) {
         if (i2c_master_probe(s_bus, addr, 50) == ESP_OK) {
-            const char *who = (addr == BSP_I2C_ES8311_ADDR) ? "  <- ES8311 音频 codec"
-                            : (addr == BSP_I2C_CW2017_ADDR) ? "  <- CW2017 电量计"
+            const char *who = (addr == BSP_I2C_ES8311_ADDR) ? "  <- ES8311 audio codec"
+                            : (addr == BSP_I2C_CW2017_ADDR) ? "  <- CW2017 fuel gauge"
                             : "";
-            ESP_LOGI(TAG, "  发现设备 @ 0x%02X%s", addr, who);
+            ESP_LOGI(TAG, "  found device @ 0x%02X%s", addr, who);
             found++;
         }
     }
-    if (found == 0) ESP_LOGW(TAG, "  未发现任何 I2C 设备 —— 检查接线、上拉电阻与供电");
-    else            ESP_LOGI(TAG, "I2C 扫描完成,共 %d 个设备", found);
+    if (found == 0) ESP_LOGW(TAG, "  no I2C devices found — check wiring, pull-ups and power");
+    else            ESP_LOGI(TAG, "I2C scan done, %d devices", found);
     return ESP_OK;
 }

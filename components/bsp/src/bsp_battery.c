@@ -114,7 +114,7 @@ static int cw_update_profile(void) {
 
     for (size_t i = 0; i < CW_PROFILE_SIZE; i++) {
         if (cw_write((uint8_t)(CW_REG_PROFILE + i), s_battery_profile[i]) != 0) {
-            ESP_LOGE(TAG, "写 profile 失败:index=%u", (unsigned)i);
+            ESP_LOGE(TAG, "profile write failed: index=%u", (unsigned)i);
             return -1;
         }
     }
@@ -122,7 +122,7 @@ static int cw_update_profile(void) {
     for (size_t i = 0; i < CW_PROFILE_SIZE; i++) {
         if (cw_read((uint8_t)(CW_REG_PROFILE + i), &val, 1) != 0) return -1;
         if (val != s_battery_profile[i]) {
-            ESP_LOGE(TAG, "profile 校验失败:index=%u expected=0x%02X actual=0x%02X",
+            ESP_LOGE(TAG, "profile verify failed: index=%u expected=0x%02X actual=0x%02X",
                      (unsigned)i, s_battery_profile[i], val);
             return -1;
         }
@@ -156,7 +156,7 @@ esp_err_t bsp_battery_init(void) {
     if (s_dev) {
         uint8_t ver = 0;
         if (cw_read(CW_REG_VERSION, &ver, 1) == 0) return ESP_OK;
-        ESP_LOGW(TAG, "CW2017 已失去响应，重新挂载 I2C 设备");
+        ESP_LOGW(TAG, "CW2017 stopped responding, re-adding I2C device");
         cw_remove_device();
     }
 
@@ -169,28 +169,28 @@ esp_err_t bsp_battery_init(void) {
         .scl_speed_hz    = 100000,
     };
     e = i2c_master_bus_add_device(bsp_i2c_bus(), &dc, &s_dev);
-    if (e != ESP_OK) { ESP_LOGE(TAG, "添加 I2C 设备失败: %s", esp_err_to_name(e)); return e; }
+    if (e != ESP_OK) { ESP_LOGE(TAG, "add I2C device failed: %s", esp_err_to_name(e)); return e; }
 
     uint8_t ver = 0;
     if (cw_read(CW_REG_VERSION, &ver, 1) != 0) {
-        ESP_LOGW(TAG, "CW2017 未应答 —— 用 bsp_i2c_scan() 确认 0x%02X 是否在线;"
-                      "无电量计的板子可忽略本项", BSP_I2C_CW2017_ADDR);
+        ESP_LOGW(TAG, "CW2017 not responding — use bsp_i2c_scan() to check 0x%02X is present;"
+                      " boards without a fuel gauge can ignore this", BSP_I2C_CW2017_ADDR);
         cw_remove_device();
         return ESP_ERR_NOT_FOUND;
     }
-    ESP_LOGI(TAG, "检测到 CW2017 VERSION=0x%02X", ver);
+    ESP_LOGI(TAG, "found CW2017 VERSION=0x%02X", ver);
 
     bool profile_matches = false;
     if (cw_profile_matches(&profile_matches) != 0) {
-        ESP_LOGE(TAG, "读取电池 profile 失败");
+        ESP_LOGE(TAG, "battery profile read failed");
         e = ESP_FAIL;
         goto fail;
     }
 
     if (!profile_matches) {
-        ESP_LOGI(TAG, "写入优特利 520mAh 厂家 profile");
+        ESP_LOGI(TAG, "writing Youteli 520mAh factory profile");
         if (cw_update_profile() != 0) {
-            ESP_LOGE(TAG, "电池 profile 写入失败");
+            ESP_LOGE(TAG, "battery profile write failed");
             e = ESP_FAIL;
             goto fail;
         }
@@ -204,7 +204,7 @@ esp_err_t bsp_battery_init(void) {
             e = ESP_FAIL;
             goto fail;
         }
-        ESP_LOGI(TAG, "优特利 520mAh profile 已匹配");
+        ESP_LOGI(TAG, "Youteli 520mAh profile matches");
     }
 
     if (cw_wait_soc_ready() != 0) {

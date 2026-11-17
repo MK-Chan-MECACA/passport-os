@@ -125,11 +125,11 @@ std::size_t s_settings_selected;
 std::size_t s_settings_row_count;
 std::size_t s_station_index;
 std::size_t s_station_count = 1;
-char s_station_name_text[64] = "清晨音乐";
-char s_station_description_text[96] = "轻松音乐 · 网络直播";
-char s_network_detail[64] = "等待网络";
+char s_station_name_text[64] = "Morning Music";
+char s_station_description_text[96] = "Easy listening · Live";
+char s_network_detail[64] = "Waiting for network";
 char s_location_text[48] = "NATIONAL";
-char s_playback_detail[64] = "准备播放";
+char s_playback_detail[64] = "Ready to play";
 RadioPlaybackState s_playback_state = RadioPlaybackState::Stopped;
 std::atomic<uint32_t> s_level_generation{0};
 uint8_t s_levels[kMeterCount] = {};
@@ -301,14 +301,14 @@ static inline lv_obj_t *make_taskbar(lv_obj_t *parent) {
 
 const char *playback_text() {
     switch (s_playback_state) {
-        case RadioPlaybackState::Stopped: return "已暂停";
-        case RadioPlaybackState::Connecting: return "正在连接电台";
-        case RadioPlaybackState::Buffering: return "正在缓冲";
-        case RadioPlaybackState::Playing: return "正在播放";
-        case RadioPlaybackState::Reconnecting: return "信号中断，正在重连";
-        case RadioPlaybackState::Error: return "暂时无法播放";
+        case RadioPlaybackState::Stopped: return "Paused";
+        case RadioPlaybackState::Connecting: return "Connecting to station";
+        case RadioPlaybackState::Buffering: return "Buffering";
+        case RadioPlaybackState::Playing: return "Playing";
+        case RadioPlaybackState::Reconnecting: return "Signal lost. Reconnecting";
+        case RadioPlaybackState::Error: return "Can't play right now";
     }
-    return "准备播放";
+    return "Ready to play";
 }
 
 void apply_network() {
@@ -443,7 +443,7 @@ bool showing_playback_detail() {
 }
 
 // The location row doubles as the explanation while playback is failing or
-// retrying, so "播放失败" never stands without a reason.
+// retrying, so "Failed" never stands without a reason.
 void apply_location() {
     if (s_location && showing_playback_detail()) {
         ui_pixel_label_set_text(s_location, s_playback_detail);
@@ -470,19 +470,19 @@ void apply_location() {
 
 void apply_playback() {
     if (!s_status || !s_play_icon) return;
-    const char *status=!s_network_connected?"网络未连接":s_playback_state==RadioPlaybackState::Playing?"播放中":
-        s_playback_state==RadioPlaybackState::Connecting?"连接中":s_playback_state==RadioPlaybackState::Buffering?"缓冲中":
-        s_playback_state==RadioPlaybackState::Reconnecting?"重连中":s_playback_state==RadioPlaybackState::Error?"播放失败":"已暂停";
+    const char *status=!s_network_connected?"No network":s_playback_state==RadioPlaybackState::Playing?"Playing":
+        s_playback_state==RadioPlaybackState::Connecting?"Connecting":s_playback_state==RadioPlaybackState::Buffering?"Buffering":
+        s_playback_state==RadioPlaybackState::Reconnecting?"Reconnecting":s_playback_state==RadioPlaybackState::Error?"Failed":"Paused";
     ui_pixel_label_set_text(s_status,status);
     ui_pixel_text_color(s_status,s_playback_state==RadioPlaybackState::Error?UI_DANGER:!s_network_connected?UI_WARNING:UI_TEXT_DIM);
     const bool playing = s_playback_state == RadioPlaybackState::Playing ||
                          s_playback_state == RadioPlaybackState::Buffering ||
                          s_playback_state == RadioPlaybackState::Connecting ||
                          s_playback_state == RadioPlaybackState::Reconnecting;
-    if (s_main_hint) ui_pixel_label_set_text(s_main_hint, !s_network_connected ? "先用手机完成配网" : playing
-        ? "上下换台 · 确定暂停"
+    if (s_main_hint) ui_pixel_label_set_text(s_main_hint, !s_network_connected ? "Set up Wi-Fi with phone first" : playing
+        ? "↑↓ Station · OK Pause"
         : s_playback_state == RadioPlaybackState::Error
-            ? "上下换台 · 确定重试" : "上下换台 · 确定播放");
+            ? "↑↓ Station · OK Retry" : "↑↓ Station · OK Play");
     apply_location();
     ui_pixel_label_set_text(s_play_icon, playing ? "II" : ">");
     ui_pixel_text_color(s_play_icon,
@@ -505,8 +505,8 @@ void apply_sleep_timer() {
     lv_obj_set_flag(s_sleep_timer,LV_OBJ_FLAG_HIDDEN,!visible);
     lv_obj_set_flag(s_status,LV_OBJ_FLAG_HIDDEN,visible);
     char value[32];
-    if(volume)std::snprintf(value,sizeof(value),"音量 %u%%",s_volume);
-    else std::snprintf(value,sizeof(value),"定时 %02u:%02u",(unsigned)(seconds/60),(unsigned)(seconds%60));
+    if(volume)std::snprintf(value,sizeof(value),"Vol %u%%",s_volume);
+    else std::snprintf(value,sizeof(value),"Sleep %02u:%02u",(unsigned)(seconds/60),(unsigned)(seconds%60));
     ui_pixel_label_set_text(s_sleep_timer,value);
     s_last_sleep_seconds=seconds;
 }
@@ -536,7 +536,7 @@ void build_main() {
 
     ui_pixel_top_bar(s_main_group);
     ui_pixel_wifi_bars_create(s_main_group, UI_STATUS_WIFI_X, 18, s_wifi_bars);
-    make_label(s_main_group, "收音机", 42, 3, 106, UI_TEXT, &buddy_font_16);
+    make_label(s_main_group, "Radio", 42, 3, 106, UI_TEXT, &buddy_font_16);
     s_clock = nullptr;
     s_battery = ui_pixel_battery_create(s_main_group, UI_STATUS_BATTERY_X, 6, UI_TEXT,
                                         &lv_font_montserrat_14);
@@ -572,7 +572,7 @@ void build_main() {
     auto *meter_panel=make_box(s_main_group,12,242,216,22,kBackground);
     for(std::size_t i=0;i<kMeterCount;i++){s_meter[i]=make_box(meter_panel,2+i*12,20,8,2,kGrid);lv_obj_set_style_bg_opa(s_meter[i],LV_OPA_TRANSP,0);}
     s_play_icon=make_label(s_main_group,"",0,0,1,kAmber);lv_obj_add_flag(s_play_icon,LV_OBJ_FLAG_HIDDEN);
-    s_main_hint=ui_pixel_footer(s_main_group,"上下换台 · 确定播放","长按：上下音量 · 确定返回",&buddy_font_16);
+    s_main_hint=ui_pixel_footer(s_main_group,"↑↓ Station · OK Play","Hold: ↑↓ Vol · OK Back",&buddy_font_16);
 
     apply_network();
     apply_station();
@@ -599,29 +599,29 @@ void build_config(const char *ssid, const char *url) {
     for (auto &bar : s_wifi_bars) bar = nullptr;
     for (auto &bar : s_meter) bar = nullptr;
 
-    make_label(s_screen, "联网收音机", 12, 12, 216, kText, &ui_font_20);
-    lv_obj_t *tag = make_label(s_screen, "首次配网", 12, 45, 216, kAmber);
+    make_label(s_screen, "Internet Radio", 12, 12, 216, kText, &ui_font_20);
+    lv_obj_t *tag = make_label(s_screen, "First-time setup", 12, 45, 216, kAmber);
     set_centered(tag);
     s_pair_dot = make_box(s_screen, 112, 77, 16, 16, kRed, LV_RADIUS_CIRCLE);
 
     lv_obj_t *panel = make_box(s_screen, 18, 111, 204, 132, kPanel, 10);
     lv_obj_set_style_border_color(panel, lv_color_hex(kGrid), 0);
     lv_obj_set_style_border_width(panel, 0, 0);
-    lv_obj_t *hint = make_label(panel, "手机连接热点", 0, 14, 204, kMuted);
+    lv_obj_t *hint = make_label(panel, "Connect phone to hotspot", 0, 14, 204, kMuted);
     set_centered(hint);
     lv_obj_t *ssid_label = make_label(panel, ssid && ssid[0] ? ssid : "LEO Radio",
                                       8, 43, 188, kAmber);
     set_centered(ssid_label);
-    hint = make_label(panel, "连接后会自动打开配网页面", 0, 77, 204, kText);
+    hint = make_label(panel, "Setup page then opens", 0, 77, 204, kText);
     set_centered(hint);
     lv_obj_t *address = make_label(panel, url && url[0] ? url : "192.168.4.1",
                                    0, 104, 204, kMuted,
                                    &lv_font_montserrat_14);
     set_centered(address);
-    hint = make_label(s_screen, "请选择 2.4G 无线网络", 12, 259, 216, kText);
+    hint = make_label(s_screen, "Use a 2.4 GHz network", 12, 259, 216, kText);
     make_taskbar(s_screen);
     set_centered(hint);
-    hint = make_label(s_screen, "配网完成后会自动开始播放", 12, 291, 216, UI_TEXT);
+    hint = make_label(s_screen, "Plays when Wi-Fi is set up", 12, 291, 216, UI_TEXT);
     set_centered(hint);
 }
 
@@ -688,7 +688,7 @@ void build_settings(RadioSettingsPage page, std::size_t selected, uint8_t volume
     s_settings_row_count = 0;
 
     if (page == RadioSettingsPage::Volume) {
-        lv_obj_t *title = make_label(s_screen, "音量", 12, 16, 216, kText,
+        lv_obj_t *title = make_label(s_screen, "Volume", 12, 16, 216, kText,
                                      &buddy_font_16);
         set_centered(title);
         s_volume_value = make_label(s_screen, "55%", 12, 84, 216, kAmber,
@@ -703,7 +703,7 @@ void build_settings(RadioSettingsPage page, std::size_t selected, uint8_t volume
         lv_obj_set_style_radius(s_volume_bar, 0, LV_PART_MAIN);
         lv_obj_set_style_radius(s_volume_bar, 0, LV_PART_INDICATOR);
         make_taskbar(s_screen);
-        lv_obj_t *hint = make_label(s_screen, "上下调节  确定返回",
+        lv_obj_t *hint = make_label(s_screen, "↑↓ Adjust · OK Back",
                                     12, 291, 216, UI_TEXT);
         set_centered(hint);
         apply_volume();
@@ -711,37 +711,37 @@ void build_settings(RadioSettingsPage page, std::size_t selected, uint8_t volume
     }
 
     static constexpr const char *kMenuItems[] = {
-        "音量", "城市电台", "定时播放", "屏幕设置", "网络设置", "蓝牙", "返回",
+        "Volume", "City stations", "Sleep timer", "Display", "Network", "Bluetooth", "Back",
     };
     static constexpr const char *kCityItems[] = {
-        "自动定位", "Kuala Lumpur", "George Town", "Johor Bahru", "Ipoh", "Kota Kinabalu", "Kuching", "Melaka",
+        "Auto-locate", "Kuala Lumpur", "George Town", "Johor Bahru", "Ipoh", "Kota Kinabalu", "Kuching", "Melaka",
     };
     static constexpr const char *kSleepTimerItems[] = {
-        "无定时", "15 分钟", "30 分钟", "60 分钟", "90 分钟", "返回",
+        "Off", "15 min", "30 min", "60 min", "90 min", "Back",
     };
     char brightness_item[32];
     char timeout_item[48];
-    std::snprintf(brightness_item, sizeof(brightness_item), "亮度 %u%%",
+    std::snprintf(brightness_item, sizeof(brightness_item), "Brightness %u%%",
                   static_cast<unsigned>(radio_display_brightness()));
     const uint16_t timeout = radio_display_timeout_seconds();
     if (!timeout) {
-        std::snprintf(timeout_item, sizeof(timeout_item), "自动熄屏 关闭");
+        std::snprintf(timeout_item, sizeof(timeout_item), "Screen off: Never");
     } else if (timeout < 60) {
-        std::snprintf(timeout_item, sizeof(timeout_item), "自动熄屏 %u 秒",
+        std::snprintf(timeout_item, sizeof(timeout_item), "Screen off: %u s",
                       static_cast<unsigned>(timeout));
     } else {
-        std::snprintf(timeout_item, sizeof(timeout_item), "自动熄屏 %u 分钟",
+        std::snprintf(timeout_item, sizeof(timeout_item), "Screen off: %u min",
                       static_cast<unsigned>(timeout / 60));
     }
-    const char *display_items[] = {brightness_item, timeout_item, "返回"};
+    const char *display_items[] = {brightness_item, timeout_item, "Back"};
     static constexpr const char *kWifiMenuItems[] = {
-        "连接新网络", "已存网络", "返回",
+        "Connect new network", "Saved networks", "Back",
     };
 
     const char *const *items = nullptr;
     std::size_t item_count = 0;
-    const char *title_text = "设置";
-    const char *hint_text = "上下选择  确定进入";
+    const char *title_text = "Settings";
+    const char *hint_text = "↑↓ Select · OK Enter";
     switch (page) {
         case RadioSettingsPage::Menu:
             items = kMenuItems;
@@ -750,26 +750,26 @@ void build_settings(RadioSettingsPage page, std::size_t selected, uint8_t volume
         case RadioSettingsPage::City:
             items = kCityItems;
             item_count = sizeof(kCityItems) / sizeof(kCityItems[0]);
-            title_text = "城市电台";
-            hint_text = "确定选择  长按返回";
+            title_text = "City stations";
+            hint_text = "OK Select · Hold Back";
             break;
         case RadioSettingsPage::SleepTimer:
             items = kSleepTimerItems;
             item_count = sizeof(kSleepTimerItems) / sizeof(kSleepTimerItems[0]);
-            title_text = "定时播放";
-            hint_text = "确定开始  长按返回";
+            title_text = "Sleep timer";
+            hint_text = "OK Start · Hold Back";
             break;
         case RadioSettingsPage::Display:
             items = display_items;
             item_count = sizeof(display_items) / sizeof(display_items[0]);
-            title_text = "屏幕设置";
-            hint_text = "确定切换  长按返回";
+            title_text = "Display";
+            hint_text = "OK Change · Hold Back";
             break;
         case RadioSettingsPage::WifiMenu:
             items = kWifiMenuItems;
             item_count = sizeof(kWifiMenuItems) / sizeof(kWifiMenuItems[0]);
-            title_text = "网络设置";
-            hint_text = "确定进入  长按返回";
+            title_text = "Network";
+            hint_text = "OK Enter · Hold Back";
             break;
         default:
             return;
@@ -809,11 +809,11 @@ void build_saved_wifi(const char *const *ssids, std::size_t count,
     const std::size_t total = count + 1;
     selected = std::min(selected, total - 1);
 
-    lv_obj_t *title = make_label(s_screen, "已存网络", 12, 12, 216, kText,
+    lv_obj_t *title = make_label(s_screen, "Saved networks", 12, 12, 216, kText,
                                  &buddy_font_16);
     set_centered(title);
     lv_obj_t *state = make_label(s_screen,
-                                  count ? "上下选择  确定设置" : "无保存网络",
+                                  count ? "↑↓ Select · OK Edit" : "No saved networks",
                                  12, 40, 216, count ? kMuted : kAmber);
     set_centered(state);
 
@@ -829,14 +829,14 @@ void build_saved_wifi(const char *const *ssids, std::size_t count,
         s_settings_rows[row] = make_box(s_screen, 18, y, 204, 29,
                                         active ? kAmberSoft : kPanel, 5);
         ui_pixel_set_selected(s_settings_rows[row], active, true);
-        const char *text = index < count ? ssids[index] : "返回";
+        const char *text = index < count ? ssids[index] : "Back";
         s_settings_labels[row] = make_label(
             s_settings_rows[row], passport::ssid_display(text, &buddy_font_16).c_str(), 8, 6, 188, active ? UI_AMBER : kMuted,
             index < count ? ssid_font(text) : &buddy_font_16);
         set_centered(s_settings_labels[row]);
     }
     make_taskbar(s_screen);
-    lv_obj_t *hint = make_label(s_screen, "长按确定返回", 12, 291, 216, UI_TEXT);
+    lv_obj_t *hint = make_label(s_screen, "Hold OK: Back", 12, 291, 216, UI_TEXT);
     set_centered(hint);
 }
 
@@ -845,13 +845,13 @@ void build_wifi_action(const char *ssid, std::size_t selected) {
     s_settings_page = RadioSettingsPage::WifiAction;
     s_settings_selected = selected % 3;
     s_settings_row_count = 3;
-    lv_obj_t *title = make_label(s_screen, "网络设置", 12, 13, 216, kText,
+    lv_obj_t *title = make_label(s_screen, "Network", 12, 13, 216, kText,
                                  &buddy_font_16);
     set_centered(title);
     lv_obj_t *network = make_label(s_screen, passport::ssid_display(ssid ? ssid : "WIFI", &buddy_font_16).c_str(), 12, 45, 216,
                                    kAmber, ssid_font(ssid));
     set_centered(network);
-    static constexpr const char *kItems[] = {"设为首选", "删除网络", "返回"};
+    static constexpr const char *kItems[] = {"Set as preferred", "Forget network", "Back"};
     for (std::size_t i = 0; i < 3; ++i) {
         const int y = 83 + static_cast<int>(i) * 55;
         s_settings_rows[i] = make_box(s_screen, 24, y, 192, 42, kPanel, 7);
@@ -861,7 +861,7 @@ void build_wifi_action(const char *ssid, std::size_t selected) {
     }
     apply_settings_selection();
     make_taskbar(s_screen);
-    lv_obj_t *hint = make_label(s_screen, "长按确定返回", 12, 291, 216, UI_TEXT);
+    lv_obj_t *hint = make_label(s_screen, "Hold OK: Back", 12, 291, 216, UI_TEXT);
     set_centered(hint);
 }
 
@@ -870,16 +870,16 @@ void build_wifi_delete_confirm(const char *ssid, std::size_t selected) {
     s_settings_page = RadioSettingsPage::WifiDeleteConfirm;
     s_settings_selected = selected % 2;
     s_settings_row_count = 2;
-    lv_obj_t *title = make_label(s_screen, "确认删除", 12, 18, 216, kText,
+    lv_obj_t *title = make_label(s_screen, "Forget network?", 12, 18, 216, kText,
                                  &buddy_font_16);
     set_centered(title);
     lv_obj_t *network = make_label(s_screen, passport::ssid_display(ssid ? ssid : "WIFI", &buddy_font_16).c_str(), 12, 55, 216,
                                    kAmber, ssid_font(ssid));
     set_centered(network);
-    lv_obj_t *warning = make_label(s_screen, "删除后无法自动连接", 12, 88, 216,
+    lv_obj_t *warning = make_label(s_screen, "It won't auto-connect", 12, 88, 216,
                                    kMuted);
     set_centered(warning);
-    static constexpr const char *kItems[] = {"返回", "确认删除"};
+    static constexpr const char *kItems[] = {"Back", "Forget"};
     for (std::size_t i = 0; i < 2; ++i) {
         const int y = 132 + static_cast<int>(i) * 61;
         s_settings_rows[i] = make_box(s_screen, 24, y, 192, 45, kPanel, 7);
@@ -892,27 +892,27 @@ void build_wifi_delete_confirm(const char *ssid, std::size_t selected) {
 
 void build_easter_egg(const char *message) {
     reset_transient_objects(Page::EasterEgg);
-    lv_obj_t *title = make_label(s_screen, "蓝牙", 12, 12, 216, kAmber,
+    lv_obj_t *title = make_label(s_screen, "Bluetooth", 12, 12, 216, kAmber,
                                  &buddy_font_16);
     set_centered(title);
-    s_easter_message = make_label(s_screen, message ? message : "正在加载彩蛋",
+    s_easter_message = make_label(s_screen, message ? message : "Loading Easter egg",
                                   12, 146, 216, kText);
     set_centered(s_easter_message);
     make_taskbar(s_screen);
-    lv_obj_t *hint = make_label(s_screen, "确定返回", 12, 291, 216, UI_TEXT);
+    lv_obj_t *hint = make_label(s_screen, "OK: Back", 12, 291, 216, UI_TEXT);
     set_centered(hint);
 }
 
 void update_wifi_list(const WifiNetworkView *networks, std::size_t count,
                       std::size_t selected, bool scanning, bool can_cancel) {
-    const char *state_text = scanning ? "正在寻找网络" :
-                             count ? "选择网络后输入密码" : "未找到网络 · 确定重试";
+    const char *state_text = scanning ? "Searching for networks" :
+                             count ? "Pick a network to join" : "No networks · OK Retry";
     lv_label_set_text(s_wifi_state, state_text);
     lv_obj_set_style_text_color(s_wifi_state,
                                 lv_color_hex(scanning ? kAmber : kMuted), 0);
     if (s_wifi_list_hint) {
         lv_label_set_text(s_wifi_list_hint,
-                          can_cancel ? "上下选择 · 长按确定返回" : "上下选择 · 确定连接");
+                          can_cancel ? "↑↓ Select · Hold OK: Back" : "↑↓ Select · OK Connect");
     }
 
     const std::size_t first = count <= kWifiVisibleRows
@@ -960,7 +960,7 @@ void build_wifi_list(const WifiNetworkView *networks, std::size_t count,
     reset_transient_objects(Page::WifiList);
     // The compact UI font contains the complete setup vocabulary. The larger
     // station-title font intentionally contains only station-name glyphs.
-    make_label(s_screen, "无线网络", 12, 12, 216, kText, &ui_font_20);
+    make_label(s_screen, "Wi-Fi", 12, 12, 216, kText, &ui_font_20);
     s_wifi_state = make_label(s_screen, "", 12, 42, 216, kMuted);
     set_centered(s_wifi_state);
 
@@ -981,8 +981,8 @@ void build_wifi_list(const WifiNetworkView *networks, std::size_t count,
     s_wifi_list_hint = make_label(s_screen, "", 12, 279, 216, UI_TEXT);
     set_centered(s_wifi_list_hint);
     char portal[96];
-    if (setup_ap_ssid && setup_ap_ssid[0]) std::snprintf(portal, sizeof(portal), "手机连 %s", setup_ap_ssid);
-    else std::snprintf(portal, sizeof(portal), "长按下返回");
+    if (setup_ap_ssid && setup_ap_ssid[0]) std::snprintf(portal, sizeof(portal), "Phone: join %s", setup_ap_ssid);
+    else std::snprintf(portal, sizeof(portal), "Hold ↓: Back");
     lv_obj_t *hint = make_label(s_screen, portal, 12, 300, 216, UI_MUTED,
                                 &buddy_font_16);
     set_centered(hint);
@@ -999,7 +999,7 @@ void update_wifi_keyboard(const char *ssid, std::size_t password_length,
     const std::size_t stars = std::min<std::size_t>(password_length, 38);
     std::memset(password, '*', stars);
     password[stars] = '\0';
-    lv_label_set_text(s_wifi_password_mask, password_length ? password : "输入密码");
+    lv_label_set_text(s_wifi_password_mask, password_length ? password : "Enter password");
     lv_obj_set_style_text_color(s_wifi_password_mask,
                                 lv_color_hex(password_length ? kText : kMuted), 0);
 
@@ -1034,15 +1034,15 @@ void update_wifi_keyboard(const char *ssid, std::size_t password_length,
 
     char navigation[112];
     const char *selected_key = key_count > 0 ? radio_ui_wifi_key(page, selected) : "";
-    const char *action = std::strcmp(selected_key, " ") == 0 ? "确定输入空格" :
-        std::strcmp(selected_key, "DEL") == 0 ? (password_length ? "确定删除一位" : "确定返回网络列表") :
-        std::strcmp(selected_key, "GO") == 0 ? "确定连接网络" :
-        std::strcmp(selected_key, "ABC") == 0 ? "确定切换大写字母" :
-        std::strcmp(selected_key, "abc") == 0 ? "确定切换小写字母" :
-        std::strcmp(selected_key, "123") == 0 ? "确定切换数字符号" :
-        std::strcmp(selected_key, "#+=") == 0 ? "确定查看更多符号" : nullptr;
+    const char *action = std::strcmp(selected_key, " ") == 0 ? "OK: Type space" :
+        std::strcmp(selected_key, "DEL") == 0 ? (password_length ? "OK: Delete one" : "OK: Back to networks") :
+        std::strcmp(selected_key, "GO") == 0 ? "OK: Connect" :
+        std::strcmp(selected_key, "ABC") == 0 ? "OK: Uppercase" :
+        std::strcmp(selected_key, "abc") == 0 ? "OK: Lowercase" :
+        std::strcmp(selected_key, "123") == 0 ? "OK: Numbers & symbols" :
+        std::strcmp(selected_key, "#+=") == 0 ? "OK: More symbols" : nullptr;
     if (action) std::snprintf(navigation, sizeof(navigation), "%s", action);
-    else std::snprintf(navigation, sizeof(navigation), "确定输入 %s · 已输 %u 位",
+    else std::snprintf(navigation, sizeof(navigation), "OK: Type %s · %u typed",
                        selected_key, (unsigned)password_length);
     lv_label_set_text(s_wifi_keyboard_status,
                       status && status[0] ? status : navigation);
@@ -1054,13 +1054,13 @@ void build_wifi_keyboard(const char *ssid, std::size_t password_length,
                          WifiKeyboardPage page, std::size_t selected,
                          const char *status) {
     reset_transient_objects(Page::WifiKeyboard);
-    make_label(s_screen, "输入密码", 12, 10, 216, kText, &ui_font_20);
+    make_label(s_screen, "Enter password", 12, 10, 216, kText, &ui_font_20);
     s_wifi_keyboard_network = make_label(s_screen, "", 12, 39, 216, kAmber,
                                           &buddy_font_16);
     set_centered(s_wifi_keyboard_network);
 
     lv_obj_t *password_box = make_box(s_screen, 18, 66, 204, 34, kPanel, 6);
-    s_wifi_password_mask = make_label(password_box, "输入密码", 8, 8, 188, kMuted,
+    s_wifi_password_mask = make_label(password_box, "Enter password", 8, 8, 188, kMuted,
                                       &buddy_font_16);
     set_centered(s_wifi_password_mask);
 
@@ -1085,21 +1085,21 @@ void build_wifi_keyboard(const char *ssid, std::size_t password_length,
     make_taskbar(s_screen);
     s_wifi_keyboard_status = make_label(s_screen, "", 12, 279, 216, UI_TEXT);
     set_centered(s_wifi_keyboard_status);
-    lv_obj_t *hint = make_label(s_screen, "上下移动 · 长按下返回", 12, 300, 216, UI_MUTED);
+    lv_obj_t *hint = make_label(s_screen, "↑↓ Move · Hold ↓: Back", 12, 300, 216, UI_MUTED);
     set_centered(hint);
     update_wifi_keyboard(ssid, password_length, page, selected, status);
 }
 
 void build_wifi_connecting(const char *ssid, const char *detail, bool success = false) {
     reset_transient_objects(Page::WifiConnecting);
-    make_label(s_screen, success ? "无线网络已连接" : "正在连接无线网络", 12, 37, 216, kText,
+    make_label(s_screen, success ? "Wi-Fi connected" : "Connecting to Wi-Fi", 12, 37, 216, kText,
                &buddy_font_16);
     lv_obj_t *network = make_label(s_screen, passport::ssid_display(ssid ? ssid : "WIFI", &buddy_font_16).c_str(), 12, 102, 216,
                                    kAmber, ssid_font(ssid));
     set_centered(network);
     s_pair_dot = make_box(s_screen, 108, 151, 24, 24, kAmber, LV_RADIUS_CIRCLE);
     if (success) lv_obj_add_flag(s_pair_dot, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_t *message = make_label(s_screen, detail ? detail : "正在连接",
+    lv_obj_t *message = make_label(s_screen, detail ? detail : "Connecting",
                                    12, 205, 216, kMuted);
     set_centered(message);
 }
@@ -1240,7 +1240,7 @@ const char *radio_ui_wifi_key(WifiKeyboardPage page, std::size_t index) {
 
 void radio_ui_show_wifi_success(const char *ssid) {
     if (!s_screen || !bsp_lvgl_lock(500)) return;
-    build_wifi_connecting(ssid, "连接成功 · 确定返回", true);
+    build_wifi_connecting(ssid, "Connected · OK Back", true);
     lv_screen_load(s_screen);
     if (s_ui_timer) lv_timer_pause(s_ui_timer);
     bsp_lvgl_unlock();
@@ -1337,7 +1337,7 @@ void radio_ui_show_wifi_delete_confirm(const char *ssid, std::size_t selected) {
 void radio_ui_show_easter_egg(const char *message) {
     if (!s_screen || !bsp_lvgl_lock(500)) return;
     if (s_page == Page::EasterEgg && s_easter_message) {
-        lv_label_set_text(s_easter_message, message ? message : "正在加载彩蛋");
+        lv_label_set_text(s_easter_message, message ? message : "Loading Easter egg");
         lv_obj_remove_flag(s_easter_message, LV_OBJ_FLAG_HIDDEN);
     } else {
         build_easter_egg(message);

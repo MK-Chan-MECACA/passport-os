@@ -54,7 +54,7 @@ static Request armed{};
 void arm(const Request &request){armed=request;}
 void clear(){armed={};}
 }
-bool radio_catalog_known_place(const char *name){return !strcmp(name,"北京")||!strcmp(name,"广东");}
+bool radio_catalog_known_place(const char *name){return !strcmp(name,"Penang")||!strcmp(name,"Selangor");}
 static std::string news(const char *name,const char *args){
     cJSON *json=cJSON_Parse(args);auto result=technews::call(name,json);cJSON_Delete(json);return result;
 }
@@ -105,30 +105,30 @@ int main(){
     // Music tools no longer exist; play requests are answered by radio.
     assert(invoke("self.music.play",R"({"source":"favorites"})",49).empty()&&armed.source==Source::None);
     assert(invoke("self.music.search",R"({"query":"x"})",49).empty());
-    answer=invoke("self.radio.play",R"({"city":"广东"})",50);
+    answer=invoke("self.radio.play",R"({"city":"Selangor"})",50);
     assert(answer.find("accepted\\\":true")!=std::string::npos&&answer.find("playback_confirmed\\\":false")!=std::string::npos);
-    assert(armed.app==APP_ID_RADIO&&armed.source==Source::Radio&&!strcmp(armed.name,"广东")&&switches==1);
+    assert(armed.app==APP_ID_RADIO&&armed.source==Source::Radio&&!strcmp(armed.name,"Selangor")&&switches==1);
     response_sent(50,true);poll();monotonic_us+=300000;poll();
     assert(switches==2&&foreground==APP_ID_RADIO&&armed.source==Source::Radio);
     foreground=APP_ID_XIAOZHI;
     // A stop timer travels with the request.
-    answer=invoke("self.radio.play",R"({"city":"北京","stop_after_minutes":30})",57);
+    answer=invoke("self.radio.play",R"({"city":"Penang","stop_after_minutes":30})",57);
     assert(answer.find("accepted\\\":true")!=std::string::npos&&answer.find("stop_after_minutes\\\":30")!=std::string::npos);
-    assert(armed.source==Source::Radio&&!strcmp(armed.name,"北京")&&armed.stop_minutes==30);
+    assert(armed.source==Source::Radio&&!strcmp(armed.name,"Penang")&&armed.stop_minutes==30);
     response_sent(57,true);poll();monotonic_us+=300000;poll();
     assert(switches==3&&foreground==APP_ID_RADIO&&armed.source==Source::Radio);
     foreground=APP_ID_XIAOZHI;
-    invoke("self.radio.play",R"({"city":"北京"})",58);
+    invoke("self.radio.play",R"({"city":"Penang"})",58);
     assert(armed.source==Source::Radio&&!armed.stop_minutes);
     cancel_session();poll();assert(armed.source==Source::None);
     // Radio: only known places; station keywords and stop timer are optional.
-    for(auto args:{R"({})",R"({"city":""})",R"({"city":"火星"})",R"({"city":"北京","station":7})",
-                  R"({"city":"北京","stop_after_minutes":200})",R"({"city":"北京","station":"一二三四五六七八九十一"})"}){
+    for(auto args:{R"({})",R"({"city":""})",R"({"city":"Mars"})",R"({"city":"Penang","station":7})",
+                  R"({"city":"Penang","stop_after_minutes":200})",R"({"city":"Penang","station":"Traxx FM Kuala Lumpur Hits Station"})"}){
         answer=invoke("self.radio.play",args,59);assert(answer.find("\"isError\":true")!=std::string::npos&&armed.source==Source::None);
     }
-    answer=invoke("self.radio.play",R"({"city":"北京","station":"交通","stop_after_minutes":30})",60);
+    answer=invoke("self.radio.play",R"({"city":"Penang","station":"BFM","stop_after_minutes":30})",60);
     assert(answer.find("target_app\\\":\\\"radio")!=std::string::npos);
-    assert(armed.app==APP_ID_RADIO&&armed.source==Source::Radio&&!strcmp(armed.name,"北京")&&!strcmp(armed.detail,"交通")&&armed.stop_minutes==30);
+    assert(armed.app==APP_ID_RADIO&&armed.source==Source::Radio&&!strcmp(armed.name,"Penang")&&!strcmp(armed.detail,"BFM")&&armed.stop_minutes==30);
     response_sent(60,true);poll();monotonic_us+=300000;poll();
     assert(switches==4&&foreground==APP_ID_RADIO&&armed.source==Source::Radio);
     foreground=APP_ID_XIAOZHI;
@@ -158,13 +158,13 @@ int main(){
     mock_soc=80;answer=invoke("self.screen.set_brightness",R"({"percent":90})");
     assert(master_brightness==90&&answer.find("limited_by_low_battery")==std::string::npos);
     // Dropped before the switch: session end, a manual switch or expiry clears it.
-    invoke("self.radio.play",R"({"city":"北京"})",51);assert(armed.source==Source::Radio);
+    invoke("self.radio.play",R"({"city":"Penang"})",51);assert(armed.source==Source::Radio);
     cancel_session();poll();assert(armed.source==Source::None);
-    invoke("self.radio.play",R"({"city":"北京"})",52);response_sent(52,true);
+    invoke("self.radio.play",R"({"city":"Penang"})",52);response_sent(52,true);
     foreground=APP_ID_HOME;poll();assert(armed.source==Source::None);foreground=APP_ID_XIAOZHI;
-    invoke("self.radio.play",R"({"city":"北京"})",53);monotonic_us+=31000000;poll();assert(armed.source==Source::None);
+    invoke("self.radio.play",R"({"city":"Penang"})",53);monotonic_us+=31000000;poll();assert(armed.source==Source::None);
     // A replacing plain open drops the earlier radio request.
-    invoke("self.radio.play",R"({"city":"北京"})",54);invoke("self.application.open",R"({"app":"radio"})",55);
+    invoke("self.radio.play",R"({"city":"Penang"})",54);invoke("self.application.open",R"({"app":"radio"})",55);
     assert(armed.source==Source::None);response_sent(55,true);poll();monotonic_us+=300000;poll();
     assert(switches==5&&foreground==APP_ID_RADIO);foreground=APP_ID_XIAOZHI;
     // UI contention around a due switch never stalls other tool requests.

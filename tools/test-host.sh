@@ -4,6 +4,7 @@ cd "$(dirname "$0")/.."
 python3 tests/test_voice_memory.py
 python3 tests/test_xiaozhi_face_power.py
 python3 tests/check_digit_font.py
+python3 tests/check_fonts.py
 python3 tests/check_title_glyphs.py
 python3 tests/check_launcher_apps.py
 test_dir="$(mktemp -d /tmp/passport-host.XXXXXX)"

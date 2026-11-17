@@ -79,7 +79,7 @@ int main() {
     p.HandleData(&late_hello);
     assert(p.HandshakeDone() && p.session_id()=="late");
     // Receive callbacks only enqueue; the controller performs the operation.
-    const char call[]=R"({"type":"mcp","payload":{"id":42,"method":"tools/call","params":{"name":"self.reminder.create","arguments":{"title":"喝水","delay_seconds":600}}}})";
+    const char call[]=R"({"type":"mcp","payload":{"id":42,"method":"tools/call","params":{"name":"self.reminder.create","arguments":{"title":"Drink water","delay_seconds":600}}}})";
     esp_websocket_event_data_t rpc{call,sizeof(call)-1,0,sizeof(call)-1,1,{0}};
     p.HandleData(&rpc); assert(tool_executions==0);
     assert(p.ProcessMcp() && tool_executions==1);

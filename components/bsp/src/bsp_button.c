@@ -60,7 +60,7 @@ esp_err_t bsp_button_init(bsp_btn_cb_t cb, void *user) {
     const adc_oneshot_unit_init_cfg_t ucfg = { .unit_id = BSP_BTN_ADC_UNIT };
     esp_err_t ae = adc_oneshot_new_unit(&ucfg, &s_adc);
     if (ae != ESP_OK) {
-        ESP_LOGE(TAG, "ADC unit 创建失败 (%s)", esp_err_to_name(ae));
+        ESP_LOGE(TAG, "ADC unit creation failed (%s)", esp_err_to_name(ae));
         s_adc = NULL;
         return ae;
     }
@@ -73,7 +73,7 @@ esp_err_t bsp_button_init(bsp_btn_cb_t cb, void *user) {
     };
     ae = adc_oneshot_config_channel(s_adc, BSP_BTN_ADC_CHANNEL, &channel_cfg);
     if (ae != ESP_OK) {
-        ESP_LOGE(TAG, "ADC 通道配置失败 (%s)", esp_err_to_name(ae));
+        ESP_LOGE(TAG, "ADC channel config failed (%s)", esp_err_to_name(ae));
         adc_oneshot_del_unit(s_adc);
         s_adc = NULL;
         return ae;
@@ -93,7 +93,7 @@ esp_err_t bsp_button_init(bsp_btn_cb_t cb, void *user) {
             bc.long_press_time = 500;
             esp_err_t e = iot_button_new_adc_device(&bc, &ac, &s_btn[i]);
             if (e != ESP_OK || !s_btn[i]) {
-                ESP_LOGE(TAG, "按键 %d 创建失败 (%s) —— 检查 GPIO%d 的 ADC 配置与分压电阻",
+                ESP_LOGE(TAG, "button %d creation failed (%s) — check GPIO%d ADC config and divider resistors",
                          i, esp_err_to_name(e), BSP_BTN_ADC_CHANNEL);
                 return e == ESP_OK ? ESP_FAIL : e;
             }
@@ -117,7 +117,7 @@ esp_err_t bsp_button_init(bsp_btn_cb_t cb, void *user) {
     };
     ae = adc_cali_create_scheme_curve_fitting(&cal, &s_cali);
     if (ae != ESP_OK) {
-        ESP_LOGW(TAG, "ADC 校准创建失败");
+        ESP_LOGW(TAG, "ADC calibration creation failed");
         s_cali = NULL;
         if (!cb) {
             adc_oneshot_del_unit(s_adc);
@@ -126,7 +126,7 @@ esp_err_t bsp_button_init(bsp_btn_cb_t cb, void *user) {
         }
     }
 
-    ESP_LOGI(TAG, "按键就绪:ADC1_CH%d 三键分压", BSP_BTN_ADC_CHANNEL);
+    ESP_LOGI(TAG, "buttons ready: ADC1_CH%d three-key divider", BSP_BTN_ADC_CHANNEL);
     return ESP_OK;
 }
 

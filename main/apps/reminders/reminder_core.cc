@@ -53,12 +53,12 @@ int64_t next_occurrence(const Record &r,int64_t after) {
     }return 0;
 }
 const char *repeat_name(uint8_t days) {
-    if(!days)return "一次";
-    if(days==127)return "每天";
-    if(days==31)return "工作日";
-    const char *names[]={"每周一","每周二","每周三","每周四","每周五","每周六","每周日"};
+    if(!days)return "Once";
+    if(days==127)return "Daily";
+    if(days==31)return "Weekdays";
+    const char *names[]={"Every Mon","Every Tue","Every Wed","Every Thu","Every Fri","Every Sat","Every Sun"};
     for(unsigned i=0;i<7;++i)if(days==(1u<<i))return names[i];
-    return "重复";
+    return "Repeats";
 }
 bool parse_local(const char *s, int offset, int64_t *utc) {
     if (!s || !utc || offset < -43200 || offset > 50400) return false;
@@ -83,6 +83,6 @@ void format_local(int64_t utc,int offset,char *out,size_t cap) {
     std::strftime(out,cap,"%Y-%m-%d %H:%M:%S",&value);
 }
 const char *status_text(Status s) {
-    return s==Status::Pending?"待提醒":s==Status::Done?"已完成":"已错过";
+    return s==Status::Pending?"Pending":s==Status::Done?"Done":"Missed";
 }
 }

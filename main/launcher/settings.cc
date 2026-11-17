@@ -109,28 +109,28 @@ void refresh_ui() {
     std::snprintf(value, sizeof(value), "%u%%", static_cast<unsigned>(s_brightness));
     lv_label_set_text(s_values[1], value);
     if (s_timeout == 0) {
-        lv_label_set_text(s_values[2], "常亮");
+        lv_label_set_text(s_values[2], "Always on");
     } else {
-        std::snprintf(value, sizeof(value), "%u 秒", static_cast<unsigned>(s_timeout));
+        std::snprintf(value, sizeof(value), "%u s", static_cast<unsigned>(s_timeout));
         lv_label_set_text(s_values[2], value);
     }
     lv_label_set_text(s_values[3], ui_theme_name(s_theme));
-    lv_label_set_text(s_values[4], ui_sfx_enabled() ? "开" : "关");
-    lv_label_set_text(s_values[5], "打开");
-    lv_label_set_text(s_values[6], "打开");
-    lv_label_set_text(s_values[7], "查看");
-    lv_label_set_text(s_values[8], s_reset_pending ? "再次确定" : "恢复");
+    lv_label_set_text(s_values[4], ui_sfx_enabled() ? "On" : "Off");
+    lv_label_set_text(s_values[5], "Open");
+    lv_label_set_text(s_values[6], "Open");
+    lv_label_set_text(s_values[7], "View");
+    lv_label_set_text(s_values[8], s_reset_pending ? "OK again" : "Reset");
     static const char *hints[kRowCount] = {
-        "确定后上下调音量", "长按下键满亮两分钟",
-        "确定切换熄屏时间", "确定切换主题",
-        "轻触反馈", "手机配网、资料与名片", "设备选网与已存网络", "查看网络、时间与电量", "仅恢复设备设置"
+        "OK, then ↑↓ for volume", "Hold Down: max for 2 min",
+        "OK: change timeout", "OK: change theme",
+        "Beep on key press", "Wi-Fi, profile, card by phone", "Pick Wi-Fi or saved networks", "Network, time and battery", "Resets device settings only"
     };
     lv_obj_set_flag(s_confirm, LV_OBJ_FLAG_HIDDEN, !s_reset_pending);
     lv_obj_set_flag(s_help, LV_OBJ_FLAG_HIDDEN, s_reset_pending);
-    ui_pixel_label_set_text(s_help, s_volume_editing ? "上键加 · 下键减" : hints[s_selected]);
-    ui_pixel_label_set_text(s_hint, s_reset_pending ? "再次确定恢复"
-                                    : s_volume_editing ? "确定完成"
-                                    : "上下选择 · 确定调整");
+    ui_pixel_label_set_text(s_help, s_volume_editing ? "↑ Louder · ↓ Quieter" : hints[s_selected]);
+    ui_pixel_label_set_text(s_hint, s_reset_pending ? "OK again to reset"
+                                    : s_volume_editing ? "OK: Done"
+                                    : "↑↓ Select · OK Adjust");
 
     const bool wifi_ok = WifiManager::GetInstance().IsConnected();
     int bars = 0;
@@ -169,13 +169,13 @@ void create_ui() {
 
     lv_obj_t *top = ui_pixel_top_bar(s_screen);
     ui_pixel_wifi_bars_create(top, UI_STATUS_WIFI_X, 18, s_wifi_bars);
-    lv_obj_t *title = ui_pixel_label(top, "设置", &buddy_font_16, UI_TEXT);
+    lv_obj_t *title = ui_pixel_label(top, "Settings", &buddy_font_16, UI_TEXT);
     lv_obj_align(title, LV_ALIGN_LEFT_MID, 42, 0);
     s_battery = ui_pixel_battery_create(top, UI_STATUS_BATTERY_X, 6, UI_TEXT, &lv_font_montserrat_14);
     ui_pixel_battery_set(&s_battery, bsp_battery_soc());
 
     static const char *labels[kRowCount] = {
-        "音量", "屏幕亮度", "自动熄屏", "外观主题", "按键音效", "手机设置", "无线网络", "网络与时间", "恢复默认"
+        "Volume", "Brightness", "Screen off", "Theme", "Key sounds", "Phone setup", "Wi-Fi", "Network & time", "Reset"
     };
     for (size_t i = 0; i < kRowCount; ++i) {
         const int y = 38 + static_cast<int>(i) * 29;
@@ -203,12 +203,12 @@ void create_ui() {
     s_help = ui_pixel_label(s_screen, "", &buddy_font_16, UI_TEXT_DIM);
     lv_obj_set_pos(s_help, 12, 244); lv_obj_set_size(s_help, 216, 22);
     lv_label_set_long_mode(s_help, LV_LABEL_LONG_DOT);
-    s_hint = ui_pixel_footer(s_screen, "", "长按确定返回", &buddy_font_16);
+    s_hint = ui_pixel_footer(s_screen, "", "Hold OK: Back", &buddy_font_16);
     s_confirm = lv_obj_create(s_screen); lv_obj_remove_style_all(s_confirm);
     lv_obj_remove_flag(s_confirm, LV_OBJ_FLAG_SCROLLABLE); lv_obj_set_pos(s_confirm, 12, 42);lv_obj_set_size(s_confirm, 216, 220);
-    auto *question = ui_pixel_label(s_confirm, "恢复默认设置？", &ui_font_20, UI_DANGER);
+    auto *question = ui_pixel_label(s_confirm, "Reset to defaults?", &ui_font_20, UI_DANGER);
     lv_obj_set_pos(question, 0, 0);lv_obj_set_width(question, 216);
-    auto *consequence = ui_pixel_label(s_confirm, "音量、亮度设为 80%\n60 秒自动熄屏\n主题恢复经典绿\n按键音效开启\nWi-Fi 与个人资料保留\n上下键取消", &buddy_font_16, UI_TEXT);
+    auto *consequence = ui_pixel_label(s_confirm, "Volume, brightness to 80%\nScreen off after 60 s\nTheme back to Classic Green\nKey sounds on\nWi-Fi and profile kept\n↑↓ to cancel", &buddy_font_16, UI_TEXT);
     lv_obj_set_pos(consequence, 0, 54);lv_obj_set_width(consequence, 216);
     lv_obj_set_style_text_line_space(consequence, 5, 0);
 
@@ -427,9 +427,9 @@ void settings_set_volume(uint8_t percent) {
 
 const passport_app_t g_settings_app = {
     .id = APP_ID_SETTINGS,
-    .name = "设置",
+    .name = "Settings",
     .en_name = "SETTINGS",
-    .desc = "音量、亮度与主题\n调整设备使用习惯",
+    .desc = "Volume, brightness, theme\nTune the device",
     .tag = "DEVICE",
     .theme_color = 0x181B1C,
     .init = settings_init,

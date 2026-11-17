@@ -61,11 +61,13 @@ void home_clock_format_date(char *buf, size_t cap) {
     time_t t = time(NULL) + (time_t)time_sync_tz_offset_sec();
     struct tm tm;
     gmtime_r(&t, &tm);
-    snprintf(buf, cap, "%02d月%02d日", tm.tm_mon + 1, tm.tm_mday);
+    static const char *kMonth[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                                   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+    snprintf(buf, cap, "%d %s", tm.tm_mday, kMonth[tm.tm_mon % 12]);
 }
 
 void home_clock_format_weekday(char *buf, size_t cap) {
-    static const char *kWeek[] = {"周日", "周一", "周二", "周三", "周四", "周五", "周六"};
+    static const char *kWeek[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
     if (!buf || cap < 8) return;
     if (!home_clock_valid()) {
         snprintf(buf, cap, "----");

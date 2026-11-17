@@ -96,13 +96,13 @@ bool create(const char *title,int64_t due,uint32_t *id,const char **error) {
 }
 bool create_repeating(const char *title,int64_t due,const RepeatRule &rule,uint32_t *id,const char **error) {
     *error=nullptr;
-    if(!mutex||!storage_ok){*error="提醒存储不可用，请重启后重试";return false;}
-    if(!clock_ready()){*error="设备尚未校时，请联网后再设置";return false;}
+    if(!mutex||!storage_ok){*error="Reminder storage unavailable. Restart and retry";return false;}
+    if(!clock_ready()){*error="Clock not set. Go online first";return false;}
     const int64_t now=time(nullptr);
-    if(!valid_title(title)){*error="事项为空、过长或含非法字符，请缩短到约三十个汉字";return false;}
-    if(due<=now||due-now>kMaxAhead){*error="时间必须在未来一年以内，请确认日期和时间";return false;}
+    if(!valid_title(title)){*error="Title empty, too long or invalid; keep it under 95 characters";return false;}
+    if(due<=now||due-now>kMaxAhead){*error="Time must be within the next year; check the date and time";return false;}
     if(!valid_rule(rule) || (rule.days && next_occurrence(Record{1,Status::Pending,due,{},rule},due-1)!=due)){
-        *error="重复规则与首次提醒时间不一致";return false;
+        *error="Repeat rule does not match the first time";return false;
     }
     Guard g;unsigned slot=kCapacity;
     for(unsigned i=0;i<kCapacity;++i) {
@@ -111,18 +111,18 @@ bool create_repeating(const char *title,int64_t due,const RepeatRule &rule,uint3
         if(r.id && r.status==Status::Pending && r.due>=due-2 && r.due<=due+2 && !std::strcmp(r.title,title) &&
             !std::memcmp(&r.repeat,&rule,sizeof(rule))) {*id=r.id;return true;}
     }
-    if(slot==kCapacity){*error="已保存二十条，请先删除不需要的提醒";return false;}
-    if(!next_id||next_id==UINT32_MAX){*error="提醒编号已用尽";return false;}
+    if(slot==kCapacity){*error="20 reminders saved. Delete one first";return false;}
+    if(!next_id||next_id==UINT32_MAX){*error="Reminder IDs used up";return false;}
     Record r{};r.id=next_id;r.status=Status::Pending;r.due=due;r.repeat=rule;std::strcpy(r.title,title);
-    if(!save(slot,r,next_id+1)){*error="保存失败，请重试";return false;}
+    if(!save(slot,r,next_id+1)){*error="Save failed. Try again";return false;}
     *id=r.id;ESP_LOGI("reminders","Saved id=%lu due=%lld",(unsigned long)r.id,(long long)due);return true;
 }
 bool update(uint32_t id,const char *title,int64_t due,const RepeatRule *rule,const char **error) {
     *error=nullptr;
-    if(!mutex||!storage_ok){*error="提醒存储不可用";return false;}
-    if(title&&!valid_title(title)){*error="事项内容无效或过长";return false;}
+    if(!mutex||!storage_ok){*error="Reminder storage unavailable";return false;}
+    if(title&&!valid_title(title)){*error="Title invalid or too long";return false;}
     if((due||rule)&&(!clock_ready()||due<=time(nullptr)||due-time(nullptr)>kMaxAhead)){
-        *error="请提供未来一年内的首次提醒时间";return false;
+        *error="Give a first time within the next year";return false;
     }
     Guard g;
     for(unsigned i=0;i<kCapacity;++i)if(id&&records[i].id==id){
@@ -132,33 +132,33 @@ bool update(uint32_t id,const char *title,int64_t due,const RepeatRule *rule,con
         if(due){
             r.due=due;r.status=Status::Pending;
             if(r.repeat.days&&!rule && !make_rule(r.repeat.days,due,r.repeat.utc_offset_minutes*60,&r.repeat)){
-                *error="新日期不在原重复规则内，请同时指定新的重复方式";return false;
+                *error="New date is outside the repeat rule; give a new repeat too";return false;
             }
         }
         if(!valid_record(r)||(r.repeat.days&&due&&next_occurrence(r,due-1)!=due)){
-            *error="重复规则与首次提醒时间不一致";return false;
+            *error="Repeat rule does not match the first time";return false;
         }
-        if(!save(i,r,next_id)){*error="保存失败，请查询当前提醒后再重试";return false;}
+        if(!save(i,r,next_id)){*error="Save failed. List reminders and retry";return false;}
         return true;
-    }*error="这条提醒已不存在";return false;
+    }*error="This reminder no longer exists";return false;
 }
 bool change(uint32_t id,bool erase,int64_t snooze,const char **error,int64_t expected_due) {
-    *error=nullptr;if(!mutex){*error="提醒尚未就绪";return false;}
-    if(snooze && (!clock_ready()||snooze<=time(nullptr)||snooze-time(nullptr)>kMaxAhead)){*error="设备时间不可用";return false;}
+    *error=nullptr;if(!mutex){*error="Reminders not ready";return false;}
+    if(snooze && (!clock_ready()||snooze<=time(nullptr)||snooze-time(nullptr)>kMaxAhead)){*error="Device time unavailable";return false;}
     Guard g;
     for(unsigned i=0;i<kCapacity;++i) if(id && records[i].id==id) {
         Record r=records[i];
-        if(expected_due&&r.due!=expected_due){*error="提醒时间已改变，请重新查询；未操作下一次提醒";return false;}
+        if(expected_due&&r.due!=expected_due){*error="Reminder time changed; list again. Next occurrence untouched";return false;}
         if(erase) r={};else if(snooze){r.due=snooze;r.status=Status::Pending;}
         else if(r.repeat.days){
             const auto next=next_occurrence(r,std::max<int64_t>(time(nullptr),r.due));
-            if(!next){*error="无法计算下一次提醒";return false;}
+            if(!next){*error="Cannot work out the next occurrence";return false;}
             r.due=next;r.status=Status::Pending;
         }else r.status=Status::Done;
-        if(!save(i,r,next_id)){*error="保存失败，请重试";return false;}
+        if(!save(i,r,next_id)){*error="Save failed. Try again";return false;}
         return true;
     }
-    *error="这条提醒已不存在";return false;
+    *error="This reminder no longer exists";return false;
 }
 bool alarm_active(){return active.load()!=0 && !dismissed.load();}
 bool sound_pending(){return alarm_active() && sound.load();}
@@ -207,7 +207,7 @@ void poll() {
                 const auto next=next_occurrence(r,std::max<int64_t>(time(nullptr),r.due));
                 if(next){r.due=next;r.status=Status::Pending;}else r.status=Status::Missed;
                 saved=save(i,r,next_id);break;}}
-            if(saved){finish_alert();return;}quiet=true;sound=false;alert_error="保存失败，请按确定重试";
+            if(saved){finish_alert();return;}quiet=true;sound=false;alert_error="Save failed. Press OK to retry";
         }
         // Retry removing the overlay if the UI lock was busy at the gesture.
         if (dismissed.load()) {show_alert(nullptr);return;}

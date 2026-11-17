@@ -142,7 +142,7 @@ void catalog_worker(void *arg) {
 void start_catalog() {
 #ifdef PASSPORT_RADIO_HLS_TEST
     // Keep the known test matrix visible; city discovery would replace it.
-    radio_ui_set_location("全球电台测试");
+    radio_ui_set_location("Global radio test");
     radio_player_set_playing(true);
     return;
 #endif
@@ -170,7 +170,7 @@ void on_wifi_event(WifiEvent event, const std::string &data) {
     if (event == WifiEvent::Connected) {
         ESP_LOGI(TAG, "Wi-Fi connected: %s", data.c_str());
         s_wifi_connected.store(true);
-        radio_ui_set_network(true, ("已连接: " + data).c_str());
+        radio_ui_set_network(true, ("Connected: " + data).c_str());
         if (!s_player_ready.load()) return;
         radio_player_set_network(true);
 
@@ -178,7 +178,7 @@ void on_wifi_event(WifiEvent event, const std::string &data) {
     } else if (event == WifiEvent::Disconnected) {
         ESP_LOGI(TAG, "Wi-Fi disconnected: %s", data.c_str());
         s_wifi_connected.store(false);
-        radio_ui_set_network(false, "Wi-Fi已断开");
+        radio_ui_set_network(false, "Wi-Fi disconnected");
         if (s_player_ready.load()) radio_player_set_network(false);
     }
 }
@@ -214,7 +214,7 @@ void radio_app_start(void) {
     radio_ui_set_volume(radio_player_volume());
     if (!s_catalog_commit || s_catalog_running.load()) {
         s_ui_alive.store(true);
-        radio_ui_set_playback(RadioPlaybackState::Error, "目录仍在退出，请稍后重试");
+        radio_ui_set_playback(RadioPlaybackState::Error, "Directory busy. Retry soon");
         return;
     }
 
@@ -226,7 +226,7 @@ void radio_app_start(void) {
             s_radio_active.store(false);
             s_ui_alive.store(true);
             radio_ui_set_playback(RadioPlaybackState::Error,
-                                  "上次音频仍在退出，请稍后重试");
+                                  "Audio busy. Retry soon");
             ESP_LOGE(TAG, "Previous player worker is still alive; refusing a second owner");
             return;
         }
@@ -237,7 +237,7 @@ void radio_app_start(void) {
         s_player_ready.store(false);
         s_radio_active.store(false);
         s_ui_alive.store(true);
-        radio_ui_set_playback(RadioPlaybackState::Error, "内存不足，音频启动失败");
+        radio_ui_set_playback(RadioPlaybackState::Error, "Low memory. Audio failed");
         return;
     }
     s_player_ready.store(true);
@@ -251,13 +251,13 @@ void radio_app_start(void) {
     if (!WifiManager::GetInstance().IsConnected()) {
         ESP_LOGI(TAG, "Wi-Fi not connected yet, checking station...");
         if (!SsidManager::GetInstance().GetSsidList().empty()) {
-            radio_ui_set_network(false, "正在连接网络...");
+            radio_ui_set_network(false, "Connecting to network...");
             WifiManager::GetInstance().StartStation();
         } else {
-            radio_ui_set_playback(RadioPlaybackState::Error, "请在手机设置中配网");
+            radio_ui_set_playback(RadioPlaybackState::Error, "Set up Wi-Fi on phone");
         }
     } else {
-        radio_ui_set_network(true, "Wi-Fi已连接");
+        radio_ui_set_network(true, "Wi-Fi connected");
         radio_player_set_network(true);
         start_catalog();
     }
@@ -364,10 +364,10 @@ void radio_app_on_key(uint8_t btn, app_btn_event_t event, uint16_t mv) {
 
 const passport_app_t g_radio_app = {
     .id = APP_ID_RADIO,
-    .name = "城市收音机",
+    .name = "Radio",
     .en_name = "RADIO",
-    .desc = "收听城市网络电台\n上下换台，确定播放",
-    .tag = "直连",
+    .desc = "Listen to Malaysian radio\n↑↓ Station · OK Play",
+    .tag = "Direct",
     .theme_color = 0xFFB74D,
     .init = radio_app_init,
     .start = radio_app_start,

@@ -45,7 +45,7 @@ lv_timer_t *s_volume_timer = nullptr;
 lv_timer_t *s_status_timer = nullptr;
 ui_pixel_battery_t s_battery{};
 lv_obj_t *s_wifi_bars[3]{};
-const char *s_default_hint = "确定说话 · 上下音量";
+const char *s_default_hint = "OK: Talk · ↑↓ Volume";
 
 // 文本内容也只在持锁时读写，避免与 lv_label 生命周期脱节。
 std::string s_user_text;
@@ -225,7 +225,7 @@ void ui_init() {
 
     auto *header = ui_pixel_top_bar(s_screen);
     ui_pixel_wifi_bars_create(header, UI_STATUS_WIFI_X, 18, s_wifi_bars);
-    auto *title = ui_pixel_label(header, "小智 AI", &buddy_font_16, UI_TEXT);
+    auto *title = ui_pixel_label(header, "Xiaozhi AI", &buddy_font_16, UI_TEXT);
     lv_obj_align(title, LV_ALIGN_LEFT_MID, 42, 0);
     s_battery = ui_pixel_battery_create(header, UI_STATUS_BATTERY_X, 6, UI_TEXT, &lv_font_montserrat_14);
     refresh_status_bar();
@@ -257,7 +257,7 @@ void ui_init() {
     lv_obj_set_style_text_color(s_status_label, lv_color_hex(kTextMain), 0);
     lv_label_set_long_mode(s_status_label, LV_LABEL_LONG_MODE_DOTS);
     lv_obj_set_size(s_status_label, 216 - face::kMiniW - 8, 20);
-    lv_label_set_text(s_status_label, "准备中...");
+    lv_label_set_text(s_status_label, "Starting…");
     lv_obj_align(s_status_label, LV_ALIGN_LEFT_MID, face::kMiniW + 8, 0);
 
     // Keep the conversation open and reserve the shared two-line key footer.
@@ -297,7 +297,7 @@ void ui_init() {
     lv_obj_set_style_text_color(s_ai_text_label, lv_color_hex(kTextMain), 0);
     lv_label_set_long_mode(s_ai_text_label, LV_LABEL_LONG_WRAP);
     lv_obj_set_style_text_align(s_ai_text_label, LV_TEXT_ALIGN_CENTER, 0);
-    lv_label_set_text(s_ai_text_label, "确定开始说话\n再按确定结束");
+    lv_label_set_text(s_ai_text_label, "Press OK to talk\nPress OK again to finish");
 
     s_companion = lv_obj_create(s_screen);
     lv_obj_remove_style_all(s_companion);
@@ -307,8 +307,8 @@ void ui_init() {
     lv_obj_add_event_cb(s_companion, draw_companion, LV_EVENT_DRAW_MAIN, nullptr);
     show_companion(true);
 
-    s_default_hint = "确定说话 · 上下音量";
-    s_hint_label = ui_pixel_footer(s_screen, s_default_hint, "长按确定返回", &buddy_font_16);
+    s_default_hint = "OK: Talk · ↑↓ Volume";
+    s_hint_label = ui_pixel_footer(s_screen, s_default_hint, "Hold OK: Back", &buddy_font_16);
     s_status_timer = lv_timer_create([](lv_timer_t *) {
         if (s_screen && app_registry_screen_is_on()) refresh_status_bar();
     }, 5000, nullptr);
@@ -370,9 +370,9 @@ void ui_set_state(State state) {
     conversation_layout();
     scroll_to_bottom_locked();
     if (s_companion) lv_obj_invalidate(s_companion);  // palette may change (error eyes)
-    s_default_hint = state == State::Listening ? "确定结束 · 上下音量" :
+    s_default_hint = state == State::Listening ? "OK: Finish · ↑↓ Volume" :
                      state == State::Speaking || state == State::Thinking ?
-                     "确定打断 · 上下音量" : "确定说话 · 上下音量";
+                     "OK: Interrupt · ↑↓ Volume" : "OK: Talk · ↑↓ Volume";
     ui_pixel_label_set_text(s_hint_label, s_default_hint);
     ui_pixel_text_color(s_status_label,
         state == State::Error || state == State::Disconnected ? UI_DANGER :
@@ -382,34 +382,34 @@ void ui_set_state(State state) {
     case State::Disconnected:
         set_badge_color(kRedAccent);
         if (!WifiManager::GetInstance().IsConnected()) {
-            lv_label_set_text(s_status_label, "Wi-Fi 未连接，请配网");
+            lv_label_set_text(s_status_label, "No Wi-Fi, set up network");
         } else {
-            lv_label_set_text(s_status_label, "未连接 · 确定重试");
+            lv_label_set_text(s_status_label, "Offline · OK: Retry");
         }
         break;
     case State::Connecting:
         set_badge_color(kAmberAccent);
-        lv_label_set_text(s_status_label, "正在连接小智");
+        lv_label_set_text(s_status_label, "Connecting to Xiaozhi");
         break;
     case State::Idle:
         set_badge_color(kGreenAccent);
-        lv_label_set_text(s_status_label, "准备就绪");
+        lv_label_set_text(s_status_label, "Ready");
         break;
     case State::Listening:
         set_badge_color(kUserBlue);
-        lv_label_set_text(s_status_label, "正在聆听");
+        lv_label_set_text(s_status_label, "Listening");
         break;
     case State::Thinking:
         set_badge_color(kAmberAccent);
-        lv_label_set_text(s_status_label, "正在思考");
+        lv_label_set_text(s_status_label, "Thinking");
         break;
     case State::Speaking:
         set_badge_color(kGreenAccent);
-        lv_label_set_text(s_status_label, "正在回复");
+        lv_label_set_text(s_status_label, "Replying");
         break;
     case State::Error:
         set_badge_color(kRedAccent);
-        lv_label_set_text(s_status_label, "服务异常 · 确定重试");
+        lv_label_set_text(s_status_label, "Error · OK: Retry");
         break;
     }
 
@@ -431,7 +431,7 @@ void ui_set_status_text(const std::string &text) {
 void ui_set_user_text(const std::string &text) {
     if (!begin_update(200)) return;
     lv_obj_remove_flag(s_user_text_label, LV_OBJ_FLAG_HIDDEN);
-    s_user_text = "你说: ";
+    s_user_text = "You: ";
     passport::append_utf8_tail(s_user_text, passport::fold_display_text(text), kMaxTextBytes);
     lv_label_set_text(s_user_text_label, s_user_text.c_str());
     conversation_layout();
@@ -445,7 +445,7 @@ void ui_set_ai_text(const std::string &text) {
     const std::string folded = passport::fold_display_text(text);
     const auto tail = passport::utf8_tail(folded, kMaxTextBytes);
     s_ai_reply_buffer.assign(tail.data(), tail.size());
-    std::string display = "小智: " + s_ai_reply_buffer;
+    std::string display = "Xiaozhi: " + s_ai_reply_buffer;
     lv_label_set_text(s_ai_text_label, display.c_str());
     conversation_layout();
     scroll_to_bottom_locked();
@@ -457,7 +457,7 @@ void ui_append_ai_text(const std::string &text) {
     lv_obj_remove_flag(s_ai_text_label, LV_OBJ_FLAG_HIDDEN);
 
     passport::append_utf8_tail(s_ai_reply_buffer, passport::fold_display_text(text), kMaxTextBytes);
-    std::string display = "小智: " + s_ai_reply_buffer;
+    std::string display = "Xiaozhi: " + s_ai_reply_buffer;
     lv_label_set_text(s_ai_text_label, display.c_str());
     conversation_layout();
     scroll_to_bottom_locked();
@@ -472,7 +472,7 @@ void ui_set_hint(const std::string &text) {
 
 void ui_set_volume(unsigned percent) {
     if (!begin_update(200)) return;
-    lv_label_set_text_fmt(s_hint_label, "音量 %u%%", percent);
+    lv_label_set_text_fmt(s_hint_label, "Volume %u%%", percent);
     if (s_volume_timer) {
         lv_timer_reset(s_volume_timer);
     } else {

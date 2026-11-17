@@ -22,10 +22,10 @@ bool home_clock_valid(void);
 // "12:34" / "--:--"
 void home_clock_format_time(char *buf, size_t cap);
 
-// "09月12日"(buddy 字体含数字与月日字形)
+// "12 Sep"
 void home_clock_format_date(char *buf, size_t cap);
 
-// "周六".."周日"
+// "Sun".."Sat"
 void home_clock_format_weekday(char *buf, size_t cap);
 
 #ifdef __cplusplus

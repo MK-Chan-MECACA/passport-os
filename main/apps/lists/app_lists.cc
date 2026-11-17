@@ -19,7 +19,7 @@ lv_obj_t *label(const char *text,int x,int y,int w,int h,uint32_t color){
 }
 void refresh(){
     if(!screen)return;
-    if(!view){ui_pixel_label_set_text(heading,"内存不足");ui_pixel_label_set_text(body,"请退出后重试");return;}
+    if(!view){ui_pixel_label_set_text(heading,"Low memory");ui_pixel_label_set_text(body,"Exit and try again");return;}
     auto &v=*view;
     if(v.revision!=revision()){
         const char *error=nullptr;
@@ -35,32 +35,32 @@ void refresh(){
         Item *item=nullptr;for(unsigned i=0;i<v.current.count;++i)if(v.current.items[i].id==v.item_id)item=&v.current.items[i];
         if(!item){v.item_id=0;v.deleting=false;}
         else{
-            ui_pixel_label_set_text(heading,v.deleting?"删除这项内容？":item->done?"已完成":"待完成");
+            ui_pixel_label_set_text(heading,v.deleting?"Delete this item?":item->done?"Done":"To do");
             ui_pixel_label_set_text(body,item->text);
-            ui_pixel_label_set_text(footer,message?message:v.deleting?"确定删除 · 上键取消\n长按确定返回":item->done?"确定改为待完成 · 下键删除\n长按确定返回":"确定标记完成 · 下键删除\n长按确定返回");return;
+            ui_pixel_label_set_text(footer,message?message:v.deleting?"OK: Delete · ↑ Cancel\nHold OK: Back":item->done?"OK: Mark to do · ↓ Delete\nHold OK: Back":"OK: Mark done · ↓ Delete\nHold OK: Back");return;
         }
     }
     if(!count){
-        ui_pixel_label_set_text(heading,v.list_id?v.current.title:"还没有清单");
-        ui_pixel_label_set_text(body,"对小智说：\n\n帮我整理一份出门清单\n\n也可以添加购物事项");
-        ui_pixel_label_set_text(footer,message?message:"确定打开小智\n长按确定返回");return;
+        ui_pixel_label_set_text(heading,v.list_id?v.current.title:"No lists yet");
+        ui_pixel_label_set_text(body,"Say to Xiaozhi:\n\n\"Make me a list for\ngoing out\"\n\nShopping items work too");
+        ui_pixel_label_set_text(footer,message?message:"OK: Open Xiaozhi\nHold OK: Back");return;
     }
-    char text[180];std::snprintf(text,sizeof(text),"%s %u/%u",v.list_id?v.current.title:"文字清单",unsigned(v.selected+1),unsigned(count));
+    char text[180];std::snprintf(text,sizeof(text),"%s %u/%u",v.list_id?v.current.title:"Lists",unsigned(v.selected+1),unsigned(count));
     ui_pixel_label_set_text(heading,text);ui_pixel_label_set_text(body,"");
     const size_t start=v.selected/3*3;
     for(size_t i=0;i<3&&start+i<count;++i){
         if(v.list_id){const auto &item=v.current.items[start+i];std::snprintf(text,sizeof(text),"%s %s",item.done?"[x]":"[ ]",item.text);}
-        else{const auto &s=v.lists[start+i];std::snprintf(text,sizeof(text),"%s\n已完成 %u / %u",s.title,unsigned(s.done),unsigned(s.count));}
+        else{const auto &s=v.lists[start+i];std::snprintf(text,sizeof(text),"%s\nDone %u / %u",s.title,unsigned(s.done),unsigned(s.count));}
         ui_pixel_label_set_text(lines[i],text);ui_pixel_text_color(lines[i],start+i==v.selected?UI_ON_ACCENT:UI_TEXT);
         ui_pixel_bg_color(lines[i],start+i==v.selected?UI_ACCENT:UI_SURFACE);lv_obj_remove_flag(lines[i],LV_OBJ_FLAG_HIDDEN);
     }
-    ui_pixel_label_set_text(footer,message?message:"上下选择 · 确定查看\n长按确定返回");
+    ui_pixel_label_set_text(footer,message?message:"↑↓ Select · OK View\nHold OK: Back");
 }
 void start(){
     if(!bsp_lvgl_lock(1000))return;
     view=new(std::nothrow) View;message=nullptr;
     screen=lv_obj_create(nullptr);ui_pixel_background(screen);auto *top=ui_pixel_top_bar(screen);
-    auto *name=ui_pixel_label(top,"文字清单",&buddy_font_16,UI_TEXT);lv_obj_align(name,LV_ALIGN_LEFT_MID,12,0);
+    auto *name=ui_pixel_label(top,"Lists",&buddy_font_16,UI_TEXT);lv_obj_align(name,LV_ALIGN_LEFT_MID,12,0);
     battery=ui_pixel_battery_create(top,UI_STATUS_BATTERY_X,6,UI_TEXT,&lv_font_montserrat_14);
     heading=label("",12,42,216,26,UI_ACCENT);body=label("",12,80,216,168,UI_TEXT);
     for(unsigned i=0;i<3;++i){lines[i]=label("",12,76+i*60,216,54,UI_TEXT);lv_label_set_long_mode(lines[i],LV_LABEL_LONG_DOT);
@@ -93,5 +93,5 @@ void key(uint8_t btn,app_btn_event_t event,uint16_t){
 }
 }}
 extern const passport_app_t g_lists_app;
-const passport_app_t g_lists_app={.id=APP_ID_LISTS,.name="文字清单",.en_name="LISTS",.desc="用小智整理事项\n随时查看完成",.tag="本地文字",.theme_color=0x8CF5A6,
+const passport_app_t g_lists_app={.id=APP_ID_LISTS,.name="Lists",.en_name="LISTS",.desc="Organise with Xiaozhi\nCheck items off anytime",.tag="Local text",.theme_color=0x8CF5A6,
     .init=nullptr,.start=lists::start,.stop=lists::stop,.on_key=lists::key,.prepare_stop=nullptr,.on_back=lists::back};

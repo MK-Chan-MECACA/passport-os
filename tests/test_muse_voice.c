@@ -64,5 +64,25 @@ int main(void) {
         assert(((unsigned char)text[next]&0xc0)!=0x80);
     }
     assert(muse_hatch_caption_at(long_reply,strlen(long_reply)-1,page,sizeof(page)) && strstr(page,"你好"));
+    /* English wraps at spaces: no word is split, one space becomes the break,
+     * and a 216 px line holds far more than 13 letters. */
+    const char *prose="The weather in Kuala Lumpur is warm with afternoon thunderstorms expected later today, "
+        "so bring an umbrella if you are heading out after lunch and keep your phone charged.";
+    char joined[1000]={0}; at=0;
+    do {
+        next=muse_hatch_reply_page(prose,at,page,sizeof(page));
+        assert(next>at);
+        char *line=page;
+        for (char *nl; line; line=nl ? nl+1 : NULL) {
+            nl=strchr(line,'\n');
+            size_t n=nl ? (size_t)(nl-line) : strlen(line);
+            assert(n>14 || !nl);
+            assert(line[0]!=' ');
+            if (joined[0]) strcat(joined," ");
+            strncat(joined,line,n);
+        }
+        at=next;
+    } while(prose[at]);
+    assert(!strcmp(joined,prose));
     puts("Muse voice WAV/base64/UTF-8 boundaries and multi-page reply vectors: PASS");
 }

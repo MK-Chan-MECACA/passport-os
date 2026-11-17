@@ -1,7 +1,6 @@
 """Every fixed string shown in the 20px title font must have native 20px glyphs.
 
-ui_font_20 falls back to the 16px body font, so a missing glyph does not fail
-to render: it silently mixes two sizes in one title. This finds each label
+A glyph missing from ui_font_20 renders as nothing. This finds each label
 created with a title font, then collects the literals it can show: literals in
 the creating call, in later set_text calls on that label, in variables passed
 to set_text, and in helper functions called there. Member fields (text sent
@@ -14,7 +13,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 TITLE_FONTS = {
     'ui_font_20': ['main/fonts/ui_font_20.c'],
-    'pomodoro_font_20': ['main/apps/pomodoro/pomodoro_font_20.c', 'main/fonts/ui_font_20.c'],
 }
 LITERAL = re.compile(r'"((?:[^"\\]|\\.)*)"')
 
@@ -41,6 +39,7 @@ def literals(expr):
 
 
 def function_literals(text, name):
+    text = re.sub(r'//[^\n]*', '', text)
     match = re.search(r'\b' + name + r'\s*\([^;{)]*\)\s*\{', text)
     if not match:
         return []

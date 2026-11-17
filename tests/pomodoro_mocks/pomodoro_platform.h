@@ -17,7 +17,7 @@ constexpr uint32_t UI_BG=0, UI_TEXT=1, UI_TEXT_DIM=2, UI_ACCENT=3,
     UI_WARNING=4, UI_SURFACE_ALT=5, UI_ON_ACCENT=6;
 #define ESP_LOGI(...) ((void)0)
 struct lv_font_t {};
-inline const lv_font_t buddy_font_16{}, pomodoro_font_20{}, pomodoro_digits_48{}, lv_font_montserrat_14{};
+inline const lv_font_t buddy_font_16{}, ui_font_20{}, pomodoro_digits_48{}, lv_font_montserrat_14{};
 struct lv_obj_t {
     lv_obj_t *parent=nullptr;
     std::vector<lv_obj_t*> children;

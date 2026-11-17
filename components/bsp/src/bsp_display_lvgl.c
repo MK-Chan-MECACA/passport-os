@@ -18,7 +18,7 @@ static uint32_t monotonic_tick_ms(void) {
 lv_display_t *bsp_lvgl_init(void) {
     if (s_disp) return s_disp;
     if (!bsp_display_panel()) {
-        ESP_LOGE(TAG, "请先成功调用 bsp_display_init()");
+        ESP_LOGE(TAG, "call bsp_display_init() successfully first");
         return NULL;
     }
 
@@ -28,7 +28,7 @@ lv_display_t *bsp_lvgl_init(void) {
     // 爆栈(Stack protection fault,2026-09-13,崩溃任务即 taskLVGL)。
     pc.task_stack = 12288;
     if (lvgl_port_init(&pc) != ESP_OK) {
-        ESP_LOGE(TAG, "lvgl_port_init 失败");
+        ESP_LOGE(TAG, "lvgl_port_init failed");
         return NULL;
     }
 
@@ -55,7 +55,7 @@ lv_display_t *bsp_lvgl_init(void) {
         .flags = { .buff_dma = true, .swap_bytes = true },
     };
     s_disp = lvgl_port_add_disp(&dc);
-    if (!s_disp) { ESP_LOGE(TAG, "lvgl_port_add_disp 失败"); return NULL; }
+    if (!s_disp) { ESP_LOGE(TAG, "lvgl_port_add_disp failed"); return NULL; }
 
     // 把 LVGL 的【默认屏】刷成黑。
     // LVGL 默认主题的 screen 背景是近白色;开机阶段(开机动画之前/切换过程中)
@@ -67,7 +67,7 @@ lv_display_t *bsp_lvgl_init(void) {
         lv_obj_set_style_bg_opa(scr, LV_OPA_COVER, 0);
     }
 
-    ESP_LOGI(TAG, "LVGL 就绪");
+    ESP_LOGI(TAG, "LVGL ready");
     return s_disp;
 }
 

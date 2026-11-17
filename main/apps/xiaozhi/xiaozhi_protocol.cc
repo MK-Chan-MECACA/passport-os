@@ -351,7 +351,7 @@ void Protocol::WebsocketEventHandler(void *handler_args, esp_event_base_t base,
         ESP_LOGE(TAG, "WebSocket error, type=%d", data ? (int)data->error_handle.error_type : -1);
         self->hello_ok_ = false;
         self->SetState(State::Error);
-        self->Publish(EvType::SocketError, "网络连接异常");
+        self->Publish(EvType::SocketError, "Network connection error");
         break;
     }
     default:
@@ -378,7 +378,7 @@ void Protocol::OnConnected() {
                   version_, kEncFrameDurationMs);
     if (!SendJson(hello)) {
         ESP_LOGE(TAG, "Failed to send hello");
-        Publish(EvType::SocketError, "握手报文发送失败");
+        Publish(EvType::SocketError, "Handshake send failed");
     }
 }
 
@@ -584,7 +584,7 @@ void Protocol::DispatchText() {
         const cJSON *status = cJSON_GetObjectItem(root, "status");
         char buf[kEventTextCap];
         std::snprintf(buf, sizeof(buf), "%s%s%s",
-                      (cJSON_IsString(msg) && msg->valuestring) ? msg->valuestring : "服务端告警",
+                      (cJSON_IsString(msg) && msg->valuestring) ? msg->valuestring : "Server alert",
                       (cJSON_IsString(status) && status->valuestring) ? " " : "",
                       (cJSON_IsString(status) && status->valuestring) ? status->valuestring : "");
         Publish(EvType::Alert, buf);

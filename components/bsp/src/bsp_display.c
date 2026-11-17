@@ -58,7 +58,7 @@ static const st_init_cmd_t ST7789P3_CMDS[] = {
 };
 
 static void backlight_init(void) {
-    if (BSP_LCD_BL < 0) { ESP_LOGW(TAG, "背光引脚未接 MCU,亮度不可调"); return; }
+    if (BSP_LCD_BL < 0) { ESP_LOGW(TAG, "backlight pin not wired to MCU, brightness fixed"); return; }
     ledc_timer_config_t t = {
         .speed_mode      = BSP_BL_LEDC_MODE,
         .timer_num       = BSP_BL_LEDC_TIMER,
@@ -67,7 +67,7 @@ static void backlight_init(void) {
         .clk_cfg         = LEDC_USE_XTAL_CLK,
     };
     esp_err_t e = ledc_timer_config(&t);
-    if (e != ESP_OK) { ESP_LOGE(TAG, "ledc_timer_config 失败: %s", esp_err_to_name(e)); return; }
+    if (e != ESP_OK) { ESP_LOGE(TAG, "ledc_timer_config failed: %s", esp_err_to_name(e)); return; }
 
     ledc_channel_config_t ch = {
         .gpio_num   = BSP_LCD_BL,
@@ -78,10 +78,10 @@ static void backlight_init(void) {
         .hpoint     = 0,
     };
     e = ledc_channel_config(&ch);
-    if (e != ESP_OK) { ESP_LOGE(TAG, "ledc_channel_config 失败: %s", esp_err_to_name(e)); return; }
+    if (e != ESP_OK) { ESP_LOGE(TAG, "ledc_channel_config failed: %s", esp_err_to_name(e)); return; }
 
     s_bl_ready = true;
-    ESP_LOGI(TAG, "背光 LEDC 就绪 gpio=%d", BSP_LCD_BL);
+    ESP_LOGI(TAG, "backlight LEDC ready gpio=%d", BSP_LCD_BL);
 }
 
 esp_err_t bsp_display_init(void) {
@@ -95,7 +95,7 @@ esp_err_t bsp_display_init(void) {
     };
     esp_err_t e = spi_bus_initialize(BSP_LCD_SPI_HOST, &bus, SPI_DMA_CH_AUTO);
     if (e != ESP_OK) {
-        ESP_LOGE(TAG, "SPI 总线初始化失败 (%s) —— 检查 MOSI=GPIO%d / SCLK=GPIO%d 是否冲突",
+        ESP_LOGE(TAG, "SPI bus init failed (%s) — check MOSI=GPIO%d / SCLK=GPIO%d for conflicts",
                  esp_err_to_name(e), BSP_LCD_MOSI, BSP_LCD_SCLK);
         return e;
     }
@@ -109,7 +109,7 @@ esp_err_t bsp_display_init(void) {
         .trans_queue_depth = 10,
     };
     e = esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)BSP_LCD_SPI_HOST, &io_cfg, &s_io);
-    if (e != ESP_OK) { ESP_LOGE(TAG, "panel_io 创建失败: %s", esp_err_to_name(e)); return e; }
+    if (e != ESP_OK) { ESP_LOGE(TAG, "panel_io creation failed: %s", esp_err_to_name(e)); return e; }
 
     esp_lcd_panel_dev_config_t dev = {
         .reset_gpio_num = BSP_LCD_RST,          // -1 → SWRESET 软复位
@@ -117,7 +117,7 @@ esp_err_t bsp_display_init(void) {
         .bits_per_pixel = 16,
     };
     e = esp_lcd_new_panel_st7789(s_io, &dev, &s_panel);
-    if (e != ESP_OK) { ESP_LOGE(TAG, "面板创建失败: %s", esp_err_to_name(e)); return e; }
+    if (e != ESP_OK) { ESP_LOGE(TAG, "panel creation failed: %s", esp_err_to_name(e)); return e; }
 
     esp_lcd_panel_reset(s_panel);   // rst=-1 时走 SWRESET
     esp_lcd_panel_init(s_panel);    // SLPOUT / COLMOD / RAMCTRL
@@ -125,7 +125,7 @@ esp_err_t bsp_display_init(void) {
     for (size_t i = 0; i < sizeof(ST7789P3_CMDS) / sizeof(ST7789P3_CMDS[0]); i++) {
         const st_init_cmd_t *c = &ST7789P3_CMDS[i];
         esp_err_t r = esp_lcd_panel_io_tx_param(s_io, c->cmd, c->data, c->len);
-        if (r != ESP_OK) ESP_LOGE(TAG, "厂商初始化命令 0x%02X 失败: %s", c->cmd, esp_err_to_name(r));
+        if (r != ESP_OK) ESP_LOGE(TAG, "vendor init command 0x%02X failed: %s", c->cmd, esp_err_to_name(r));
         if (c->delay_ms) vTaskDelay(pdMS_TO_TICKS(c->delay_ms));
     }
 
@@ -139,11 +139,11 @@ esp_err_t bsp_display_init(void) {
     // "首帧刷完"早一点,露出的就是白闪。这里先钉成黑,把这类白闪的源头去掉。
     {
         esp_err_t fr = bsp_display_fill(0x0000);
-        if (fr != ESP_OK) ESP_LOGW(TAG, "清屏失败: %s", esp_err_to_name(fr));
+        if (fr != ESP_OK) ESP_LOGW(TAG, "screen clear failed: %s", esp_err_to_name(fr));
     }
 
     backlight_init();
-    ESP_LOGI(TAG, "显示就绪 %dx%d", BSP_LCD_W, BSP_LCD_H);
+    ESP_LOGI(TAG, "display ready %dx%d", BSP_LCD_W, BSP_LCD_H);
     return ESP_OK;
 }
 

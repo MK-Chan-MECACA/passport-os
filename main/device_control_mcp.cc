@@ -8,12 +8,12 @@
 namespace device_control {
 namespace {
 const char *const schemas[] = {
-R"({"name":"self.pomodoro.control","description":"Control or query the device's actual pomodoro timer (番茄钟). action: status/start/pause/resume/reset. start defaults to focus=25 minutes; short_break=5 and long_break=15 are the only other durations. Do not claim unsupported custom durations. phase is allowed only with start. Starting an already running same phase does not restart it; use resume for a paused timer. Reset only on explicit user request; never automatically reset to resolve a conflict. Starting stays in Xiaozhi and continues counting after leaving it or screen sleep. Open the pomodoro app separately only if asked. Read actual returned status and remaining_seconds. Timer is not saved across power-off. Completion shows on screen; sound waits while another audio app owns the speaker.","inputSchema":{"type":"object","properties":{"action":{"type":"string","enum":["status","start","pause","resume","reset"]},"phase":{"type":"string","enum":["focus","short_break","long_break"]}},"required":["action"],"additionalProperties":false}})",
+R"({"name":"self.pomodoro.control","description":"Control or query the device's actual pomodoro timer. action: status/start/pause/resume/reset. start defaults to focus=25 minutes; short_break=5 and long_break=15 are the only other durations. Do not claim unsupported custom durations. phase is allowed only with start. Starting an already running same phase does not restart it; use resume for a paused timer. Reset only on explicit user request; never automatically reset to resolve a conflict. Starting stays in Xiaozhi and continues counting after leaving it or screen sleep. Open the pomodoro app separately only if asked. Read actual returned status and remaining_seconds. Timer is not saved across power-off. Completion shows on screen; sound waits while another audio app owns the speaker.","inputSchema":{"type":"object","properties":{"action":{"type":"string","enum":["status","start","pause","resume","reset"]},"phase":{"type":"string","enum":["focus","short_break","long_break"]}},"required":["action"],"additionalProperties":false}})",
 R"({"name":"self.device.get_status","description":"Read this device's saved speaker volume, screen brightness and current app. Volume and brightness are percentages. Use the actual tool result; do not guess device state.","inputSchema":{"type":"object","properties":{}}})",
 R"({"name":"self.audio.set_volume","description":"Change AND persist this device's master speaker volume. Use exactly one of percent (absolute 0..100) or delta (signed percentage points -100..100). For louder/quieter without an amount use delta +10/-10. Zero mutes speech and media; timer and reminder alarms still ring at their fixed alert level. Only claim saved on saved=true; report the returned volume_percent. No external player or server setting is needed.","inputSchema":{"type":"object","properties":{"percent":{"type":"integer","minimum":0,"maximum":100},"delta":{"type":"integer","minimum":-100,"maximum":100}}}})",
 R"({"name":"self.screen.set_brightness","description":"Change AND persist this device's screen brightness. Use exactly one of percent (absolute 10..100) or delta (signed percentage points -100..100). For brighter/dimmer without an amount use delta +10/-10. Values clamp to 10..100 to keep the display readable. Only claim saved on saved=true; report brightness_percent. Survives reboot and screen sleep/wake.","inputSchema":{"type":"object","properties":{"percent":{"type":"integer","minimum":10,"maximum":100},"delta":{"type":"integer","minimum":-100,"maximum":100}}}})",
-R"({"name":"self.application.open","description":"Open a built-in device app on explicit request. radio=城市收音机; reminders=备忘提醒; lists=文字清单; pomodoro=番茄时钟; settings=设置; home=首页; launcher=应用列表; stopwatch=秒表; tetris=俄罗斯方块; sound_jump=声音跳一跳; game=你在狗叫什么; muse=Muse; voice=随身AI语音; xiaozhi=小智. Ask which app if ambiguous. Opens its screen only. Switching exits this Xiaozhi conversation after the tool reply; do not promise continued background voice control.","inputSchema":{"type":"object","properties":{"app":{"type":"string","enum":["radio","reminders","lists","pomodoro","settings","home","launcher","stopwatch","tetris","sound_jump","game","muse","voice","xiaozhi"]}},"required":["app"]}})",
-R"({"name":"self.radio.play","description":"Play live internet radio for a Malaysian city, town or state in this device's Radio app, e.g. play radio in Penang = city Penang; use the English place name. station: optional keywords of a station name such as 交通 or 音乐; otherwise the most popular local station plays. stop_after_minutes pauses the radio later, e.g. 半小时后停 = 30. This device has no music library: for any request to play music or a song, offer live radio with this tool instead. Exits this Xiaozhi conversation after the reply. Stations come from a public directory, so do not promise a particular one; the result shows on screen.","inputSchema":{"type":"object","properties":{"city":{"type":"string","maxLength":40},"station":{"type":"string","maxLength":10},"stop_after_minutes":{"type":"integer","minimum":1,"maximum":180}},"required":["city"]}})"
+R"({"name":"self.application.open","description":"Open a built-in device app on explicit request. radio=Radio; reminders=Reminders; lists=Lists; pomodoro=Pomodoro; settings=Settings; home=Home; launcher=app list; stopwatch=Stopwatch; tetris=Tetris; sound_jump=Sound Jump; game=Why Barking voice game; muse=Muse; voice=AI Voice; xiaozhi=Xiaozhi. Ask which app if ambiguous. Opens its screen only. Switching exits this Xiaozhi conversation after the tool reply; do not promise continued background voice control.","inputSchema":{"type":"object","properties":{"app":{"type":"string","enum":["radio","reminders","lists","pomodoro","settings","home","launcher","stopwatch","tetris","sound_jump","game","muse","voice","xiaozhi"]}},"required":["app"]}})",
+R"({"name":"self.radio.play","description":"Play live internet radio for a Malaysian city, town or state in this device's Radio app, e.g. play radio in Penang = city Penang; use the English place name. station: optional keywords of a station name such as BFM or Traxx; otherwise the most popular local station plays. stop_after_minutes pauses the radio later, e.g. stop in half an hour = 30. This device has no music library: for any request to play music or a song, offer live radio with this tool instead. Exits this Xiaozhi conversation after the reply. Stations come from a public directory, so do not promise a particular one; the result shows on screen.","inputSchema":{"type":"object","properties":{"city":{"type":"string","maxLength":40},"station":{"type":"string","maxLength":10},"stop_after_minutes":{"type":"integer","minimum":1,"maximum":180}},"required":["city"]}})"
 };
 struct App {const char *key; passport_app_id_t id;};
 constexpr App apps[] = {
@@ -58,11 +58,11 @@ bool text_field(const cJSON *args,const char *key,bool required,char *out,size_t
     const bool city=!std::strcmp(key,"city");
     if (!value && !required) return true;
     if (!cJSON_IsString(value) || !value->valuestring[0]) {
-        *error=city?"请说出要播放的城市或省份":"电台名称必须是文字";
+        *error=city?"Name the city or state to play":"Station name must be text";
         return false;
     }
     if (std::strlen(value->valuestring)>=capacity) {
-        *error=city?"城市名称太长":"电台名称太长";
+        *error=city?"City name too long":"Station name too long";
         return false;
     }
     std::strcpy(out,value->valuestring);
@@ -80,51 +80,51 @@ std::string call(const char *name,const cJSON *args,uint64_t token) {
     else if (!std::strcmp(name,"self.pomodoro.control")) request.action=Action::Pomodoro;
     else if (!std::strcmp(name,"self.radio.play")) request.action=Action::Handover;
     else return {};
-    if (!cJSON_IsObject(args)) return fail("请提供有效的设备控制参数");
+    if (!cJSON_IsObject(args)) return fail("Provide valid device control arguments");
     request.token=token;
     if (request.action==Action::Volume || request.action==Action::Brightness) {
         const cJSON *percent=cJSON_GetObjectItemCaseSensitive(args,"percent");
         const cJSON *delta=cJSON_GetObjectItemCaseSensitive(args,"delta");
-        if (bool(percent)==bool(delta)) return fail("请只指定一个绝对百分比或增减幅度");
+        if (bool(percent)==bool(delta)) return fail("Give exactly one of percent or delta");
         const cJSON *value=percent?percent:delta;
         if (!integer(value,delta?-100:request.action==Action::Volume?0:10,100))
-            return fail("音量范围0到100，亮度范围10到100；增减幅度为整数百分比");
+            return fail("Volume is 0 to 100, brightness 10 to 100; delta is a whole percentage");
         request.value=value->valueint;request.relative=delta!=nullptr;
     } else if (request.action==Action::Pomodoro) {
         unsigned fields=0;
         for (const cJSON *field=args->child;field;field=field->next) {
             const unsigned bit=field->string&&!std::strcmp(field->string,"action")?1:
                 field->string&&!std::strcmp(field->string,"phase")?2:0;
-            if (!bit || (fields&bit)) return fail("番茄钟只接受 action 和 phase，暂不支持自定义时长");
+            if (!bit || (fields&bit)) return fail("Pomodoro accepts only action and phase; custom durations are not supported");
             fields|=bit;
         }
         const auto *action=cJSON_GetObjectItemCaseSensitive(args,"action");
         const auto *phase=cJSON_GetObjectItemCaseSensitive(args,"phase");
-        if (!cJSON_IsString(action)) return fail("请指定查询、开始、暂停、继续或重置番茄钟");
+        if (!cJSON_IsString(action)) return fail("Say whether to check, start, pause, resume or reset the pomodoro");
         unsigned index=0;
         while (index<5 && std::strcmp(action->valuestring,timer_actions[index])) ++index;
-        if (index==5) return fail("不支持的番茄钟操作");
+        if (index==5) return fail("Unsupported pomodoro action");
         request.timer_action=static_cast<pomodoro_action_t>(index);
         if (phase) {
             if (request.timer_action!=POMODORO_START || !cJSON_IsString(phase))
-                return fail("仅开始计时时可以指定专注或休息类型");
+                return fail("Focus or break type can only be given with start");
             index=0;
             while (index<3 && std::strcmp(phase->valuestring,timer_phases[index])) ++index;
-            if (index==3) return fail("仅支持25分钟专注、5分钟短休息、15分钟长休息");
+            if (index==3) return fail("Only 25-minute focus, 5-minute short break and 15-minute long break are supported");
             request.timer_phase=static_cast<uint8_t>(index);
         }
     } else if (request.action==Action::Open) {
         const auto *app=cJSON_GetObjectItemCaseSensitive(args,"app");
-        if (!cJSON_IsString(app)) return fail("请明确要打开哪个应用");
+        if (!cJSON_IsString(app)) return fail("Say which app to open");
         for (const auto &candidate:apps) if (!std::strcmp(app->valuestring,candidate.key)) request.app=candidate.id;
-        if (request.app==APP_ID_COUNT) return fail("设备没有这个应用，请选择内置应用");
+        if (request.app==APP_ID_COUNT) return fail("No such app on this device; choose a built-in app");
     } else if (request.action==Action::Handover) {
         using voice_intent::Source;
         auto &media=request.handover;
         const char *error=nullptr;
         const auto *stop=cJSON_GetObjectItemCaseSensitive(args,"stop_after_minutes");
         if (stop) {
-            if (!integer(stop,1,voice_intent::kMaxStopMinutes)) return fail("定时停止请用1到180分钟的整数");
+            if (!integer(stop,1,voice_intent::kMaxStopMinutes)) return fail("Stop timer must be a whole number from 1 to 180 minutes");
             media.stop_minutes=static_cast<uint16_t>(stop->valueint);
         }
         media.app=APP_ID_RADIO;media.source=Source::Radio;
@@ -134,15 +134,15 @@ std::string call(const char *name,const cJSON *args,uint64_t token) {
     }
     const Result result=execute(request);
     switch(result.error) {
-        case Error::Busy:return fail("设备正在处理其他请求，请稍后再试");
-        case Error::Inactive:return fail("小智已退出，未执行设备控制");
-        case Error::Storage:return fail("设置保存失败，未应用新值，请稍后重试");
-        case Error::Timeout:return fail("执行结果尚未确认，请查询设备状态后再决定是否重试");
-        case Error::Alarm:return fail("请先处理当前提醒，再打开其他应用");
-        case Error::UnknownApp:return fail("无法打开该应用");
-        case Error::AlreadyOpen:return fail("小智已经在运行，无需再次打开");
-        case Error::TimerConflict:return fail("番茄钟状态不支持此操作，请先查询状态；已暂停请继续，未开始或已结束请开始。不要自行重置已有计时");
-        case Error::TimerInvalid:return fail("无效的番茄钟操作");
+        case Error::Busy:return fail("Device is busy with another request; try again later");
+        case Error::Inactive:return fail("Xiaozhi has exited; device control not carried out");
+        case Error::Storage:return fail("Could not save the setting; new value not applied. Try again later");
+        case Error::Timeout:return fail("Result not confirmed; check device status before deciding to retry");
+        case Error::Alarm:return fail("Handle the current reminder before opening another app");
+        case Error::UnknownApp:return fail("Cannot open that app");
+        case Error::AlreadyOpen:return fail("Xiaozhi is already running; no need to open it again");
+        case Error::TimerConflict:return fail("Pomodoro state does not allow this action. Check status first: resume if paused, start if not started or finished. Do not reset an existing timer on your own");
+        case Error::TimerInvalid:return fail("Invalid pomodoro action");
         case Error::None:break;
     }
     Json value(cJSON_CreateObject(),cJSON_Delete);

@@ -79,7 +79,7 @@ constexpr int kMouthW = 7;
 constexpr int kTongueX = 14;
 constexpr int kTongueYBase = 8;
 
-// 气泡阈值(推力 0..255):>60 出"汪!",≥180 升级"汪汪!"(原值一致)。
+// 气泡阈值(推力 0..255):>60 出"Woof!",≥180 升级"Woof woof!"(原值一致)。
 constexpr int kBarkSoft = 60;
 constexpr int kBarkLoud = 180;
 
@@ -102,9 +102,9 @@ constexpr int kVuH = 244;    // 34..278,不压到草地(GC_GROUND_Y=284)
 constexpr int kVuStep = 6;   // 高度量化步长,减少无意义的重绘
 
 // 提示语(单行,不换行 —— 原来 13 个汉字宽 221px 超过 216 会折成两行压在草地上)
-constexpr char kHintPlay[] = "出声升 · 安静降 · 确定跳";
-constexpr char kHintDead[] = "确定再来 · 长按确定返回";
-constexpr char kHintReady[] = "确定开始 · 长按确定返回";
+constexpr char kHintPlay[] = "Bark to rise · OK: Jump";
+constexpr char kHintDead[] = "OK: Again · Hold OK: Back";
+constexpr char kHintReady[] = "OK: Start · Hold OK: Back";
 
 // ---------------------------------------------------------------------------
 // 配色(沿用整机像素风色板)
@@ -124,7 +124,7 @@ constexpr uint32_t kTongue = 0xFF6B8B;   // 粉舌头
 // ---------------------------------------------------------------------------
 
 // lv_label_set_text() 内部没有"和当前文本相同就直接返回"的短路:每次调用都会
-// lv_free 旧串 → lv_malloc 新串 → 全文重新排版 → invalidate。原来"汪!"气泡每帧
+// lv_free 旧串 → lv_malloc 新串 → 全文重新排版 → invalidate。原来"Woof!"气泡每帧
 // 无条件调用一次(30 次/秒),既制造堆碎片又反复触发布局。这里在调用前先比对。
 struct TextCache {
     char text[48];
@@ -291,7 +291,7 @@ void build_dead_panel(lv_obj_t *parent) {
         : static_cast<lv_border_side_t>(LV_BORDER_SIDE_TOP | LV_BORDER_SIDE_BOTTOM), 0);
     lv_obj_set_style_border_color(panel, lv_color_hex(UI_BORDER), 0);
 
-    lv_obj_t *title = px_label(panel, "再来一局？", &ui_font_20, UI_TEXT,
+    lv_obj_t *title = px_label(panel, "Play again?", &ui_font_20, UI_TEXT,
                                LV_TEXT_ALIGN_CENTER);
     lv_obj_set_width(title, 210);
     lv_obj_set_pos(title, 3, 10);
@@ -301,12 +301,12 @@ void build_dead_panel(lv_obj_t *parent) {
     lv_obj_set_width(s_dead_score, 210);
     lv_obj_set_pos(s_dead_score, 3, 34);
 
-    s_dead_best = px_label(panel, "最高纪录 0", &buddy_font_16, UI_SUB,
+    s_dead_best = px_label(panel, "Best 0", &buddy_font_16, UI_SUB,
                            LV_TEXT_ALIGN_CENTER);
     lv_obj_set_width(s_dead_best, 210);
     lv_obj_set_pos(s_dead_best, 3, 82);
 
-    s_dead_rating = px_label(panel, "轻声挑战，下次再试", &buddy_font_16, UI_TEXT,
+    s_dead_rating = px_label(panel, "Too quiet. Try again", &buddy_font_16, UI_TEXT,
                              LV_TEXT_ALIGN_CENTER);
     lv_obj_set_width(s_dead_rating, 210);
     lv_obj_set_pos(s_dead_rating, 3, 112);
@@ -465,15 +465,15 @@ void on_dead() {
     char line[24];
     std::snprintf(line, sizeof(line), "%d", score);
     lv_label_set_text(s_dead_score, line);
-    std::snprintf(line, sizeof(line), "最高纪录 %d", s_best);
+    std::snprintf(line, sizeof(line), "Best %d", s_best);
     lv_label_set_text(s_dead_best, line);
 
     // 抽象段位评级(沿用原四档,补一档 20 分彩蛋,强化成就感)
-    const char *rating = "轻声挑战，下次再试";
-    if (score >= 20) rating = "全小区的狗都跟着你叫";
-    else if (score >= 10) rating = "纯种哮天犬现世";
-    else if (score >= 5) rating = "保安已被你惊动";
-    else if (score >= 2) rating = "单身狗·很有精神";
+    const char *rating = "Too quiet. Try again";
+    if (score >= 20) rating = "Every dog nearby joins in";
+    else if (score >= 10) rating = "A legendary hound!";
+    else if (score >= 5) rating = "Security guard alerted";
+    else if (score >= 2) rating = "Lone dog, full of spirit";
     if (s_dead_rating) lv_label_set_text(s_dead_rating, rating);
 
     // 死亡演出:先张嘴"呜"着往下坠,结算面板等坠完再滑入(内容已填好)
@@ -485,7 +485,7 @@ void on_dead() {
     s_last_mouth_h = kMouthMaxH;
     lv_obj_set_y(s_dog_ear, 3);      // 耳朵彻底耷拉
     s_last_ear_y = 3;
-    update_bark("呜!!", s_dog_y);
+    update_bark("Awoo!!", s_dog_y);
     set_hint(kHintDead); /* 明确告诉玩家怎么继续,免得以为死机 */
     if (kSfxEnabled) game_sfx_play(new_best ? GS_BEST : GS_DEAD);
 
@@ -541,8 +541,8 @@ void playing_tick() {
 
     // 叫声弹幕气泡(P1:只在跨档位时改文本,不再每帧 malloc+重排)
     const char *bark = "";
-    if (thrust >= kBarkLoud) bark = "汪汪!";
-    else if (thrust > kBarkSoft) bark = "汪!";
+    if (thrust >= kBarkLoud) bark = "Woof woof!";
+    else if (thrust > kBarkSoft) bark = "Woof!";
     update_bark(bark, dog_y);
 
     update_vu(thrust);
@@ -580,7 +580,7 @@ void dead_tick() {
         const int floor_y = GC_GROUND_Y - GC_BIRD_H;
         if (y > floor_y) y = floor_y;
         set_dog_y(y);
-        update_bark("呜!!", y);
+        update_bark("Awoo!!", y);
         if (s_dying == 0) s_panel_anim = kPanelAnimFrames;
     }
 }
@@ -642,7 +642,7 @@ void build_ui() {
     ui_pixel_background(s_screen);
 
     lv_obj_t *bar = ui_pixel_top_bar(s_screen);
-    lv_obj_t *title = px_label(bar, "你在狗叫什么", &buddy_font_16, UI_TEXT,
+    lv_obj_t *title = px_label(bar, "Why Barking", &buddy_font_16, UI_TEXT,
                                LV_TEXT_ALIGN_LEFT);
     ui_pixel_status_text_align(title, 12, 96, LV_TEXT_ALIGN_LEFT);
     s_score_lbl = px_label(bar, "0", &lv_font_montserrat_14, UI_YELLOW,
@@ -774,9 +774,9 @@ static void game_on_key(uint8_t btn, app_btn_event_t event, uint16_t mv) {
 
 const passport_app_t g_game_app = {
     .id = APP_ID_GAME,
-    .name = "你在狗叫什么",
+    .name = "Why Barking",
     .en_name = "WHY BARKING",
-    .desc = "出声上升，安静下降\n用声音越过障碍",
+    .desc = "Make noise to rise, go quiet to fall\nUse your voice to clear the pipes",
     .tag = "DOG",
     .theme_color = 0xEEA438,
     .init = game_init,

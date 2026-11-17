@@ -104,7 +104,7 @@ static int tx_send_parts(uint8_t type, const uint8_t *head, size_t head_len,
         return -1;
     }
     if (xSemaphoreTake(s_tx_mux, pdMS_TO_TICKS(50)) != pdTRUE) {
-        ESP_LOGW(TAG, "TX 互斥等待超时,丢弃该帧");
+        ESP_LOGW(TAG, "TX mutex wait timed out, dropping frame");
         return -1;
     }
     int rc = -1;
@@ -119,7 +119,7 @@ static int tx_send_parts(uint8_t type, const uint8_t *head, size_t head_len,
         if (n == (ssize_t)(len + 1)) {
             rc = 0;
         } else {
-            ESP_LOGW(TAG, "sendto 失败: rc=%d errno=%d", (int)n, errno);
+            ESP_LOGW(TAG, "sendto failed: rc=%d errno=%d", (int)n, errno);
         }
     }
     xSemaphoreGive(s_tx_mux);
@@ -202,7 +202,7 @@ static void rx_task(void *arg)
             if (type == VOICE_UDP_T_BEACON) {
                 s_beacon_cnt++;
                 if (peer_accept_beacon(&src)) {
-                    ESP_LOGI(TAG, "companion beacon 来自 %s → link up",
+                    ESP_LOGI(TAG, "companion beacon from %s → link up",
                              inet_ntoa(src.sin_addr));
                     send_device_hello();
                 }
@@ -218,11 +218,11 @@ static void rx_task(void *arg)
                 if (app_protocol_parse(json, plen, &ev)) {
                     app_protocol_dispatch_event(&ev);   // 审批重要投递,其余零阻塞
                 } else {
-                    ESP_LOGW(TAG, "下行 JSON 拒绝: %.*s",
+                    ESP_LOGW(TAG, "downlink JSON rejected: %.*s",
                              (int)(plen > 80 ? 80 : plen), json);
                 }
             } else {
-                ESP_LOGW(TAG, "未知报文类型 0x%02x(%d B),忽略", type, (int)n);
+                ESP_LOGW(TAG, "unknown packet type 0x%02x (%d B), ignored", type, (int)n);
             }
         }
 
@@ -264,7 +264,7 @@ int udp_audio_init(void)
     if (s_tx_mux == NULL) {
         s_tx_mux = xSemaphoreCreateMutexStatic(&s_tx_mux_storage);
         if (s_tx_mux == NULL) {
-            ESP_LOGE(TAG, "TX 互斥创建失败");
+            ESP_LOGE(TAG, "TX mutex create failed");
             return -1;
         }
     }
@@ -272,7 +272,7 @@ int udp_audio_init(void)
     if (s_tx_buf == NULL) {
         uint8_t *tx = malloc(TX_BUF_MAX);
         if (tx == NULL) {
-            ESP_LOGE(TAG, "TX 缓冲分配失败");
+            ESP_LOGE(TAG, "TX buffer alloc failed");
             return -1;
         }
         xSemaphoreTake(s_tx_mux, portMAX_DELAY);
@@ -281,13 +281,13 @@ int udp_audio_init(void)
     }
     uint8_t *rx = malloc(RX_BUF_MAX + 1);
     if (rx == NULL) {
-        ESP_LOGE(TAG, "RX 缓冲分配失败");
+        ESP_LOGE(TAG, "RX buffer alloc failed");
         return -1;
     }
 
     int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (sock < 0) {
-        ESP_LOGE(TAG, "socket 创建失败: errno=%d", errno);
+        ESP_LOGE(TAG, "socket create failed: errno=%d", errno);
         free(rx);
         return -1;
     }
@@ -297,7 +297,7 @@ int udp_audio_init(void)
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
     addr.sin_port        = htons(VOICE_UDP_PORT);
     if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-        ESP_LOGE(TAG, "bind %d 失败: errno=%d", VOICE_UDP_PORT, errno);
+        ESP_LOGE(TAG, "bind %d failed: errno=%d", VOICE_UDP_PORT, errno);
         close(sock);
         free(rx);
         return -1;
@@ -314,14 +314,14 @@ int udp_audio_init(void)
     s_sock = sock;
     s_active = true;
     if (xTaskCreate(rx_task, "udp_rx", 4096, rx, 4, &s_rx_task) != pdPASS) {
-        ESP_LOGE(TAG, "RX 任务创建失败");
+        ESP_LOGE(TAG, "RX task create failed");
         s_active = false;
         free(rx);
         close(sock);
         s_sock = -1;
         return -1;
     }
-    ESP_LOGI(TAG, "UDP 通道就绪(port %d),等待 companion beacon", VOICE_UDP_PORT);
+    ESP_LOGI(TAG, "UDP channel ready (port %d), waiting for companion beacon", VOICE_UDP_PORT);
     return 0;
 }
 
@@ -336,7 +336,7 @@ int udp_audio_deinit(void)
         vTaskDelay(pdMS_TO_TICKS(10));
     }
     if (s_rx_task != NULL) {
-        ESP_LOGW(TAG, "RX 任务未在 500ms 内退出(继续关闭,任务将自行收敛)");
+        ESP_LOGW(TAG, "RX task did not exit within 500 ms (closing anyway; it will wind down itself)");
     }
     // 3. 关 socket
     if (s_sock >= 0) {
@@ -357,7 +357,7 @@ int udp_audio_deinit(void)
         s_tx_buf = NULL;
         xSemaphoreGive(s_tx_mux);
     }
-    ESP_LOGI(TAG, "UDP 通道已关闭");
+    ESP_LOGI(TAG, "UDP channel closed");
     return 0;
 }
 

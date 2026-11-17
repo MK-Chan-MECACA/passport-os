@@ -63,7 +63,7 @@ static esp_err_t i2s_profile_init(audio_profile_t profile) {
         .intr_priority = 0,
     };
     esp_err_t e = i2s_new_channel(&chan, tx ? &s_tx : NULL, rx ? &s_rx : NULL);
-    if (e != ESP_OK) { ESP_LOGE(TAG, "i2s_new_channel 失败: %s", esp_err_to_name(e)); return e; }
+    if (e != ESP_OK) { ESP_LOGE(TAG, "i2s_new_channel failed: %s", esp_err_to_name(e)); return e; }
 
     // 这里的采样率只用于建通道;实际速率由 esp_codec_dev_open() 按需重配。
     i2s_std_config_t std = {
@@ -93,10 +93,10 @@ static esp_err_t i2s_profile_init(audio_profile_t profile) {
         },
     };
     if (s_tx && (e = i2s_channel_init_std_mode(s_tx, &std)) != ESP_OK) {
-        ESP_LOGE(TAG, "i2s tx 初始化失败: %s", esp_err_to_name(e)); return e;
+        ESP_LOGE(TAG, "i2s tx init failed: %s", esp_err_to_name(e)); return e;
     }
     if (s_rx && (e = i2s_channel_init_std_mode(s_rx, &std)) != ESP_OK) {
-        ESP_LOGE(TAG, "i2s rx 初始化失败: %s", esp_err_to_name(e)); return e;
+        ESP_LOGE(TAG, "i2s rx init failed: %s", esp_err_to_name(e)); return e;
     }
     // esp_codec_dev_open 内部重配前会先 i2s_channel_disable,而 disable 要求通道处于
     // RUNNING;刚 init 的通道是 READY,会打一条 "channel has not been enabled yet" 错误日志。
@@ -127,8 +127,8 @@ static esp_err_t audio_init(audio_profile_t profile) {
         .bus_handle = bsp_i2c_bus(),
     });
     if (!s_ctrl) {
-        ESP_LOGE(TAG, "ES8311 控制口创建失败 —— 用 bsp_i2c_scan() 确认 0x%02X 是否应答;"
-                      "检查 SDA=GPIO%d / SCL=GPIO%d 接线与 codec 供电",
+        ESP_LOGE(TAG, "ES8311 control interface creation failed — use bsp_i2c_scan() to check 0x%02X responds;"
+                      " check SDA=GPIO%d / SCL=GPIO%d wiring and codec power",
                  BSP_I2C_ES8311_ADDR, BSP_I2C_SDA, BSP_I2C_SCL);
         return ESP_FAIL;
     }
@@ -139,7 +139,7 @@ static esp_err_t audio_init(audio_profile_t profile) {
     uint8_t reset_val = 0x1F;
     s_ctrl->write_reg(s_ctrl, 0x00, 1, &reset_val, 1);
     vTaskDelay(pdMS_TO_TICKS(5));
-    ESP_LOGI(TAG, "ES8311 芯片级软件复位完成 (REG00=0x1F)");
+    ESP_LOGI(TAG, "ES8311 chip-level soft reset done (REG00=0x1F)");
 
     if ((e = i2s_profile_init(profile)) != ESP_OK) {
         bsp_audio_deinit();
@@ -149,7 +149,7 @@ static esp_err_t audio_init(audio_profile_t profile) {
     s_data = audio_codec_new_i2s_data(&(audio_codec_i2s_cfg_t){
         .port = BSP_I2S_PORT, .tx_handle = s_tx, .rx_handle = s_rx,
     });
-    if (!s_data) { ESP_LOGE(TAG, "I2S 数据口创建失败"); bsp_audio_deinit(); return ESP_FAIL; }
+    if (!s_data) { ESP_LOGE(TAG, "I2S data interface creation failed"); bsp_audio_deinit(); return ESP_FAIL; }
 
     s_gpio = audio_codec_new_gpio();
     if (!s_gpio) { bsp_audio_deinit(); return ESP_ERR_NO_MEM; }
@@ -171,7 +171,7 @@ static esp_err_t audio_init(audio_profile_t profile) {
         //   ADCL+DACR 参考模式,单声道读到的那一路是 DAC 参考 → 【录音恒为 0】。
         .no_dac_ref  = true,
     });
-    if (!s_codec) { ESP_LOGE(TAG, "es8311_codec_new 失败"); bsp_audio_deinit(); return ESP_FAIL; }
+    if (!s_codec) { ESP_LOGE(TAG, "es8311_codec_new failed"); bsp_audio_deinit(); return ESP_FAIL; }
 
     s_dev = esp_codec_dev_new(&(esp_codec_dev_cfg_t){
         .dev_type = s_tx && s_rx ? ESP_CODEC_DEV_TYPE_IN_OUT :
@@ -179,14 +179,14 @@ static esp_err_t audio_init(audio_profile_t profile) {
         .codec_if = s_codec,
         .data_if  = s_data,
     });
-    if (!s_dev) { ESP_LOGE(TAG, "esp_codec_dev_new 失败"); bsp_audio_deinit(); return ESP_FAIL; }
+    if (!s_dev) { ESP_LOGE(TAG, "esp_codec_dev_new failed"); bsp_audio_deinit(); return ESP_FAIL; }
 
     if (s_tx && bsp_audio_volume_configure(s_dev) != 0) {
-        ESP_LOGE(TAG, "输出音量曲线配置失败");
+        ESP_LOGE(TAG, "output volume curve setup failed");
         bsp_audio_deinit();
         return ESP_FAIL;
     }
-    ESP_LOGI(TAG, "ES8311 就绪(80%% 以下保留低噪声曲线, 最高 +6dB)");
+    ESP_LOGI(TAG, "ES8311 ready (low-noise curve below 80%%, max +6dB)");
     return ESP_OK;
 }
 
@@ -298,7 +298,7 @@ static esp_err_t set_format(uint32_t hz, uint8_t bits, uint8_t ch) {
     if (r != 0) {
         // esp_codec_dev_open marks input/output opened before set_fs/enable.
         // Clear that partial state or the next retry can return a false success.
-        ESP_LOGE(TAG, "esp_codec_dev_open 失败: %d", r);
+        ESP_LOGE(TAG, "esp_codec_dev_open failed: %d", r);
         esp_codec_dev_close(s_dev);
         return ESP_FAIL;
     }
@@ -310,13 +310,13 @@ static esp_err_t set_format(uint32_t hz, uint8_t bits, uint8_t ch) {
     if (s_rx) esp_codec_dev_set_in_gain(s_dev, 30.0f);
     const uint8_t actual_volume = output_volume();
     if (s_tx && apply_volume() != 0) {
-        ESP_LOGE(TAG, "恢复输出音量失败: %u%%", actual_volume);
+        ESP_LOGE(TAG, "restore output volume failed: %u%%", actual_volume);
         esp_codec_dev_close(s_dev);
         return ESP_FAIL;
     }
 
     s_opened = true; s_hz = hz; s_bits = bits; s_ch = ch;
-    ESP_LOGI(TAG, "codec 打开 %luHz/%ubit/%uch, 输出音量 %u%%",
+    ESP_LOGI(TAG, "codec open %luHz/%ubit/%uch, output volume %u%%",
              (unsigned long)hz, bits, ch, actual_volume);
     return ESP_OK;
 }
@@ -351,7 +351,7 @@ void bsp_audio_set_volume(uint8_t percent) {
     s_requested_volume = percent;
     s_alert_volume = false;
     if (s_opened && s_tx && apply_volume() != 0) {
-        ESP_LOGW(TAG, "应用音量设置失败");
+        ESP_LOGW(TAG, "app volume set failed");
     }
     control_unlock();
 }
@@ -364,7 +364,7 @@ void bsp_audio_set_alert_volume(uint8_t percent) {
         s_requested_volume = percent;
         s_alert_volume = true;
         if (s_opened && s_tx && apply_volume() != 0) {
-            ESP_LOGW(TAG, "提醒音量设置失败");
+            ESP_LOGW(TAG, "alert volume set failed");
         }
     }
     control_unlock();
@@ -375,9 +375,9 @@ void bsp_audio_set_master_volume(uint8_t percent) {
     if (percent > 100) percent = 100;
     s_master_volume = percent;
     if (s_opened && s_tx && apply_volume() != 0) {
-        ESP_LOGW(TAG, "系统音量设置失败");
+        ESP_LOGW(TAG, "system volume set failed");
     }
-    ESP_LOGI(TAG, "主音量=%u%%, 应用=%u%%, 输出=%u%%", s_master_volume,
+    ESP_LOGI(TAG, "master=%u%%, app=%u%%, output=%u%%", s_master_volume,
              s_requested_volume, output_volume());
     control_unlock();
 }

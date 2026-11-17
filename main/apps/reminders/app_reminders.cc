@@ -36,18 +36,18 @@ void refresh() {
         Record r{};if(!get(detail_id,&r)){detail_id=0;deleting=false;}
         else {
             char when[32];format_local(r.due,r.repeat.days?r.repeat.utc_offset_minutes*60:time_sync_tz_offset_sec(),when,sizeof(when));
-            ui_pixel_label_set_text(heading,deleting?(r.repeat.days?"删除整个重复提醒？":"删除这条提醒？"):status_text(r.status));
+            ui_pixel_label_set_text(heading,deleting?(r.repeat.days?"Delete whole repeat?":"Delete this reminder?"):status_text(r.status));
             char text[200];std::snprintf(text,sizeof(text),"%s\n%s\n\n%s",when,repeat_name(r.repeat.days),r.title);ui_pixel_label_set_text(body,text);
-            ui_pixel_label_set_text(footer,error_text?error_text:deleting?"确定删除 · 上键取消\n长按确定返回":r.repeat.days?"确定完成本次 · 下键删除\n长按确定返回列表":"确定标记完成 · 下键删除\n长按确定返回列表");return;
+            ui_pixel_label_set_text(footer,error_text?error_text:deleting?"OK: Delete · ↑ Cancel\nHold OK: Back":r.repeat.days?"OK: Done once · ↓ Delete\nHold OK: Back to list":"OK: Mark done · ↓ Delete\nHold OK: Back to list");return;
         }
     }
-    if(!rows){ui_pixel_label_set_text(heading,"内存不足");ui_pixel_label_set_text(body,"请退出后重试");return;}
+    if(!rows){ui_pixel_label_set_text(heading,"Low memory");ui_pixel_label_set_text(body,"Exit and try again");return;}
     if(!count) {
-        ui_pixel_label_set_text(heading,"还没有提醒");
-        ui_pixel_label_set_text(body,"对小智说：\n\n十分钟后提醒我喝水\n\n只保存文字和时间");
-        ui_pixel_label_set_text(footer,"确定打开小智\n长按确定返回");return;
+        ui_pixel_label_set_text(heading,"No reminders yet");
+        ui_pixel_label_set_text(body,"Say to Xiaozhi:\n\n\"Remind me to drink\nwater in ten minutes\"\n\nOnly text and time are saved");
+        ui_pixel_label_set_text(footer,"OK: Open Xiaozhi\nHold OK: Back");return;
     }
-    char title[48];std::snprintf(title,sizeof(title),"提醒 %u / %u",unsigned(selected+1),unsigned(count));
+    char title[48];std::snprintf(title,sizeof(title),"Reminder %u / %u",unsigned(selected+1),unsigned(count));
     ui_pixel_label_set_text(heading,title);ui_pixel_label_set_text(body,"");
     const size_t start=selected/3*3;
     for(size_t i=0;i<3&&start+i<count;++i) {
@@ -59,7 +59,7 @@ void refresh() {
         ui_pixel_bg_color(lines[i],start+i==selected?UI_ACCENT:UI_SURFACE);
         lv_obj_remove_flag(lines[i],LV_OBJ_FLAG_HIDDEN);
     }
-    ui_pixel_label_set_text(footer,clock_ready()?"上下选择 · 确定查看\n长按确定返回":"尚未校时，请联网\n上下选择 · 确定查看");
+    ui_pixel_label_set_text(footer,clock_ready()?"↑↓ Select · OK View\nHold OK: Back":"Clock not set. Go online\n↑↓ Select · OK View");
 }
 void start() {
     if(!bsp_lvgl_lock(1000))return;
@@ -67,7 +67,7 @@ void start() {
     rows=new(std::nothrow) Record[kCapacity];
     screen=lv_obj_create(nullptr);ui_pixel_background(screen);
     auto *top=ui_pixel_top_bar(screen);
-    auto *name=ui_pixel_label(top,"备忘提醒",&buddy_font_16,UI_TEXT);lv_obj_align(name,LV_ALIGN_LEFT_MID,12,0);
+    auto *name=ui_pixel_label(top,"Reminders",&buddy_font_16,UI_TEXT);lv_obj_align(name,LV_ALIGN_LEFT_MID,12,0);
     battery=ui_pixel_battery_create(top,UI_STATUS_BATTERY_X,6,UI_TEXT,&lv_font_montserrat_14);
     heading=label(screen,"",12,42,216,24,UI_ACCENT);
     body=label(screen,"",12,82,216,166,UI_TEXT);
@@ -130,21 +130,21 @@ void show_alert(const Record *r,const char *error) {
         lv_obj_set_style_radius(alert,0,0);lv_obj_set_style_pad_all(alert,0,0);
         lv_obj_set_style_border_width(alert,2,0);lv_obj_set_style_border_color(alert,lv_color_hex(UI_ACCENT),0);
         lv_obj_set_style_bg_color(alert,lv_color_hex(UI_BG),0);lv_obj_set_style_bg_opa(alert,LV_OPA_COVER,0);
-        label(alert,"提醒时间到了",10,12,200,24,UI_ACCENT);
+        label(alert,"Reminder due",10,12,200,24,UI_ACCENT);
         alert_time=label(alert,"",10,42,200,24,UI_TEXT_DIM);
         alert_title=label(alert,"",10,76,200,76,UI_TEXT);
         alert_hint=label(alert,"",10,170,200,48,UI_TEXT_DIM);
     }
     char when[32];format_local(r->due,r->repeat.days?r->repeat.utc_offset_minutes*60:time_sync_tz_offset_sec(),when,sizeof(when));
     ui_pixel_label_set_text(alert_time,when+5);ui_pixel_label_set_text(alert_title,r->title);
-    ui_pixel_label_set_text(alert_hint,error?error:"确定完成 · 下键延后5分\n上键静音");
+    ui_pixel_label_set_text(alert_hint,error?error:"OK: Done · ↓ Snooze 5m\n↑ Mute");
     bsp_lvgl_unlock();
 }
 }
 extern const passport_app_t g_reminders_app;
 const passport_app_t g_reminders_app={
-    .id=APP_ID_REMINDERS,.name="备忘提醒",.en_name="REMINDERS",
-    .desc="用小智记下事项\n到点响铃提醒",.tag="本地提醒",.theme_color=0x8CF5A6,
+    .id=APP_ID_REMINDERS,.name="Reminders",.en_name="REMINDERS",
+    .desc="Note things with Xiaozhi\nRings when it is due",.tag="Local alerts",.theme_color=0x8CF5A6,
     .init=nullptr,.start=reminders::start,.stop=reminders::stop,.on_key=reminders::key,
     .prepare_stop=nullptr,.on_back=reminders::back
 };

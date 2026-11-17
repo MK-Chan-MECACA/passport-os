@@ -4,12 +4,12 @@
 // Shared presets: one catalog failure must not leave the radio with one station.
 inline constexpr RadioStation kRadioPresets[] = {
 #ifdef PASSPORT_RADIO_HLS_TEST
-    {"经济之声", "HLS测试 · TS/AAC", "http://ngcdn002.cnr.cn/live/jjzs/index.m3u8", 0},
-    {"华语金曲", "HLS测试 · AAC分片", "http://ls.qingting.fm/live/3412131.m3u8?bitrate=64", 0},
-    {"凤凰资讯", "HLS测试 · TS/AAC", "http://playtv-live.ifeng.com/live/06OLEEWQKN4_audio.m3u8", 0},
-    {"SomaFM", "美国 · MP3测试", "https://ice6.somafm.com/groovesalad-128-mp3", 0},
-    {"MANGORADIO", "德国 · MP3测试", "https://mangoradio.stream.laut.fm/mangoradio", 0},
-    {"中国之声", "MP3回归测试", "http://lhttp.qingting.fm/live/15318317/64k.mp3", 0},
+    {"Voice of Economy", "HLS test · TS/AAC", "http://ngcdn002.cnr.cn/live/jjzs/index.m3u8", 0},
+    {"Chinese Hits", "HLS test · AAC segments", "http://ls.qingting.fm/live/3412131.m3u8?bitrate=64", 0},
+    {"Phoenix News", "HLS test · TS/AAC", "http://playtv-live.ifeng.com/live/06OLEEWQKN4_audio.m3u8", 0},
+    {"SomaFM", "US · MP3 test", "https://ice6.somafm.com/groovesalad-128-mp3", 0},
+    {"MANGORADIO", "Germany · MP3 test", "https://mangoradio.stream.laut.fm/mangoradio", 0},
+    {"Voice of China", "MP3 regression test", "http://lhttp.qingting.fm/live/15318317/64k.mp3", 0},
 #else
     // MP3 (96 kbps) only: AAC needs ~23 KiB of decoder heap, and presets are the
     // fallback when everything else failed. Frequencies differ by region, so 0.
