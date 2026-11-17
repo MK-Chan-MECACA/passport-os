@@ -8,8 +8,8 @@ Find the module from `AGENTS.md` and [CURRENT.md](CURRENT.md), change the source
 
 ## Environment
 
-- The working copy must live at a path **without spaces**. The `esp_audio_codec` component passes an unquoted `-L` path, so the link fails otherwise. A symlink does not help because CMake resolves it. On this machine the repo is `~/passport-os`; `~/Claude Code/Passport OS MY` is only a symlink to it, so build from `~/passport-os`.
-- ESP-IDF 5.5.3 (CI uses 5.5.3). `build.sh` loads it from `/opt/esp-idf` unless `IDF_DIR` is set.
+- Paths with spaces are fine. `esp_audio_codec` adds an unquoted `-L` flag that used to break the link there; the root `CMakeLists.txt` removes it (the libraries are linked by full path, so the image is unchanged). On this machine the repo is `~/Claude Code/Passport OS MY`; `~/passport-os` is a symlink to it.
+- ESP-IDF 5.5.3 (CI uses 5.5.3). `build.sh` loads it from `IDF_DIR`, else `IDF_PATH`, else `/opt/esp-idf`.
 - Host tests assume Linux GCC. On macOS run them in a container (`python:3.12-bookworm` plus `nodejs`, `cmake`, `ninja-build`) with ESP-IDF mounted at `/opt/esp-idf`:
 
 ```bash
@@ -42,7 +42,7 @@ python3 tools/verify_firmware.py build
 
 1. Set `PROJECT_VER` in `CMakeLists.txt` and write `docs/release-<version>.md`.
 2. Build and verify the public configuration, then optionally run `tools/package_firmware.py` for a local candidate with a source snapshot and manifest.
-3. Push a tag such as `v0.2.0-my.1`. The `Build firmware` workflow attaches `Passport-OS-MY-<tag>-full.bin`, `Passport-OS-MY-<tag>-app.bin` and `SHA256.txt` to a GitHub Release on `MK-Chan-MECACA/passport-os`.
+3. Push a tag such as `v0.2.0-my.1`. The `Build firmware` workflow attaches `Passport-OS-MY-<tag>-full.bin`, `Passport-OS-MY-<tag>-app.bin` and `SHA256.txt` to a GitHub Release on `MK-Chan-MECACA/passport-os-my`.
 
 Creating a tag or release publishes firmware; do it only when the user asks.
 

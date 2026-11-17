@@ -16,7 +16,7 @@ this edition. Anything not listed here stays as upstream.
 | 5 | AI Hot → Tech News | Replace `aihot.news` with the HN Algolia API (one HTTPS request per fetch). `Hot` = `search?tags=front_page`; `Latest` = `search_by_date?query=AI&tags=story&numericFilters=points>50`; `Daily` dropped. Titles + points only. |
 | 6 | Xiaozhi | Keep the official xiaozhi.me backend. Translate MCP tool names/descriptions, voice intents and on-screen activation text to English. README tells users to set the agent language and voice to English on xiaozhi.me. Keep the `ota_url` override. Name stays "Xiaozhi". |
 | 7 | Setup and network | Translate `phone_setup.html`, `wifi_configuration.html`, `web/phone-location.html`. Fallback connectivity probe `qualcomm.cn` → `cp.cloudflare.com/generate_204`. Keep IP-geo services and the `Passport-WiFi-xxxx` SSID. |
-| 8 | Branding | Name "Passport OS MY", version `0.2.0-my.1`. Releases via GitHub Releases on `MK-Chan-MECACA/passport-os` (`-full.bin` + `-app.bin`). Keep the FoloToy MIT notice; add a Malaysia-edition credit line. |
+| 8 | Branding | Name "Passport OS MY", version `0.2.0-my.1`. Releases via GitHub Releases on `MK-Chan-MECACA/passport-os-my` (`-full.bin` + `-app.bin`). Keep the FoloToy MIT notice; add a Malaysia-edition credit line. |
 | 9 | Docs | Translate living docs: `README.md` (English becomes primary; merge `docs/README.en.md`), `AGENTS.md`, `docs/CURRENT.md`, `docs/MAINTENANCE.md`, `docs/xiaozhi-app.md`, install guide → `docs/install.md`. Move historical reviews, plans, audit, release notes and `voice-udp-channel.md` to `docs/archive/zh/` unchanged. Delete `README.zh_CN.md`. |
 | 10 | Code comments | Translate all hand-written comments in a separate final commit with no code changes. Firmware build output must be identical before and after. Generated font files excluded. |
 
@@ -39,6 +39,6 @@ One commit per step on branch `my-edition`. Run the relevant host tests after ea
 
 - **AAC with no PSRAM.** The decoder needs about 23 KiB; upstream logs show out-of-memory retries. This needs a real-device test with Wi-Fi + TLS active. A host test is not acceptance.
 - **Xiaozhi latency.** The backend is in China; expect higher voice round-trip time from Malaysia.
-- **Build path.** The project must live at a path without spaces: the `esp_audio_codec` component passes an unquoted `-L` path and the link fails. A symlink is not enough because CMake resolves it. The working copy is `~/passport-os`; `~/Claude Code/Passport OS MY` is a symlink to it for convenience only.
+- **Build path.** Resolved 2026-11-17: `esp_audio_codec` adds an unquoted `-L` flag that broke the link under paths with spaces; the root `CMakeLists.txt` drops it. A reproducible build from `~/Claude Code/Passport OS MY` is byte-identical to one from a path without spaces.
 - **Host tests.** Upstream host tests assume Linux GCC. On macOS run them in a container with ESP-IDF mounted at `/opt/esp-idf` (python:3.12-bookworm plus nodejs, cmake, ninja-build).
 - Serial-simulated buttons are not physical-button or real-microphone acceptance.

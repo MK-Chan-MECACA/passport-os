@@ -12,7 +12,7 @@ Devices that look similar but differ in flash size, screen, pins, audio chip or 
 
 ## Download
 
-Download all files from the same [GitHub Release](https://github.com/MK-Chan-MECACA/passport-os/releases):
+Download all files from the same [GitHub Release](https://github.com/MK-Chan-MECACA/passport-os-my/releases):
 
 - `Passport-OS-MY-vX.Y.Z-full.bin`: first installation or a complete reset, written at `0x0`.
 - `Passport-OS-MY-vX.Y.Z-app.bin`: normal upgrade of a device that already runs Passport OS with the same partition table, written at `0x10000`.
@@ -87,11 +87,11 @@ On first start the device opens the phone setup screen and a password-free hotsp
 
 ## Build from source
 
-You need ESP-IDF 5.5.3, Python 3, Git, and Linux, WSL or another environment that runs ESP-IDF. Clone to a path without spaces:
+You need ESP-IDF 5.5.3, Python 3, Git, and Linux, WSL or another environment that runs ESP-IDF (macOS works too):
 
 ```bash
-git clone -b my-edition https://github.com/MK-Chan-MECACA/passport-os.git
-cd passport-os
+git clone https://github.com/MK-Chan-MECACA/passport-os-my.git
+cd passport-os-my
 bash build.sh release
 ```
 

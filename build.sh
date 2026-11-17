@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build passport-os in WSL.
+# Build passport-os (Linux, WSL or macOS).
 #
 # Usage:
 #   bash build.sh          build the local official Jollybot edition
@@ -12,23 +12,23 @@
 set -u
 
 PROJECT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-IDF_DIR="${IDF_DIR:-/opt/esp-idf}"
+IDF_DIR="${IDF_DIR:-${IDF_PATH:-/opt/esp-idf}}"
 
-cd "$PROJECT_DIR" || { echo "找不到项目目录 $PROJECT_DIR"; exit 1; }
+cd "$PROJECT_DIR" || { echo "Project directory not found: $PROJECT_DIR"; exit 1; }
 
 if [ ! -f "$IDF_DIR/export.sh" ]; then
-    echo "找不到 ESP-IDF: $IDF_DIR/export.sh"
-    echo "如有其他位置,用 IDF_DIR=/path/to/esp-idf bash build.sh 指定"
+    echo "ESP-IDF not found: $IDF_DIR/export.sh"
+    echo "If it is elsewhere, run: IDF_DIR=/path/to/esp-idf bash build.sh"
     exit 1
 fi
 
-echo "==> 载入 ESP-IDF 环境 ($IDF_DIR)"
+echo "==> Loading ESP-IDF environment ($IDF_DIR)"
 set +e
 . "$IDF_DIR/export.sh" >/dev/null 2>&1
 rc=$?
 set -e
 if [ $rc -ne 0 ]; then
-    echo "export.sh 执行失败,请检查 IDF 安装"
+    echo "export.sh failed; check the ESP-IDF installation"
     exit 1
 fi
 
@@ -55,11 +55,11 @@ if [ "${1:-}" = "diag" ]; then
 fi
 
 if [ "${1:-}" = "clean" ]; then
-    echo "==> 清理构建目录"
+    echo "==> Cleaning build directory"
     rm -rf build
 fi
 
-echo "==> 开始编译（本地官方 Jollybot 形象版）"
+echo "==> Building (local official Jollybot edition)"
 # Never reuse the ignored root sdkconfig: it may preserve obsolete options even
 # after defaults change. Keep the expanded generated config inside the build
 # directory and seed it from the tracked memory budget on every invocation.

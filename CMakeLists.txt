@@ -12,6 +12,18 @@ include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 idf_build_set_property(COMPILE_DEFINITIONS "LV_ASSERT_HANDLER=while((__builtin_trap(),1)){}" APPEND)
 project(passport-os)
 
+# esp_audio_codec adds an unquoted "-L <component>/lib/<target>" link flag, which
+# breaks the link when the project path contains spaces. It is redundant: both
+# prebuilt libraries are already linked by full path, so drop it.
+idf_component_get_property(audio_codec_lib espressif__esp_audio_codec COMPONENT_LIB)
+foreach(link_property LINK_LIBRARIES INTERFACE_LINK_LIBRARIES)
+    get_target_property(link_items ${audio_codec_lib} ${link_property})
+    if(link_items)
+        list(FILTER link_items EXCLUDE REGEX "-L ")
+        set_target_properties(${audio_codec_lib} PROPERTIES ${link_property} "${link_items}")
+    endif()
+endforeach()
+
 # These are memory-safety requirements, not optional tuning. A generated root
 # sdkconfig can silently retain old values after sdkconfig.defaults changes;
 # that exact drift removed about 19 KB from the first internal-heap region and

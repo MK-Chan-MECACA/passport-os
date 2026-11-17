@@ -21,6 +21,18 @@ jobs:
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
+      # Host tests compile ESP-IDF's cJSON and mbedtls sources from /opt/esp-idf.
+      # Fetch only those two submodules of the release the firmware uses.
+      - name: Fetch ESP-IDF sources used by host tests
+        run: |
+          sudo mkdir -p /opt/esp-idf
+          sudo chown "$USER" /opt/esp-idf
+          git -c advice.detachedHead=false clone --quiet --depth 1 --branch v5.5.3 --filter=blob:none --sparse \
+            https://github.com/espressif/esp-idf.git /opt/esp-idf
+          git -C /opt/esp-idf sparse-checkout set components/json components/mbedtls
+          git -C /opt/esp-idf submodule update --quiet --init --depth 1 \
+            components/json/cJSON components/mbedtls/mbedtls
+
       - name: Run hardware-independent regression tests
         run: bash tools/test-host.sh
 

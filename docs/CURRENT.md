@@ -1,8 +1,8 @@
 # Current status
 
-Passport OS MY 0.2.0-my.1, branch `my-edition` on `https://github.com/MK-Chan-MECACA/passport-os`. Forked from upstream 0.2.0-rc.59 (`5101891`). The edition scope and per-step results are in [MY-EDITION.md](MY-EDITION.md). The upstream status log this file replaces is kept in Chinese at [archive/zh/CURRENT-upstream-rc59.md](archive/zh/CURRENT-upstream-rc59.md).
+Passport OS MY 0.2.0-my.1, branch `main` (mirrored on `my-edition`) of `https://github.com/MK-Chan-MECACA/passport-os-my`, a standalone copy of the `MK-Chan-MECACA/passport-os` fork. Forked from upstream 0.2.0-rc.59 (`5101891`). The edition scope and per-step results are in [MY-EDITION.md](MY-EDITION.md). The upstream status log this file replaces is kept in Chinese at [archive/zh/CURRENT-upstream-rc59.md](archive/zh/CURRENT-upstream-rc59.md).
 
-Git: the working copy is `~/passport-os` (it must be a path without spaces, see [MAINTENANCE.md](MAINTENANCE.md)). `~/.cache/passport-baseline` is a detached worktree of the upstream baseline `5101891`, used to compare build output. Nothing has been pushed or released from this edition yet.
+Git: the working copy is `~/Claude Code/Passport OS MY` (`~/passport-os` is a symlink to it); remote `my` is the new repo, `origin` the old fork. `~/.cache/passport-baseline` is a detached worktree of the upstream baseline `5101891`, used to compare build output. Pushed to `main` on both repos; no release tag yet.
 
 ## Product and source map
 

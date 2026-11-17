@@ -65,7 +65,7 @@ The device also has themes, volume, brightness, auto screen-off, wake on short p
 
 ## Install
 
-Prebuilt images are on the [GitHub Releases page](https://github.com/MK-Chan-MECACA/passport-os/releases). You do not need AI tools or a firmware development environment to install them.
+Prebuilt images are on the [GitHub Releases page](https://github.com/MK-Chan-MECACA/passport-os-my/releases). You do not need AI tools or a firmware development environment to install them.
 
 Use only the matching FoloToy AI Passport hardware revision with ESP32-C3 and 8 MB Flash. Similar-looking boards may have incompatible displays, audio chips, buttons or partition layouts.
 
@@ -110,14 +110,12 @@ Xiaozhi and Muse need your own service setup. For Muse through a proxy, enter th
 Install Git, ESP-IDF 5.5.3 and its toolchain. On Windows you can build in WSL and flash through a Windows serial port.
 
 ```bash
-git clone -b my-edition https://github.com/MK-Chan-MECACA/passport-os.git
-cd passport-os
+git clone https://github.com/MK-Chan-MECACA/passport-os-my.git
+cd passport-os-my
 bash build.sh release
 ```
 
-Clone to a path **without spaces**: the `esp_audio_codec` component passes an unquoted linker path and the link fails otherwise. A symlink does not help because CMake resolves it.
-
-The script loads ESP-IDF from `/opt/esp-idf` by default. For another installation path:
+The script loads ESP-IDF from `$IDF_PATH`, or `/opt/esp-idf` if that is not set. For another installation path:
 
 ```bash
 IDF_DIR="$HOME/esp/esp-idf" bash build.sh release
