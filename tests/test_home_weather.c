@@ -93,7 +93,7 @@ int main(int argc,char **argv) {
         assert(!home_profile_coordinates_valid(*p,"113.6"));
     assert(!home_profile_coordinates_valid("22",""));
     home_profile_init();home_weather_init();home_weather_t weather;assert(!home_weather_get(&weather));
-    strcpy(zhuhai.city,"珠海");strcpy(zhuhai.region,"广东");strcpy(zhuhai.radio_city,"珠海");strcpy(zhuhai.country_code,"CN");
+    strcpy(zhuhai.city,"珠海");strcpy(zhuhai.region,"广东");strcpy(zhuhai.radio_city,"珠海");strcpy(zhuhai.country_code,"MY");
     strcpy(zhuhai.lat,"22.2707");strcpy(zhuhai.lon,"113.5767");
     assert(home_profile_set_text(&zhuhai)==ESP_OK);
     assert(home_weather_refresh(zhuhai.lat,zhuhai.lon)==ESP_OK);

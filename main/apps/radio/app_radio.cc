@@ -107,7 +107,7 @@ void catalog_worker(void *arg) {
         // The tool limits the name to this field; preferred is zero-filled.
         std::memcpy(preferred.city, voice->name,
                     std::min(std::strlen(voice->name), sizeof(preferred.city) - 1));
-        std::snprintf(preferred.country_code, sizeof(preferred.country_code), "CN");
+        std::snprintf(preferred.country_code, sizeof(preferred.country_code), "MY");
     } else {
         home_profile_t profile;
         home_profile_get(&profile);

@@ -80,7 +80,7 @@ static RadioLocation asked;
 static std::string voice_filter;
 static int chosen=-1;
 static size_t radio_catalog_discover_location(RadioLocation preferred,RadioStation*out,size_t,RadioLocation*,bool(*)(),const char*filter){
- queries++;asked=preferred;voice_filter=filter?filter:"<browse>";out[0]={"北京新闻广播","","",0};out[1]={"北京交通广播","","",0};return 2;}
+ queries++;asked=preferred;voice_filter=filter?filter:"<browse>";out[0]={"KL News FM","","",0};out[1]={"KL Traffic FM","","",0};return 2;}
 void radio_player_set_station(size_t index){chosen=static_cast<int>(index);}
 static void radio_ui_set_location(const char*){}
 bool radio_player_replace_stations_resuming(const RadioStation*,size_t){installs++;return true;}
@@ -112,11 +112,11 @@ int main(){
  fail_catalog_alloc=false;s_catalog_running=true;catalog_worker(nullptr);
  assert(queries==1 && installs==1 && playing && !s_catalog_running && s_catalog_installed && chosen==-1);
  // A voice request replaces the profile city once and picks the named station.
- auto *voice=new voice_intent::Request{};std::strcpy(voice->name,"北京");std::strcpy(voice->detail,"交通");
+ auto *voice=new voice_intent::Request{};std::strcpy(voice->name,"Kuala Lumpur");std::strcpy(voice->detail,"Traffic");
  s_voice=voice;s_catalog_running=true;catalog_worker(nullptr);
- assert(!strcmp(asked.city,"北京") && !strcmp(asked.country_code,"CN") && chosen==1 && !s_voice && voice_filter=="交通");
- voice=new voice_intent::Request{};std::strcpy(voice->name,"广东");s_voice=voice;s_catalog_running=true;
- catalog_worker(nullptr);assert(!strcmp(asked.city,"广东") && chosen==0 && !s_voice);
+ assert(!strcmp(asked.city,"Kuala Lumpur") && !strcmp(asked.country_code,"MY") && chosen==1 && !s_voice && voice_filter=="Traffic");
+ voice=new voice_intent::Request{};std::strcpy(voice->name,"Selangor");s_voice=voice;s_catalog_running=true;
+ catalog_worker(nullptr);assert(!strcmp(asked.city,"Selangor") && chosen==0 && !s_voice);
  chosen=-1;s_catalog_running=true;catalog_worker(nullptr);assert(!asked.city[0] && chosen==-1);
  puts("Radio shared stations: ownership, init failure, stop timeout, reuse; catalog timeout/cancel/OOM admission, once per session, voice city/station: PASS");
 }

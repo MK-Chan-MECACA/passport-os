@@ -13,7 +13,7 @@
 
 struct TestHttp { std::string url, body; std::size_t offset = 0; bool fail = false; };
 std::vector<std::string> queries;
-std::string city_fixture, province_fixture, state_fixture, ip_city;
+std::string city_fixture, province_fixture, state_fixture, ip_city, ip_region;
 bool fail_dns = false, fail_first = false, fail_all = false, stopped = false, stop_on_read = false, fake_dns = false;
 unsigned ip_requests = 0, live_http = 0;
 uint32_t esp_random() { return 0; }
@@ -35,10 +35,10 @@ extern "C" esp_http_client_handle_t esp_http_client_init(const esp_http_client_c
     client->fail = fail_all || (fail_first && client->url.find("de1.") != std::string::npos);
     if (client->url.find("ip-api") != std::string::npos || client->url.find("ipwho") != std::string::npos) {
         ++ip_requests;
-        client->body = "{\"status\":\"success\",\"countryCode\":\"CN\",\"regionName\":\"Guangdong\",\"city\":\""+ip_city+"\"}";
+        client->body = "{\"status\":\"success\",\"countryCode\":\"MY\",\"regionName\":\""+ip_region+"\",\"city\":\""+ip_city+"\"}";
     } else {
         queries.push_back(client->url);
-        if (client->url.find("name=广东") != std::string::npos) client->body = province_fixture;
+        if (client->url.find("name=Johor&") != std::string::npos) client->body = province_fixture;
         else if (client->url.find("state=") != std::string::npos) client->body = state_fixture;
         else client->body = city_fixture;
     }
@@ -70,35 +70,36 @@ std::string station(const std::string &name,const std::string &url,const std::st
 }
 void reset() {
     assert(live_http==0);queries.clear();ip_requests=0;fail_dns=fail_first=fail_all=stopped=stop_on_read=fake_dns=false;
-    ip_city="Zhuhai";city_fixture="[]";province_fixture="[]";state_fixture="[]";
+    ip_city="Johor Bahru";ip_region="Johor";city_fixture="[]";province_fixture="[]";state_fixture="[]";
 }
 void unique(const RadioStation *s,std::size_t n) {
     for(std::size_t i=0;i<n;++i)for(std::size_t j=i+1;j<n;++j)assert(std::strcmp(s[i].url,s[j].url));
 }
 int main(int argc,char **argv) {
     RadioStation stations[8] = {};RadioLocation preferred={},location={};
-    std::strcpy(preferred.city,"珠海");std::strcpy(preferred.region,"广东");
+    std::strcpy(preferred.city,"Johor Bahru");std::strcpy(preferred.region,"Johor");
     reset();
-    city_fixture="["+station("珠海交通875","http://local/stream",",\"hls\":false,\"lastcheckok\":true")+","+
-                      station("珠海先锋951","http://local/2.mp3")+"]";
+    city_fixture="["+station("Johor FM 101.9","http://local/stream",",\"hls\":false,\"lastcheckok\":true")+","+
+                      station("Best FM JB","http://local/2.mp3")+"]";
     province_fixture="[";
-    for(int i=0;i<8;++i)province_fixture+=(i?",":"")+station("广东省内"+std::to_string(i),"http://province/"+std::to_string(i));
+    for(int i=0;i<8;++i)province_fixture+=(i?",":"")+station("Johor state "+std::to_string(i),"http://province/"+std::to_string(i));
     province_fixture+="]";
     auto n=radio_catalog_discover_location(preferred,stations,8,&location,cancel);
-    assert(n==8&&ip_requests==0&&queries.size()==2);
-    assert(!std::strcmp(stations[0].name,"珠海交通875")&&stations[0].frequency_decihz==875);
+    assert(n==8&&ip_requests==0&&queries.size()==2&&!std::strcmp(location.country_code,"MY"));
+    assert(queries[0].find("countrycode=MY&name=Johor Bahru&")!=std::string::npos);
+    assert(!std::strcmp(stations[0].name,"Johor FM 101.9")&&stations[0].frequency_decihz==1019);
     assert(std::strstr(stations[0].description,"当地")&&std::strstr(stations[2].description,"省内"));unique(stations,n);
 
     // Voice handover stops after finding its target; browsing still tops up.
-    // A missing named station must keep looking in the province directory.
+    // A missing named station must keep looking in the state directory.
     queries.clear();
     n=radio_catalog_discover_location(preferred,stations,8,&location,cancel,"");
-    assert(n==8&&queries.size()==1&&!std::strcmp(stations[0].name,"珠海交通875"));
+    assert(n==8&&queries.size()==1&&!std::strcmp(stations[0].name,"Johor FM 101.9"));
     queries.clear();
-    n=radio_catalog_discover_location(preferred,stations,8,&location,cancel,"交通");
+    n=radio_catalog_discover_location(preferred,stations,8,&location,cancel,"Best");
     assert(n==8&&queries.size()==1);
     queries.clear();
-    n=radio_catalog_discover_location(preferred,stations,8,&location,cancel,"广东省内");
+    n=radio_catalog_discover_location(preferred,stations,8,&location,cancel,"Johor state");
     assert(n==8&&queries.size()==2);
 
     reset();
@@ -107,10 +108,19 @@ int main(int argc,char **argv) {
     n=radio_catalog_discover_location(preferred,stations,8,&location,cancel);
     assert(n==8&&queries.size()==3&&std::strstr(stations[2].description,"推荐"));unique(stations,n);
 
-    reset();ip_city="Jiangmen";city_fixture="["+station("江门电台","http://jm/live")+"]";
+    // IP providers use older or royal state spellings; both map to catalog states.
+    reset();ip_city="Alor Gajah";ip_region="Malacca";city_fixture="["+station("Melaka FM","http://mk/live")+"]";
     n=radio_catalog_discover(stations,8,&location,cancel);
-    assert(n==7&&ip_requests==1&&!std::strcmp(location.city,"江门"));
-    assert(queries[0].find("name=江门")!=std::string::npos);
+    assert(n==7&&ip_requests==1&&!std::strcmp(location.city,"Alor Gajah")&&!std::strcmp(location.region,"Melaka"));
+    assert(queries[0].find("name=Alor Gajah&")!=std::string::npos&&queries[2].find("state=Melaka&")!=std::string::npos);
+    reset();ip_city="Unknown Town";ip_region="Selangor Darul Ehsan";
+    radio_catalog_discover(stations,8,&location,cancel);
+    assert(!std::strcmp(location.region,"Selangor")&&!std::strcmp(location.country_code,"MY"));
+    // A failed IP lookup falls back to Kuala Lumpur.
+    reset();fail_all=true;radio_catalog_discover(stations,8,&location,cancel);
+    assert(!std::strcmp(location.city,"Kuala Lumpur")&&!std::strcmp(location.region,"Kuala Lumpur"));
+    assert(radio_catalog_known_place("kuala lumpur")&&radio_catalog_known_place("Penang")&&
+           radio_catalog_known_place("Kota Kinabalu")&&!radio_catalog_known_place("Mars"));
 
     reset();fail_dns=true;fail_first=true;city_fixture="["+station("恢复","http://ok/live")+"]";
     n=radio_catalog_discover_location(preferred,stations,8,&location,cancel);
@@ -148,9 +158,8 @@ int main(int argc,char **argv) {
         city_fixture.assign(std::istreambuf_iterator<char>(local),{});
         province_fixture.assign(std::istreambuf_iterator<char>(province),{});
         n=radio_catalog_discover_location(preferred,stations,8,&location,cancel);
-        assert(n==8&&std::strstr(stations[0].name,"珠海")&&std::strstr(stations[1].name,"珠海"));
-        unique(stations,n);
-        std::puts("Live directory fixtures through production parser: 2 Zhuhai + 6 province stations");
+        assert(n==8);unique(stations,n);
+        std::puts("Live directory fixtures through production parser: Johor Bahru + Johor state stations");
         for(std::size_t i=0;i<n;++i)std::printf("%zu: %s | %s\n",i+1,stations[i].name,stations[i].description);
     }
     std::puts("Radio: shared city, IP translation, sparse top-up/dedup, mirror failover, cancellation, MP3 metadata and bounded streamed JSON: PASS");

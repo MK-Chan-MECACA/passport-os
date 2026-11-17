@@ -27,7 +27,7 @@ Unchanged on purpose: timezone default (UTC+8 = MYT) and weather (Open-Meteo, gl
 One commit per step on branch `my-edition`. Run the relevant host tests after each step.
 
 1. Remove NetEase. (done)
-2. Malaysian city catalog (GeoNames generator, `cities.json.gz`, radio state map).
+2. Malaysian city catalog (GeoNames generator, `cities.json.gz`, radio state map). (done: 530 places, 16 states/FTs, 10 KB gzip. Profile accepts only `MY`. City names are GeoNames English, so the city capital is listed as "Malacca"; "Melaka" resolves as the state. Directory query flow and on-screen/phone labels are left for steps 3, 5 and 6.)
 3. Radio: `countrycode=MY`, MP3 + AAC/AAC+, Malaysian presets.
 4. Replace the `aihot.news` client with Tech News on HN Algolia (in place, reusing `main/json_scanner`).
 5. English UI strings and Latin-only fonts.

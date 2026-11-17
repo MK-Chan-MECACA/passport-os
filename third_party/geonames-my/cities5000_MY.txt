@@ -1,0 +1,530 @@
+1222387	Padang Mat Sirat	Padang Mat Sirat	Kampung Padang Masirat,Kampung Padang Mat Sirat,Kampung-Padang-Masirat,Padang Masirat,Padang Mat Sirat,Кампунг-Паданг-Масират	6.35423	99.73404	P	PPL	MY		02	0207			10000		8	Asia/Kuala_Lumpur	2021-04-17
+1222391	Ayer Hangat	Ayer Hangat	Air Hangat,Ayer Hangat,Ehjr-Khangat,Kampong Ayer Hangat,Эйр-Хангат	6.42062	99.82199	P	PPL	MY		02	0207			10000		12	Asia/Kuala_Lumpur	2021-04-17
+1222396	Kuah	Kuah	Kuah,Kuakh,Kuan,Kwah,LGK,Langkawi,Куах	6.32649	99.8432	P	PPLA2	MY		02	0207			30212		11	Asia/Kuala_Lumpur	2021-04-20
+1732602	Jerantut	Jerantut	Jerantut	3.936	102.3626	P	PPL	MY		06	0804			33606		73	Asia/Kuala_Lumpur	2021-04-17
+1732637	Maran	Maran	Kampong Maran,Maran,Маран	3.586	102.773	P	PPL	MY		06	0807			111056		29	Asia/Kuala_Lumpur	2026-09-14
+1732663	Raub	Raub	Raub,lao wu,劳勿	3.7899	101.857	P	PPL	MY		06	0809			40024		149	Asia/Kuala_Lumpur	2024-10-12
+1732664	Teras	Teras	Teras,Tras,dou lai,都赖	3.742	101.8112	P	PPL	MY		06	0809			6266		205	Asia/Kuala_Lumpur	2024-10-12
+1732667	Bentung	Bentung	Benton,Bentong,Bentung	3.5316	101.9038	P	PPL	MY		06	0801			40373		95	Asia/Kuala_Lumpur	2024-04-21
+1732672	Tanjong Malim	Tanjong Malim	Tanjong Malim,Tanjung Malim	3.681	101.5198	P	PPL	MY		07	0901			66103		44	Asia/Kuala_Lumpur	2024-04-20
+1732676	Kuala Kubu Baharu	Kuala Kubu Baharu	Kuala Kubu,Kuala Kubu Baharu,Kuala Kubu Bahru,Kuala Kubu Bakharu,Kuala Kubu Baru,Kuala Kubu Bharu,kola kupu paru,xin gu mao,Куала Кубу Бахару,கோலா குபு பாரு,クアラ・クブ・バル,新古毛	3.5638	101.6581	P	PPL	MY		12	1703			194387		76	Asia/Kuala_Lumpur	2026-09-14
+1732680	Parit Sulung	Parit Sulung	Parit Sulong,Parit Sulung	1.976	102.8835	P	PPL	MY		01	0101			82399		8	Asia/Kuala_Lumpur	2024-10-24
+1732681	Parit Jawa	Parit Jawa	Jawa,Parit Jawa	1.9577	102.6401	P	PPL	MY		01	0108			10000		7	Asia/Kuala_Lumpur	2024-10-24
+1732682	Tongkang Pechah	Tongkang Pechah	Kampong Tongkang Pechah,Tongkang Pechah,zhong jiang,中江	1.9203	102.9561	P	PPL	MY		01	0101			13000		9	Asia/Kuala_Lumpur	2024-10-24
+1732687	Batu Pahat	Batu Pahat	BP,Bandar Penggaram,Batu Pahat,Batu-Pakhat (gorod),Бату-Пахат (город)	1.8548	102.9325	P	PPL	MY		01	0101			156236		7	Asia/Kuala_Lumpur	2026-09-14
+1732696	Ayer Hitam	Ayer Hitam	Air Hitam,Ayer Hitam,Bandar Seramik	1.915	103.1808	P	PPL	MY		01	0101			6745		15	Asia/Kuala_Lumpur	2024-10-24
+1732698	Parit Raja	Parit Raja	Parit Raja	1.8681	103.1124	P	PPL	MY		01	0101			17441		9	Asia/Kuala_Lumpur	2021-04-17
+1732699	Layang Layang	Layang Layang	Layang Layang	1.8154	103.4784	P	PPL	MY		01	0103			13374		31	Asia/Kuala_Lumpur	2024-04-22
+1732700	Simpang Renggam	Simpang Renggam	Simpang Rengam,Simpang Renggam	1.825	103.3107	P	PPL	MY		01	0103			59033		30	Asia/Kuala_Lumpur	2024-04-20
+1732704	Rengit	Rengit	Rengit	1.6807	103.1478	P	PPL	MY		01	0101			12000		6	Asia/Kuala_Lumpur	2024-04-23
+1732706	Pekan Nenas	Pekan Nenas	Pekan Nanas,Pekan Nenas	1.51	103.5141	P	PPL	MY		01	0109			23292		20	Asia/Kuala_Lumpur	2021-04-17
+1732710	Pontian Besar	Pontian Besar	Pontian,Pontian Besar,ben zhen,笨珍	1.5059	103.3816	P	PPL	MY		01	0109			40613		9	Asia/Kuala_Lumpur	2024-10-12
+1732721	Kampung Pasir Gudang Baru	Kampung Pasir Gudang Baru	Kampung Pasir Gudang,Kampung Pasir Gudang Baru,Кампунг Пасир Гуданг Бару	1.4726	103.878	P	PPL	MY		01	0102			145639		10	Asia/Kuala_Lumpur	2026-09-14
+1732722	Pasir Gudang	Pasir Gudang	Baxi Gudang,Pasir Gudang,Pasir-Gudang,ZLW,ba xi gu dang,pasyr gwdang,Пасир-Гуданг,پاسیر گودانگ,巴西古当	1.462	103.9053	P	PPL	MY		01	0102			534659		29	Asia/Kuala_Lumpur	2026-09-14
+1732724	Kampung Larkin Lama	Kampung Larkin Lama	Kampung Larkin Lama,Larkin,Кампунг Ларкин Лама	1.5024	103.744	P	PPL	MY		01	0102			500000		34	Asia/Kuala_Lumpur	2026-09-14
+1732734	Kampung Sedenak	Kampung Sedenak	Kampung Sedenak,Sedenak,Sedenak Village	1.7114	103.5276	P	PPL	MY		01	0105			22535		58	Asia/Kuala_Lumpur	2024-04-21
+1732738	Kota Tinggi	Kota Tinggi	Bandar Kota Tinggi,Kota Tinggi,Kota Tuiggi	1.7381	103.8999	P	PPL	MY		01	0104			52743		17	Asia/Kuala_Lumpur	2024-04-23
+1732741	Taman Senai	Taman Senai	Senai,Taman Senai,shi nai,Сенаи,士乃	1.6006	103.6419	P	PPL	MY		01	0105			73176		26	Asia/Kuala_Lumpur	2024-09-19
+1732742	Kulai	Kulai	Kulai,Kuli	1.6561	103.6032	P	PPL	MY		01	0105			63762		33	Asia/Kuala_Lumpur	2021-04-17
+1732745	Skudai	Skudai	Kampong Skudai,Kangkar Skudai,Scudai,Sekudai,Skudai,Skudaj,Скудай	1.53741	103.65779	P	PPLX	MY		01	0102			159733		40	Asia/Kuala_Lumpur	2026-09-14
+1732746	Kempas	Kempas	Kempas	1.5489	103.6965	P	PPL	MY		01	0102			62011		33	Asia/Kuala_Lumpur	2024-04-21
+1732747	Pelentong	Pelentong	Kangkar Plintong,Pelentong,Pelentung,Plentong,Plintong,Пелентонг	1.5243	103.824	P	PPL	MY		01	0102			583640		25	Asia/Kuala_Lumpur	2026-09-14
+1732750	Masai	Masai	Kangkar Masai,Masai,Масаи	1.4907	103.8788	P	PPL	MY		01	0102			141730		9	Asia/Kuala_Lumpur	2026-09-14
+1732752	Johor Bahru	Johor Bahru	Baru,Bharu,Dzhokhor Bakhru,Dzhokhor-Baru,Dzohor Baru,Dzokhor Bakhru,Džohor Baru,JB,JHB,Jahore Bahru,Johor,Johor Baharu,Johor Bahru,Johore,Johore Bahru,Johore Baru,Johore Bharu,Sin-san-su,Sîn-sân-sṳ,johara baharu,joholeubalu,johora baharu,johora baru,johori bahiru,johorubaru,jokur paru,jwhr bhrw,jwhwr bhrw,xin shan,ya hor bah ru,Џохор Бахру,Джохор Бахру,Джохор-Бару,גוהור באהרו,جوهر بهرو,جوهور بهرو,جوھر بھرو,जोहोर बहरु,जोहोर बारू,জোহর বাহরু,ਜੋਹੋਰ ਬਾਹਰੂ,ஜொகூர் பாரு,ยะโฮร์บาห์รู,ဂျဟိုးဘာရူးမြို့,ጆሆር ባህሩ,ジョホールバル,新山,조호르바루	1.4655	103.7578	P	PPLA	MY		01	0102			858118		32	Asia/Kuala_Lumpur	2026-04-14
+1732755	Gelang Patah	Gelang Patah	Gelang Patah,Glang Patah	1.4484	103.5873	P	PPL	MY		01	0102			64375		11	Asia/Kuala_Lumpur	2024-04-20
+1732785	Pengerang	Pengerang	Kampong Pengerang,Pengerang	1.3651	104.1118	P	PPL	MY		01	0104			15494		15	Asia/Kuala_Lumpur	2024-10-27
+1732805	Paloh	Paloh	Paloh,Paluh	2.1904	103.1963	P	PPL	MY		01	0103			12677		37	Asia/Kuala_Lumpur	2024-10-24
+1732811	Kluang	Kluang	Keluang,Kluang,Клуанг	2.03046	103.31689	P	PPL	MY		01	0103			323762		51	Asia/Kuala_Lumpur	2026-09-14
+1732812	Niyor	Niyor	Niyor,Nyiur	2.0945	103.2807	P	PPL	MY		01	0103			6092		43	Asia/Kuala_Lumpur	2024-09-26
+1732814	Yong Peng	Yong Peng	Sri Bertam,Yong Peng,Yongping,Yǒngpíng,yong ping,永平	2.0136	103.0659	P	PPL	MY		01	0101			27138		9	Asia/Kuala_Lumpur	2024-10-21
+1732826	Mersing	Mersing	MEP,Mersing	2.4312	103.8405	P	PPL	MY		01	0107			22007		8	Asia/Kuala_Lumpur	2021-04-20
+1732846	Segamat	Segamat	Segamat	2.5148	102.8158	P	PPL	MY		01	0110			69816		35	Asia/Kuala_Lumpur	2021-04-17
+1732857	Tangkak	Tangkak	Tangkah,Tangkak	2.2673	102.5453	P	PPL	MY		01	0106			35109		20	Asia/Kuala_Lumpur	2021-04-17
+1732858	Gerisek	Gerisek	Gereck Kampong,Gerisek,Gerisik,Grisek	2.2097	102.7095	P	PPL	MY		01	0106			33217		14	Asia/Kuala_Lumpur	2024-10-25
+1732859	Pagoh	Pagoh	Pagoh,Paguh	2.1495	102.7704	P	PPL	MY		01	0108			95202		8	Asia/Kuala_Lumpur	2024-04-21
+1732869	Muar	Muar	Bandar Maharani,Muar,Muar town,ma po,Муар,麻坡	2.0442	102.5689	P	PPL	MY		01	0108			314776		6	Asia/Kuala_Lumpur	2025-11-03
+1732871	Bakri	Bakri	Bakeri,Bakri,Bukit Bakri,Бакри	2.0441	102.6527	P	PPL	MY		01	0108			30280		9	Asia/Kuala_Lumpur	2021-04-17
+1732877	Labis	Labis	Labis	2.385	103.021	P	PPL	MY		01	0110			21906		48	Asia/Kuala_Lumpur	2021-04-17
+1732884	Chaah	Chaah	Caah,Chaah,Kangkar Chaah	2.249	103.048	P	PPL	MY		01	0110			11844		24	Asia/Kuala_Lumpur	2021-04-17
+1732891	Kuala Selangor	Kuala Selangor	Kuala Selangor,Kuala-Selangor,Selangor,Куала-Селангор	3.35	101.25	P	PPL	MY		12	1706			55887		2	Asia/Kuala_Lumpur	2021-04-17
+1732892	Batang Berjuntai	Batang Berjuntai	Batang Berjuntai,Bestari Jaya,Betang Berjuntai,ba ding yan dai,beis ta ri ca ya,pestari jeya,பெஸ்தாரி ஜெயா,เบิซตารีจายา,ベスタリ・ジャヤ,八丁燕带	3.38333	101.41667	P	PPL	MY		12	1706			20001		35	Asia/Kuala_Lumpur	2021-04-17
+1732893	Batu Arang	Batu Arang	Arang,Batu Arang	3.31667	101.46667	P	PPL	MY		12	1701			22579		61	Asia/Kuala_Lumpur	2021-04-17
+1732901	Kapar	Kapar	Kapar,jia bu qu,kappar,Капар,காப்பார்,加埔区,加埔區	3.13333	101.38333	P	PPL	MY		12	1704			269627		1	Asia/Kuala_Lumpur	2026-09-14
+1732902	Meru	Meru	Meru	3.13622	101.4394	P	PPL	MY		12	1704			7404		147	Asia/Kuala_Lumpur	2024-10-21
+1732903	Shah Alam	Shah Alam	Sa Alam,Sach Alamas,Sahalama,Shah Alam,Shakh Alam,Shakh-Alam,chah xa lam,sa alam,sah alm,saha alama,sha a nan,sha ya nan,shah-alami,syaallam,Šach Alamas,Šahalama,Σα Αλάμ,Шах Алам,Шах-Алам,שה אלם,شاه عالم,شاہ عالم,शाह आलम,শাহ আলম,શાહ આલમ,ஷா ஆலாம்,షా ఆలమ్,ಶಾಹ್ ಆಲ್ಮ್,ഷാ ആലം,ශා ඇලම්,ชะฮ์อาลัม,ရှားအလမ်မြို့,შაჰ-ალამი,シャー・アラム,沙亞南,莎阿南,샤알람	3.08507	101.53281	P	PPL	MY		12	1707			740750		53	Asia/Kuala_Lumpur	2022-12-06
+1732905	Klang	Klang	Kelang,Klang,Klangas,Klanq,Port Kelang,ba sheng,ba sheng shi,kalanga,keullang,killan,klagh,klaj,klam,klang,klang syty,kuran,qlng,Келанг,Кланг,קלנג,كلاج,كلاغ,کلانگ,کلانگ سیتی,कलंग,ক্লাং,கிள்ளான்,クラン,巴生,巴生市,클랑	3.03667	101.44333	P	PPL	MY		12	1704			240016		5	Asia/Kuala_Lumpur	2025-11-03
+1732910	Gedangsa	Gedangsa	FELDA Gedangsa,Gedangsa	3.73333	101.4	P	PPL	MY		12	1703			6150		69	Asia/Kuala_Lumpur	2024-11-13
+1732915	Cangkat Jong	Cangkat Jong	Cangkat Jong,Changkat Jong,ceng ji rong,曾吉容	3.9851	101.1237	P	PPL	MY		07	0902			25618		16	Asia/Kuala_Lumpur	2024-10-14
+1732927	Sungkai	Sungkai	Sungkai,Sungkaj,Sungkei,cunkai nakaram,song xi,Сунгкай,சுங்கை நகரம்,宋溪	4	101.31667	P	PPL	MY		07	0901			32700		40	Asia/Kuala_Lumpur	2024-04-23
+1732931	Slim River	Slim River	Slim River,Sungai Selim,cilim rivar,shi lin he,சிலிம் ரிவர்,仕林河	3.83333	101.4	P	PPL	MY		07	0901			6297		29	Asia/Kuala_Lumpur	2024-04-20
+1732938	Sekinchan	Sekinchan	Kampong Sekinchang,Sekincan,Selinchan	3.5074	101.1041	P	PPL	MY		12	1708			13226		7	Asia/Kuala_Lumpur	2024-04-20
+1732945	Cukai	Cukai	Chukai,Chukei,Cukai,Mokuan,Telor Mokuan	4.25	103.41667	P	PPL	MY		13	1504			82425		12	Asia/Kuala_Lumpur	2021-04-17
+1732955	Kemasik	Kemasik	Kampong Kemasik,Kemasik,Kumasi	4.4256	103.4538	P	PPL	MY		13	1504			10247		11	Asia/Kuala_Lumpur	2025-12-12
+1733023	Kuala Lipis	Kuala Lipis	Kuala Lipis	4.1842	102.0468	P	PPL	MY		06	0806			15448		99	Asia/Kuala_Lumpur	2021-04-17
+1733331	Val Dor	Val Dor	Hua Du Cun,Val Dor,Val d'Or,Val d’Or,Valley of Gold,hua dou,hua dou cun,华都,华都村	5.25198	100.49046	P	PPL	MY		09	1102			88600		7	Asia/Kuala_Lumpur	2024-10-08
+1733353	Papar	Papar	'pappar,'பாப்பார்,Papar,ba ba,ba ba xian,papaleu,吧巴,吧巴縣,파파르	5.73333	115.93333	P	PPL	MY		16	1213			19278		6	Asia/Kuching	2021-04-17
+1733366	Bongawan	Bongawan	Bangawan Station,Bongawan	5.53333	115.85	P	PPL	MY		16	1213			5594		23	Asia/Kuching	2024-10-25
+1733376	Kuala Penyu	Kuala Penyu	Kuala Penyu,Kuala Peyu,Kwala Penyu,gua la ban you,gua la ban you xian,kaw la pexyu,kola penyu,kuallapeun-yu,கோலா பென்யூ,กัวลาเปอญู,瓜拉班尤,瓜拉班尤縣,쿠알라픈유	5.5714	115.5984	P	PPL	MY		16	1208			24200		12	Asia/Kuching	2024-10-21
+1733432	Kota Kinabalu	Kota Kinabalu	BKI,Jesselton,KK,Kinabalu,Kota Kinabalu,Kota-Kinabalu,kota kinabalu,kotakinaballu,kotakinabalu,kotakinabaru,kweta kinabalu,kwta kynabalw,kwٹa knabalw,ya bi,Кота-Кинабалу,كوتا كينابالو,کوتا کينابالو,کوتا کینابالو,کوٹا کنابالو,कोटा किनाबालु,কোটা কিনাবালু,ਕੋਟਾ ਕਿਨਾਬਾਲੂ,ኮታ ኪናባሉ,コタキナバル,亞庇,코타키나바루,코타키나발루	5.9749	116.0724	P	PPLA	MY		16	1206			500421		5	Asia/Kuching	2026-04-14
+1733438	Donggongon	Donggongon	Donggongon,Dongongon,dong gong an,Донгонгон,東貢岸	5.90702	116.10146	P	PPL	MY		16	1214			78086		13	Asia/Kuching	2026-08-30
+1733440	Putatan	Putatan	Kampong Putatan,Putatan Station	5.9258	116.06094	P	PPL	MY		16	1214			78340		6	Asia/Kuching	2021-04-17
+1733449	Kinarut	Kinarut	Kinarut,Kinarut Station,jing na lu,kinaruto,Кинарут,キナルト,京那律	5.8231	116.0466	P	PPL	MY		16	1213			15716		9	Asia/Kuching	2026-08-30
+1733468	Tambunan	Tambunan	Tambunan,Tibabar	5.71667	116.4	P	PPL	MY		16	1221			29294		630	Asia/Kuching	2024-10-21
+1733502	Ranau	Ranau	RNU,Ranau,lanau,ranau,ラナウ,라나우	5.9538	116.6641	P	PPL	MY		16	1217			19294		570	Asia/Kuching	2021-04-17
+1733635	Kampung Kunak	Kampung Kunak	Kampong Kunak,Kampung Kunak,Kunak,gu na,gu na xian,kunak,kunakku,கூனாக்,クナック,古納縣,古纳	4.68577	118.24908	P	PPL	MY		16	1210			13823		11	Asia/Kuching	2025-12-12
+1733697	Semporna	Semporna	SMM,Semporna,Semporna Settlement,Sempurna,Simporan,Simporna,cempurna,senporuna,xian ben na,Семпорна,செம்பூர்ணா,センポルナ,仙本那	4.48178	118.61119	P	PPL	MY		16	1219			62641		7	Asia/Kuching	2021-04-17
+1733782	Labuan	Labuan	Labuan,Namin,Nàmǐn,Victoria,Victoria Town,Viktorija,labu'ana,labuwani,labuyana,labwan,na min,rabuan,Виктория,Лабуан,لابوان,लाबुआन,লাবুয়ান,ਲਾਬੁਆਨ,ላቡዋን,ラブアン,纳闽	5.28028	115.2475	P	PPLA	MY		15	0501			95120		7	Asia/Kuala_Lumpur	2026-04-14
+1733868	Sipitang	Sipitang	SPT,Sipitang,Sipitong,cipittan nakaram,shi bi dan,shi bi dan xian,சிபித்தாங் நகரம்,实必丹,實必丹,實必丹縣	5.07903	115.54964	P	PPL	MY		16	1220			39300		9	Asia/Kuching	2024-10-21
+1733874	Beaufort	Beaufort	Beaufort	5.3473	115.7455	P	PPL	MY		16	1201			15855		18	Asia/Kuching	2021-04-17
+1733885	Tenom	Tenom	Tenom	5.11922	115.93719	P	PPL	MY		16	1223	1734122		5148		201	Asia/Kuching	2024-10-25
+1733953	Lahad Datu	Lahad Datu	LDU,Lahad Datu,Lahad Datu Town,Lakhad-Datu,lakat tattu,na du,rahadatou,Лахад-Дату,லகாட் டத்து,ラハダトゥ,拿笃	5.02298	118.32897	P	PPL	MY		16	1211			105622		7	Asia/Kuching	2021-04-17
+1734052	Sandakan	Sandakan	Elopura,SDK,Samdakan,San-ta-kin,Sandakan,Sandakan Town,Sân-tá-kîn,cantakkan,san da kan,sandakan,shan da gen,sndakan,Сандакан,سانداكان,سانداکان,سنداکان,சண்டாக்கான்,ശാന്തകൻ,ซันดากัน,サンダカン,山打根,산다칸	5.8402	118.1179	P	PPL	MY		16	1218			439050		10	Asia/Kuching	2022-12-06
+1734098	Keningau	Keningau	KGU,Kaningow,Kengingan,Kenin'nkaou,Keninga,Keningas,Keningau,gen de yao,gen de yao xian,kenin'gau,kenin'gav,keninga'a'u,keninga'u,keningau,keningum,keninkavu,kheni n ko,knyngayw,konna'u,kynynghaw,kynynjaw,Κένινγκαου,Кенингау,Кенінгау,كينينجاو,كينينغاو,کنینگائو,کینینجاو,केनिंगआउ,कोंनऊ,কেনিঙ্গাউ,કેનિન્ગૌ,கெனிங்காவு,కేనింగుఁ,ಕೇನಿನ್ಗಾವ್,කෙනින්ගෞ,เคนินโก,ケニンガウ,根地咬,根地咬縣,케닌가우	5.3378	116.1602	P	PPL	MY		16	1203			77650		277	Asia/Kuching	2021-04-17
+1734114	Bandar Nabawan	Bandar Nabawan	Bandar Nabawan,Nabawan,Nebawan	5.0393	116.4274	P	PPL	MY		16	1212			31807		459	Asia/Kuching	2024-10-25
+1734199	Tawau	Tawau	TWU,Tavau,Tawao,Tawau,dou hu,tavav,tawau,tawaw,Тавау,تاواو,தாவாவ்,タワウ,斗湖,타와우	4.24482	117.89115	P	PPL	MY		16	1222			372615	0	12	Asia/Kuching	2022-12-06
+1734308	Dungun	Dungun	Dungun,Kuala Dungun	4.775	103.4162	P	PPL	MY		13	1502			34767		7	Asia/Kuala_Lumpur	2024-10-21
+1734313	Paka	Paka	Kampong Paka,Packa,Pak,Paka,Пак	4.6374	103.4368	P	PPL	MY		13	1502			21044		9	Asia/Kuala_Lumpur	2021-04-17
+1734316	Kertih	Kertih	KTE,Kerteh,Kertih,Kertikh,Kuala Kerteh,ju cha,ke xr tea h,kertte,Кертих,கெர்த்தே,เกอร์เตะฮ์,局茶	4.5141	103.4483	P	PPL	MY		13	1504			24401		5	Asia/Kuala_Lumpur	2026-08-30
+1734346	Kampung Kuala Balah	Kampung Kuala Balah	Kampung Kuala Balah,Kuala Balah	5.41667	101.91667	P	PPL	MY		03	0303			10198		210	Asia/Kuala_Lumpur	2024-11-13
+1734372	Gerik	Gerik	Gerik,Grik,gerik,gryq,kirik,yi li,گریق,கிரிக்,ಗೆರಿಕ್,宜力	5.41667	101.13333	P	PPL	MY		07	0903			30868		116	Asia/Kuala_Lumpur	2024-04-20
+1734389	Lunas	Lunas	Lunas	5.43058	100.53012	P	PPL	MY		02	0206			18236		21	Asia/Kuala_Lumpur	2024-10-25
+1734393	Kulim	Kulim	Kulim,Кулим	5.36499	100.56177	P	PPL	MY		02	0206			170889		54	Asia/Kuala_Lumpur	2026-09-14
+1734399	Selama	Selama	Selama,Selamar	5.2236	100.69262	P	PPL	MY		07	0904			34800		24	Asia/Kuala_Lumpur	2024-04-21
+1734407	Bandar Baharu	Bandar Baharu	Bandar Baharu,Bandar Bahru,Bandar Bharu	5.13428	100.49549	P	PPL	MY		02	0202			44412		4	Asia/Kuala_Lumpur	2024-04-20
+1734409	Bagan Serai	Bagan Serai	Bagan Serai	5.0108	100.54101	P	PPL	MY		07	0905			20476		3	Asia/Kuala_Lumpur	2021-04-17
+1734418	Padang Serai	Padang Serai	Padang Serai	5.51307	100.55356	P	PPL	MY		02	0206			50757		15	Asia/Kuala_Lumpur	2024-10-17
+1734439	Bedong	Bedong	Bedong,Bedung	5.72743	100.50876	P	PPL	MY		02	0204			47585		6	Asia/Kuala_Lumpur	2021-04-17
+1734444	Kampung Kupang	Kampung Kupang	Kampung Kupang	5.63638	100.84517	P	PPL	MY		02	0201			18844		44	Asia/Kuala_Lumpur	2024-04-20
+1734445	Pulai	Pulai	Pulai	5.65489	100.89541	P	PPL	MY		02	0201			19093		69	Asia/Kuala_Lumpur	2024-04-20
+1734464	Kampung Jeli	Kampung Jeli	Jeli,Kampung Jeli,jly,ri li,جلي,日里	5.7	101.83333	P	PPL	MY		03	0303			17734		76	Asia/Kuala_Lumpur	2024-11-13
+1734506	Siburan	Siburan	17th Mile Bazaar,Siburan	1.36667	110.4	P	PPL	MY		11	1311			27286		14	Asia/Kuching	2024-04-22
+1734537	Tebedu	Tebedu	Tebedu,Tepedu	1.02656	110.36331	P	PPL	MY		11	1326			25232		56	Asia/Kuching	2024-04-22
+1734539	Bau	Bau	Bau	1.41667	110.15	P	PPL	MY		11	1302			52643		21	Asia/Kuching	2024-04-22
+1734559	Sebuyau	Sebuyau	Sebuyau,Sebuyau Kampong,shi wu yao,诗巫瑶	1.51667	110.93333	P	PPL	MY		11	1328			13200		55	Asia/Kuching	2024-04-22
+1734575	Kampung Cangkat Jering	Kampung Cangkat Jering	Changkat Jering,Kampung Cangkat Jering,cankat jerin,xin lu kou,சங்காட் ஜெரிங்,新路口	4.78333	100.71667	P	PPL	MY		07	0908			6936		21	Asia/Kuala_Lumpur	2024-10-25
+1734576	Simpang Empat	Simpang Empat	Semanggol,Simpang 4,Simpang Ampat,Simpang Empat,shi zi gang,十字港	4.95	100.63333	P	PPL	MY		07	0905			58004		4	Asia/Kuala_Lumpur	2024-10-11
+1734577	Kamunting	Kamunting	Kamunting,Kemunting,gan wen ding,kamuntin,கமுந்திங்,カムンティン,甘文丁	4.88333	100.73333	P	PPL	MY		07	0908			36243		26	Asia/Kuala_Lumpur	2024-04-21
+1734579	Batu Kurau	Batu Kurau		4.96667	100.8	P	PPL	MY		07	0908			22307		45	Asia/Kuala_Lumpur	2024-10-24
+1734586	Taiping	Taiping	Bandar Taiping,TPG,Taipeng,Taiping,Taipingo,Tajpin,tai ping,taipin,taiping,taippin,Тайпин,தைப்பிங்,タイピン,太平,타이핑	4.85	100.73333	P	PPL	MY		07	0908			217647		19	Asia/Kuala_Lumpur	2021-04-17
+1734594	Padang Rengas	Padang Rengas	Padang Rengas,Rengas,patan renkas,xiao shan,பாடாங் ரெங்காஸ்,硝山	4.76667	100.85	P	PPL	MY		07	0907			38294		68	Asia/Kuala_Lumpur	2024-10-23
+1734599	Kuala Kangsar	Kuala Kangsar	Kangsar,Kouala Kan'nksar,Kuala Kangsa,Kuala Kangsar,Kuala Kangsaro apskritis,Kuala-Kangsar,Kualakangsara,gua la jiang sha,kaula kangsar,kaulag kangsar,kaw la kang sar,kolakancar,ku'ala kangasara,kualleukangsaleu,kuarakansaru,kula kangasara,kuyala kansara,kwala kanjsar,kwala knghsar,kwala kngsr,kwala lkanjsar,Κουάλα Κανγκσάρ,Куала-Кангсар,كوالا كنغسار,كوالا لكانجسار,کوالا کانجسار,کوالا کنگسر,कुआला कांगसार,कुला कांगसर,কুয়ালা কাংসার,કુઆલા કાંગસર,கோலாகங்சார்,కౌలా కాంగ్సర్,ಕೌಲಾಗ್ ಕಾಂಗ್ಸರ್,ක්වාලාකැන්ග්සර්,กัวลากังซาร์,クアラカンサル,瓜拉江沙,쿠알르캉사르	4.76667	100.93333	P	PPL	MY		07	0907			39331		42	Asia/Kuala_Lumpur	2021-04-17
+1734607	Beruas	Beruas	Beruas,Bruas	4.5	100.78333	P	PPL	MY		07	0909			9268		19	Asia/Kuala_Lumpur	2024-10-18
+1734626	Chemor	Chemor	Cemur,Chemor,Chemur	4.7211	101.1189	P	PPL	MY		07	0906			30461		76	Asia/Kuala_Lumpur	2024-10-25
+1734634	Ipoh	Ipoh	IPH,Ipo,Ipoh,Ipoha,Ipohas,Ipokh,Yi-po-su,Yî-pó-sṳ,aybwh,aypw,aypwh,ipo,ipoha,ippo,xi poh,yi bao,ʿiፖhi,Іпох,Ипо,Ипох,איפוה,إيبوه,ايبوه,ایپو,ایپوه,इपोह,ইপোহ,ਇਪੋਹ,ஈப்போ,อีโปห์,အီပိုးမြို့,ኢፖህ,イポー,怡保,이포	4.5841	101.0829	P	PPLA	MY		07	0906			759952		45	Asia/Kuala_Lumpur	2026-04-14
+1734637	Lahat	Lahat	Lahat	4.5388	101.0365	P	PPL	MY		07	0906			30694		43	Asia/Kuala_Lumpur	2024-04-22
+1734651	Gua Musang	Gua Musang	Gua Musang	4.88441	101.96857	P	PPL	MY		03	0302			19731		90	Asia/Kuala_Lumpur	2021-04-17
+1734705	Kuala Terengganu	Kuala Terengganu	Bandar Kuala Terengganu,Kuala Terenganu,Kuala Terengganu,Kuala Trengganu,Kuala-Trenganu,Kuala-Trengganu,Kvala Terenganu,TGG,Trengganu,Tringano,Tringganu,gua la deng jia lou,kaw la trang kanu,ku'ala terengaganu,ku'ala terenganu,kuallateuleng-ganu,kuaratorenganu,kuwala tereniganu,kuyala terenganu,kwala trnganw,kwala trnghanw,kwala trynjanw,kwala tyrnganw,Куала Теренгану,Куала Теренггану,Куала-Тренгану,Куала-Тренггану,كوالا ترنغانو,کوالا ترنگانو,کوالا ترينجانو,کوالا تیرنگانو,कुआला तेरेंगगानु,কুয়ালা তেরেঙ্গানু,ਕੁਆਲਾ ਤੇਰੇਂਗਾਨੂ,กัวลาตรังกานู,ኩዋላ ተሬንጋኑ,クアラトレンガヌ,瓜拉登嘉楼,쿠알라트렝가누	5.3302	103.1408	P	PPLA	MY		13	1505			426500		15	Asia/Kuala_Lumpur	2026-04-14
+1734715	Marang	Marang	Kuala Marang,Kualla Merang,Marang,Маранг	5.2056	103.2059	P	PPL	MY		13	1506			21410		14	Asia/Kuala_Lumpur	2021-04-17
+1734721	Kampung Teluk Kemang	Kampung Teluk Kemang	Kampong Telok Kemang,Kampung Teluk Kemang,Telok Kemang	2.46146	101.85951	P	PPL	MY		05	0704			16672		21	Asia/Kuala_Lumpur	2024-10-23
+1734727	Pasir Panjang	Pasir Panjang	Pasir Panjang	2.4322	101.9352	P	PPL	MY		05	0704			8249		21	Asia/Kuala_Lumpur	2024-10-24
+1734738	Tampin	Tampin	Tampin	2.4701	102.2302	P	PPL	MY		05	0707			28238		61	Asia/Kuala_Lumpur	2021-04-17
+1734745	Alor Gajah	Alor Gajah	AG,Alor Gajah,Alor Gajeh,Alur Gajah,alor kaja,alwr gaja,ya luo ya ye,الور گاجا,அலோர் காஜா,亚罗牙也	2.3804	102.2089	P	PPL	MY		04	0601			20163		19	Asia/Kuala_Lumpur	2024-10-17
+1734748	Durian Tunggal	Durian Tunggal	Durian Tunggal,Liulian Dongge,liu lian dong ge,turiyan tunkal,டுரியான் துங்கல்,榴梿洞葛,榴槤洞葛	2.3125	102.2805	P	PPL	MY		04	0601			42185		12	Asia/Kuala_Lumpur	2024-04-21
+1734749	Rembia	Rembia	Rembia,wen miao,文庙	2.328	102.2101	P	PPL	MY		04	0601			6217		19	Asia/Kuala_Lumpur	2024-10-17
+1734753	Kampung Ayer Keroh	Kampung Ayer Keroh	Air Keruh,Ayer Keroh,Kampung Ayer Keroh	2.2654	102.2801	P	PPL	MY		04	0603			37716		22	Asia/Kuala_Lumpur	2021-04-17
+1734755	Ayer Molek	Ayer Molek	Air Molek,Ayer Molek,Bukit Lintang	2.2028	102.3172	P	PPL	MY		04	0603			10792		10	Asia/Kuala_Lumpur	2024-04-21
+1734757	Sungai Udang	Sungai Udang	Sungai Udang,cunkai utan,shuang xi wu lang,சுங்கை ஊடாங்,双溪乌浪,雙溪烏浪	2.269	102.1427	P	PPL	MY		04	0603			26044		31	Asia/Kuala_Lumpur	2021-04-17
+1734759	Malacca	Malacca	Bandaraya Melaka,MKZ,Malaca,Malacca,Malacca Town,Malaka,Malakka,Melaka,ma liu jia,malaka,malakka,marakka,mlaka,mlqa,myalakka,Малакка,ملاکا,ملقا,मलक्का,ম্যালাক্কা,ਮਲਾਕਾ,ማላካ,マラッカ,马六甲	2.196	102.2405	P	PPLA	MY		04	0603			579000		6	Asia/Kuala_Lumpur	2026-04-14
+1734760	Teluk Mas	Teluk Mas	Telok Mas,Teluk Mas,zhi luo an,直落垵,直落埯	2.1654	102.322	P	PPL	MY		04	0603			10028		9	Asia/Kuala_Lumpur	2024-10-23
+1734761	Kampung Umbai	Kampung Umbai	Kampung Umbai,Umbai	2.1586	102.3475	P	PPL	MY		04	0602			8989		10	Asia/Kuala_Lumpur	2024-04-21
+1734762	Merlimau	Merlimau	Kampong Telok Merlimau,Merlimau	2.1449	102.4251	P	PPL	MY		04	0602			18632		6	Asia/Kuala_Lumpur	2024-10-17
+1734768	Teluk Panglima Garang	Teluk Panglima Garang	Telok Panglima Garang,Teluk Panglima Garang,teluk panlima karan,zhi luo bang li ma jia lang,தெலுக் பாங்லிமா காராங்,直落邦里玛嘉朗	2.90796	101.46877	P	PPL	MY		12	1705			49155		5	Asia/Kuala_Lumpur	2024-10-21
+1734769	Pelabuhan Klang	Pelabuhan Klang	Pelabohan Klang,Pelabuhan Kelang,Pelabuhan Kelang Selatan,Pelabuhan Klang,Port Kalang,Port Kelang,Port Klang,Port Sweetenham,Port Swettenham,XPQ	2.99959	101.39287	P	PPL	MY		12	1704			20000		6	Asia/Kuala_Lumpur	2026-05-01
+1734781	Banting	Banting	Banting	2.8136	101.50185	P	PPL	MY		12	1705			48240		9	Asia/Kuala_Lumpur	2021-04-17
+1734793	Jenjarum	Jenjarum	Jenjarom,Jenjarum	2.8724	101.49484	P	PPL	MY		12	1705			24857		8	Asia/Kuala_Lumpur	2021-04-17
+1734797	Bangi	Bangi	Bangi,Kampong Bangi,ban'gi,bangi,bangy  sylngwr,bngy,panki,wan yi,בנגי,بانگی، سیلنگور,बन्गी,பாங்கி,バンギ,万宜,萬宜	2.9	101.78333	P	PPL	MY		12	1702			45042		25	Asia/Kuala_Lumpur	2024-10-21
+1734798	Semenyih	Semenyih	Semenyeh,Semenyih,Semeyih,cemini,semen'i,shi mao yue,செமினி,セメンイー,士毛月	2.9516	101.843	P	PPL	MY		12	1702	1734798		92491		39	Asia/Kuala_Lumpur	2021-04-20
+1734803	Lenggeng	Lenggeng	Lenggeng,Lengging	2.8558	101.9424	P	PPL	MY		05	0706			13081		64	Asia/Kuala_Lumpur	2024-10-17
+1734810	Seremban	Seremban	Cirampan,Cirampāṉ,Fu-yung-su,Fû-yûng-sṳ,Serehmban,Seremban,Shuang Xi Wu Rong,Soghomban,Sungai Ujong,cirampan,fu rong shi,hua cheng,sarembana,seremabana,serembana,sereምbani,seuleumban,shuang xi wu rong,srem ban,srmban,surenban,Серембан,Серэмбан,سرمبان,सरेंबान,सेरेम्बन,সেরেম্বান,ਸੇਰੇਮਬਾਨ,சிரம்பான்,സിരമ്പാൻ,สเรมบัน,ሰረምባን,スレンバン,双溪乌绒,芙蓉市,花城,스름반	2.7297	101.9381	P	PPLA	MY		05	0706			372917		59	Asia/Kuala_Lumpur	2026-04-14
+1734815	Port Dickson	Port Dickson	Arang Arang Anchorage,Arang-Arang,Port Dickson,Port-Dikson,Порт-Диксон	2.52462	101.79651	P	PPLA2	MY		05	0704			119300		-9999	Asia/Kuala_Lumpur	2026-09-14
+1734821	Sepang	Sepang	Sepang,Xue bang,Xuě bāng,xue bang,Сепанг,雪邦	2.6931	101.7498	P	PPL	MY		12	1709			212050		12	Asia/Kuala_Lumpur	2024-09-20
+1734826	Taman Senawang Indah	Taman Senawang Indah	Senawang,Taman Senawang Indah	2.691	101.989	P	PPL	MY		05	0706			64497		72	Asia/Kuala_Lumpur	2024-04-22
+1734833	Titi	Titi	Titi	2.9983	102.0765	P	PPL	MY		05	0701			5533		132	Asia/Kuala_Lumpur	2024-10-25
+1734839	Bahau	Bahau	Bahau	2.8079	102.4049	P	PPL	MY		05	0702			31273		63	Asia/Kuala_Lumpur	2021-04-17
+1734841	Kuala Pilah	Kuala Pilah	Kuala Lipis,Kuala Pilah	2.7389	102.2487	P	PPL	MY		05	0703			19510		93	Asia/Kuala_Lumpur	2021-04-17
+1734854	Rembau	Rembau	Rembau	2.5897	102.0913	P	PPL	MY		05	0705			29595		46	Asia/Kuala_Lumpur	2024-10-17
+1734860	Gemencheh	Gemencheh	Gemencheh,Gemencheh Baharu,Gemencheh Bahru	2.5331	102.3989	P	PPL	MY		05	0707			12175		65	Asia/Kuala_Lumpur	2024-10-17
+1734879	Buloh Kasap	Buloh Kasap	Buloh Kasap,Buluh Kasap	2.5536	102.764	P	PPL	MY		01	0110			13088		20	Asia/Kuala_Lumpur	2021-04-17
+1734881	Batu Anam	Batu Anam	Batu Anam,Batu Enam	2.5825	102.711	P	PPL	MY		01	0110			21923		22	Asia/Kuala_Lumpur	2024-10-24
+1734883	Rompin	Rompin	Rompin	2.7083	102.5047	P	PPL	MY		05	0702			41931		52	Asia/Kuala_Lumpur	2024-04-27
+1734885	Gemas	Gemas	Gemas,Gomeh,jin ma shi,金馬士,金马士	2.5832	102.6117	P	PPL	MY		05	0707			29777		34	Asia/Kuala_Lumpur	2024-10-17
+1734897	Padang Endau	Padang Endau	Bandar Endau,Endau,Kuala Endau,Padang Endau	2.65568	103.61504	P	PPL	MY		01	0107			14517		5	Asia/Kuala_Lumpur	2024-04-22
+1734914	Kuala Rompin	Kuala Rompin	Bandar Rompin,Bandar Rompin Lama,Kuala Rompin,Rompin,kola rompin,yun bing,கோலா ரொம்பின்,云冰,雲冰	2.81667	103.48333	P	PPL	MY		06	0810			10417		6	Asia/Kuala_Lumpur	2024-10-21
+1734971	Pekan	Pekan	Pekan,bei gen,pekkan,pkan,Пекан,پکان,பெக்கான்,ปกัน,北根	3.4836	103.3996	P	PPL	MY		06	0808			31826		11	Asia/Kuala_Lumpur	2021-04-17
+1735011	Karak	Karak	Karak	3.4	102.03333	P	PPL	MY		06	0801			9362		118	Asia/Kuala_Lumpur	2024-10-17
+1735018	Mentakab	Mentakab	Mentakab,Mentekab,choan:mentagab,mentakap,wen de jia,Ментекаб,மெந்தகாப்,文德甲,초안:멘타갑	3.4854	102.3484	P	PPL	MY		06	0811			42171		43	Asia/Kuala_Lumpur	2026-08-30
+1735022	Temerluh	Temerluh	Temerloh,Temerluh	3.4506	102.4176	P	PPL	MY		06	0811			59916		45	Asia/Kuala_Lumpur	2021-04-17
+1735069	Kampung Teluk Air Tawar	Kampung Teluk Air Tawar	Kampung Teluk Air Tawar,Kampung Teluk Ayer Tawar,Teluk Air Tawar,Teluk Ayer Tawar	5.48333	100.38333	P	PPL	MY		09	1104			19371		9	Asia/Kuala_Lumpur	2024-10-17
+1735074	Batu Feringgi	Batu Feringgi	Batu Feringgi,Batu Ferringhi	5.4709	100.24529	P	PPL	MY		09	1105			20000		9	Asia/Kuala_Lumpur	2021-04-17
+1735076	Butterworth	Butterworth	BWH,Batervortas,Battervort,Butterworth,bat te xrweirth,batawasu,batrwwrt,bei hai,bei hai bin cheng,beoteowoseu,kolappurai,Баттерворт,باتروورت,கோலப்புறை,บัตเตอร์เวิร์ท,バターワース,北海,北海槟城,버터워스	5.3991	100.36382	P	PPL	MY		09	1104			107591		6	Asia/Kuala_Lumpur	2024-04-19
+1735077	Perai	Perai	Perai,Prai	5.38333	100.38333	P	PPL	MY		09	1103			65301		5	Asia/Kuala_Lumpur	2021-04-17
+1735079	Bukit Mertajam	Bukit Mertajam	Boukit Mertatzam,Bukit Mertadzamas,Bukit Mertadžamas,Bukit Mertajam,Bukit Mertarajam,Bukit-Mertadzham,Bukita Mertadzama,Bukita Mertadžama,bukis meleutajam,bukit me xr ta cam,bukit mertajam,bukita maratajama,bukita martajama,bukita meratajama,bukita mrtajama,bwkyt myrtajam,bwkyt myrtajm,da shan jiao,pukkit mertajam,Μπουκίτ Μερτατζάμ,Букит-Мертаджам,Букіт-Мертаджам,بوكيت ميرتاجام,بوکیت میرتاجام,بوکیت میرتاجم,बुकिट मृताजम,बुकिट मेरताजम,বুকিট মারতাজাম,બુકીટ મર્ટાજમ,புக்கிட் மெர்தாஜாம்,బుకిట్ మేర్టాజం,ಬುಕಿಟ್ ಮೆರ್ಟಾಜಮ್,බුකිට් මෙර්ටජාම්,บูกิต เมอร์ตาจาม,ブキット・メルタジャム,大山脚,大山腳,부킷 메르타잠	5.36301	100.4667	P	PPL	MY		09	1103			212329		27	Asia/Kuala_Lumpur	2021-04-17
+1735082	Simpang Empat	Simpang Empat	Simpang Ampat,Simpang Empat	5.2818	100.47768	P	PPL	MY		09	1102			9149		6	Asia/Kuala_Lumpur	2024-10-23
+1735086	Nibong Tebal	Nibong Tebal	Nibon Tebal,Nibong Tebai,Nibong Tebal,Nibong Tebalas,Nibong Tepal,Nibong-Tebal,Nibongtebala,Nibung Tebal,Nimpon'nk Tempal,gao yuan,ni bng te bal,nibam tebala,nibamga tibila,nibang tebal,nibon'ga tibala,nibong tebal,nibonga  tebala,nimong tebal,nipon tipal,nybwn tybal,nybwnj tybal,Νιμπόνγκ Τεμπάλ,Нибонг-Тебал,Нібонг-Тебал,نيبون تيبال,نیبونج تیبال,निबाँग टीबिल,नीबोंग  टेबल,নিবং তেবাল,નિબોન્ગ ટીબલ,நிபோங் திபால்,నిబొంగ్ తేబాల్,ನಿಬಾಂಗ್ ಟೆಬಾಲ್,නයිබෝන්ග් ටෙබල්,นิบง เตบาล,ニボン・テバル,高淵,高渊,니몽 테발	5.16586	100.47793	P	PPL	MY		09	1102			40072		5	Asia/Kuala_Lumpur	2021-08-24
+1735089	Parit Buntar	Parit Buntar	Parit Buntar	5.12671	100.49316	P	PPL	MY		07	0905			27313		5	Asia/Kuala_Lumpur	2021-04-17
+1735090	Bagan Tiang	Bagan Tiang		5.11667	100.41667	P	PPL	MY		07	0905			13538		3	Asia/Kuala_Lumpur	2024-10-24
+1735091	Tanjung Piandang	Tanjung Piandang	Tanjung Piandang,jiao tou,tancon piyantan,தஞ்சோங் பியாண்டாங்,角头,角頭	5.07236	100.38105	P	PPL	MY		07	0905			8352		3	Asia/Kuala_Lumpur	2024-10-17
+1735092	Kuala Kurau	Kuala Kurau	Kuala Kura,Kuala Kurau	5.01821	100.42824	P	PPL	MY		07	0905			31065		6	Asia/Kuala_Lumpur	2024-04-20
+1735093	Tasek Glugor	Tasek Glugor	Gelugor,Gelugor  Seberang Perai,Tasek Gelugor,Tasek Gelugur,Tasek Glugor,da xi niu ru e,tacek kulukor,Тасек Глугор,தாசேக் குளுகோர்,打昔牛汝莪	5.48032	100.49849	P	PPL	MY		09	1104			135786		10	Asia/Kuala_Lumpur	2026-09-14
+1735096	Balik Pulau	Balik Pulau	Balek Pulau,Balik Pulau,Mukim 5,balyk pwlayw,fu luo shan bei,palik pulav,بالیک پولائو,பாலிக் புலாவ்,浮罗山背,浮羅山背	5.34916	100.23938	P	PPL	MY		09	1101			23559		24	Asia/Kuala_Lumpur	2024-09-30
+1735102	Bayan Lepas	Bayan Lepas	Bajan-Lepas,Bayan Lepas,Mukim 12,Байан-Лепас	5.29992	100.26052	P	PPL	MY		09	1101			130455		26	Asia/Kuala_Lumpur	2026-09-14
+1735106	George Town	George Town	Dzhordzhtaun,Dzordz Taun,Dzordztauna,Dzordztaunas,Džordžtauna,Džordžtaunas,George Town,Georgetown,Gorgtauno,Khiau-chhu-su,Khiâu-chhṳ-sṳ,PEN,Penang,Pinang,Pinang George Town,cxrc thawn,jaraja ta'una,jarj tavun,jarja ta'una,jojitaun,joriji taውni,jorja ta'una,jrj tawn pnang,jwrj tawn,jwrj twn,jwrjtwn,qiao zhi shi,Ĝorĝtaŭno,Џорџ Таун,Джорджтаун,גורג טאון,جارج ٹاؤن، پینانگ,جرج تاون پنانگ,جورج تاون,جورج تون,جورجتون,जर्ज टाउन,जॉर्ज टाउन,জর্জ টাউন,ਜਾਰਜ ਟਾਊਨ,ஜார்ஜ் டவுன்,ജോർജ്ജ് ടൗൺ,จอร์จทาวน์,ပီနန်မြို့,ჯორჯტაუნი,ጆርጅ ታውን,ジョージタウン,乔治市,喬治市,조지타운	5.41123	100.33543	P	PPLA	MY		09	1105			158336		14	Asia/Kuala_Lumpur	2026-04-14
+1735133	Kampung Bukit Tinggi, Bentong	Kampung Bukit Tinggi, Bentong	Bukit TInggi  Bentong	3.34944	101.82631	P	PPL	MY		06	0801			12346		390	Asia/Kuala_Lumpur	2024-09-26
+1735147	Hulu Yam Lama	Hulu Yam Lama	Hulu Yam Lama,Ulu Yam,Ulu Yam Lama	3.4537	101.6413	P	PPL	MY		12	1703			20334		41	Asia/Kuala_Lumpur	2024-10-21
+1735148	Serendah	Serendah	Serendah	3.3646	101.6041	P	PPL	MY		12	1703			71202		42	Asia/Kuala_Lumpur	2024-04-20
+1735150	Rawang	Rawang	Ravang,Rawang,Wan Nao,wan nao,Раванг,万挠	3.3213	101.5767	P	PPL	MY		12	1701			199095		38	Asia/Kuala_Lumpur	2026-09-14
+1735153	Sungai Buloh	Sungai Buloh	Sungai Buloh,Sungai Bulokh,Sungai Buluh,Сунгаи Булох	3.21	101.561	P	PPL	MY		12	1707			222858		50	Asia/Kuala_Lumpur	2026-09-14
+1735154	Batu Tiga	Batu Tiga	Batu Tiga	3.078	101.547	P	PPL	MY		12	1707			5419		22	Asia/Kuala_Lumpur	2024-11-14
+1735158	Petaling Jaya	Petaling Jaya	PJ,Petaling Dzhaja,Petaling Jaya,Petaling-Dzhaja,ba da ling zai ye,bytalyngh jaya,petalin jeya,peutallingjaya,ptalyng jaya,pytalnyg jaya,Петалинг Джая,Петалинг-Джая,بيتالينغ جايا,پتالینگ جایا,پیتالنیگ جایا,பெடாலிங் ஜெயா,プタリン・ジャヤ,八打灵再也,프탈링자야	3.10726	101.60671	P	PPLA2	MY		12	1707			807879		45	Asia/Kuala_Lumpur	2025-06-26
+1735161	Kuala Lumpur	Kuala Lumpur	Federal Territory of Kuala Lumpur,Gizlungzpoh,KL,KUL,Kouala Loumpou,Kouala Loumpour,Kuala Lumpor,Kuala Lumpur,Kuala-Lumpur,Kuala-Lumpuro,Kualae-Lumpur,Kualalumpura,Kualalumpūra,Kvala Lumpuras,Kvala Lumpūras,Kúala Lúmpúr,Wilayah Persekutuan Kuala Lumpur,ji long po,kaulalampur,kawlalampexr,kolalampur,ku'a lalampura,ku'ala lupura,ku'alalampura,ku'alalumpura,kuallalumpuleu,kuararunpuru,kuyalalamapura,kvalalampura,kwala lambwr,kwala lmpwr,kwalalampwr,kwalalmbwr,kwalalmpwr,kwalalwmpwr,kۇyalalۇmpۇr,Κουάλα Λουμπούρ,Куалæ-Лумпур,Куала Лумпур,Куала-Лумпур,Կուալա Լումպուր,קואלה לומפור,كوالا لامبور,كوالالمبور,كۇئالالۇمپۇر,کوالا لمپور,کوالالامپور,کوالالمپور,کوالالومپور,कुआ लालम्पुर,कुआलालम्पुर,क्वालालंपूर,কুয়ালালামপুর,ਕੁਆਲਾ ਲੁੰਪੁਰ,କୁଆଲାଲୁମ୍ପୁର,கோலாலம்பூர்,ಕೌಲಾಲಂಪುರ್,കോലാലമ്പൂർ,กัวลาลัมเปอร์,ཁལ་ལུང་ཕུ།,ကွာလာလမ်ပူမြို့,კუალა-ლუმპური,ኩዋላ ሉምፑር,クアラルンプール,吉隆坡,쿠알라룸푸르	3.1412	101.68653	P	PPLC	MY		14	0401			1453975		56	Asia/Kuala_Lumpur	2026-04-29
+1735162	Setapak	Setapak	Setapak,Сетапак	3.207	101.727	P	PPL	MY		12				353268		52	Asia/Kuala_Lumpur	2026-09-14
+1735166	Batu Caves	Batu Caves	Batu Caves,Peshhery Batu,Пещеры Бату	3.238	101.682	P	PPL	MY		12	1701			254083		44	Asia/Kuala_Lumpur	2026-09-14
+1735168	Ampang	Ampang	Ampang,Ampang Hilir,Ampang Jaya,Empangan,ampan,ampangjaya,an bang,anpan・jaya,Ампанг,அம்பாங்,アンパン・ジャヤ,安邦,암팡자야	3.15	101.76667	P	PPL	MY		14				126285		56	Asia/Kuala_Lumpur	2026-09-14
+1735172	Hulu Langat	Hulu Langat	Hulu Langat,Ulu Langat	3.1137	101.8142	P	PPL	MY		12	1702			55251		53	Asia/Kuala_Lumpur	2024-05-18
+1735179	Bagan Datuk	Bagan Datuk	Bagan Datoh,Bagan Datok,Bagan Datuk	3.9899	100.7819	P	PPL	MY		07	0902			13700		8	Asia/Kuala_Lumpur	2024-04-23
+1735188	Hutan Melintang	Hutan Melintang	Hutan Melintang,Utan Melintang,ban gang,uttan melintan,ஊத்தான் மெலிந்தாங்,半港	3.8766	100.9328	P	PPL	MY		07	0902			28357		4	Asia/Kuala_Lumpur	2024-04-20
+1735195	Sabak Bernam	Sabak Bernam	Sabah,Sabak,Sabak Bernam,Sobak Bernam	3.7698	100.9879	P	PPL	MY		12	1708			8696		4	Asia/Kuala_Lumpur	2024-04-22
+1735199	Sungai Besar	Sungai Besar	Kampong Sungei Besar,Sungai Besar,cunkai pecar,da gang,சுங்கை பெசார்,大港	3.6746	100.9867	P	PPL	MY		12	1708			26939		8	Asia/Kuala_Lumpur	2021-04-17
+1735227	Kuantan	Kuantan	KUA,Koan-tan-su,Kuala Kuantan,Kuala Kuatan,Kuantan,Kôan-tan-sṳ,guan dan,ku'antana,kuantan,kuvantan,kuwanitani,kuyantana,kvantana,kwantan,kwn tan,Куантан,كوانتان,کوانتان,कुआंतान,क्वांतान,কুয়ান্তান,ਕੁਆਂਤਾਨ,குவாந்தான்,กวนตัน,ኩዋንታን,クアンタン,关丹,쿠안탄	3.8077	103.326	P	PPLA	MY		06	0805			548014		12	Asia/Kuala_Lumpur	2026-04-14
+1735244	Kuala Pahang	Kuala Pahang	Kampong Kuala Pahang,Kampong Pahang,Kuala Pahang,Pahang,Pahang Tua Hulu,gua la peng heng,kwala bahanj,كوالا باهانج,瓜拉彭亨	3.5321	103.4619	P	PPL	MY		06	0808			12540		6	Asia/Kuala_Lumpur	2025-12-12
+1735258	Mambang Di Awan	Mambang Di Awan	Mambang Di Awan,Mambang Diawan,mampan ti avan,wan bang diao wan,மம்பாங் டி அவான்,万邦刁湾,萬邦刁灣	4.26667	101.15	P	PPL	MY		07	0906			13300		29	Asia/Kuala_Lumpur	2024-10-23
+1735262	Tanah Rata	Tanah Rata	Cameron,Tana Rata,Tanah Rata,Тана Рата	4.46361	101.3763	P	PPLA2	MY		06	0803			7000		1488	Asia/Kuala_Lumpur	2024-04-19
+1735263	Ringlet	Ringlet	Ringlet	4.4155	101.3836	P	PPL	MY		06	0803			8242		1127	Asia/Kuala_Lumpur	2024-04-19
+1735265	Sungai Siput	Sungai Siput	Selatan,Sungai Siput,Sungei Sipid	4.3945	101.1947	P	PPL	MY		07	0906			49000		48	Asia/Kuala_Lumpur	2024-10-17
+1735268	Batu Gajah	Batu Gajah	Batu Gaah,Batu Gajah	4.46916	101.04107	P	PPL	MY		07	0906			46183		31	Asia/Kuala_Lumpur	2021-04-17
+1735274	Kampar	Kampar	Kampar	4.3	101.15	P	PPL	MY		07	0906			19056		25	Asia/Kuala_Lumpur	2021-04-17
+1735282	Tapah Road	Tapah Road	Tapah Lu,Tapah Road,da ba lu,tappa rotu,தாப்பா ரோடு,打巴路	4.16667	101.2	P	PPL	MY		07	0901			27863		40	Asia/Kuala_Lumpur	2024-04-22
+1735287	Bidur	Bidur	Bidor,Bidur	4.11667	101.28333	P	PPL	MY		07	0901			30016		39	Asia/Kuala_Lumpur	2021-04-17
+1735339	Mukah	Mukah	MKM,Muka,Mukah	2.89435	112.09145	P	PPL	MY		11	1320			33478		6	Asia/Kuching	2024-04-22
+1735404	Tatau	Tatau	Tatau,da dao,达岛,達島	2.88333	112.85	P	PPL	MY		11	1331			31920		22	Asia/Kuching	2024-04-22
+1735406	Balingian	Balingian	Baligian,Balingian	2.93057	112.54135	P	PPL	MY		11	1320			8797		3	Asia/Kuching	2024-04-22
+1735433	Parit	Parit	Parit	4.48333	100.91667	P	PPL	MY		07	0910			60988		44	Asia/Kuala_Lumpur	2024-10-27
+1735434	Pusing	Pusing	Pusing	4.4941	101.0079	P	PPL	MY		07	0906			6780		54	Asia/Kuala_Lumpur	2024-04-22
+1735447	Pangkor	Pangkor	Kampong Raja Bayang,PKG,Pangkor,Pangkur	4.2134	100.5747	P	PPL	MY		07	0909			10000		9	Asia/Kuala_Lumpur	2024-10-25
+1735450	Lumut	Lumut	Lumut	4.2323	100.6298	P	PPL	MY		07	0909			39595		13	Asia/Kuala_Lumpur	2021-04-17
+1735453	Sitiawan	Sitiawan	SWY,Simpang Ampat,Sitiavan,Sitiawan,Ситиаван	4.2168	100.6996	P	PPL	MY		07	0909			156234		9	Asia/Kuala_Lumpur	2026-09-14
+1735459	Teluk Intan	Teluk Intan	Telok Anson,Teluk Anson,Teluk Intan,Teluk-Intan,an shun,an shun shi,teluk intan,terokkuintan,teullug-intan,Телук-Интан,தெலுக் இந்தான்,テロックインタン,安顺,安顺市,틀룩인탄	4.02219	101.02083	P	PPL	MY		07	0902			232800		4	Asia/Kuala_Lumpur	2026-09-14
+1735485	Gurun	Gurun	Gurun,Kampung Gurun	5.81717	100.47381	P	PPL	MY		02	0204			15964		22	Asia/Kuala_Lumpur	2021-04-17
+1735489	Yan Besar	Yan Besar	Yan,Yan Besar,Yen	5.7989	100.37264	P	PPL	MY		02	0212			67653		9	Asia/Kuala_Lumpur	2024-04-19
+1735498	Sungai Petani	Sungai Petani	Sungai Patani,Sungai Petani,Sungaj Petani,Sungei Patani,Сунгай Петани	5.647	100.48772	P	PPL	MY		02	0204			544851		17	Asia/Kuala_Lumpur	2026-09-14
+1735506	Kepala Batas	Kepala Batas	Jia Pao Ba Di,Kapala Batas,Kepala Batas,jia pao ba di,甲抛峇底	5.51707	100.4265	P	PPL	MY		09	1104			17131		8	Asia/Kuala_Lumpur	2024-09-30
+1735518	Keruh	Keruh	Keroh,Keruh,Kroh,PH,Pengkalan Hulu	5.71667	101	P	PPL	MY		07	0903			14661	380	340	Asia/Kuala_Lumpur	2024-10-09
+1735533	Melor	Melor	Melor,Melur	5.96561	102.29422	P	PPL	MY		03	0304			5777		19	Asia/Kuala_Lumpur	2024-10-27
+1735545	Pasir Puteh	Pasir Puteh	Pasir Puteh,Pasir Putekh,Pasir Putih,Пасир Путех	5.83333	102.4	P	PPL	MY		03	0308			137400		7	Asia/Kuala_Lumpur	2026-09-14
+1735546	Cherang Ruku	Cherang Ruku	Cherang Ruku,Kampong Cherang Ruku,Kampung Cerang Ruku	5.87062	102.49479	P	PPL	MY		03				14656		3	Asia/Kuala_Lumpur	2024-10-27
+1735553	Tanah Merah	Tanah Merah	Tanah Merah,Tanah Merak	5.8	102.15	P	PPL	MY		03	0309			29116		19	Asia/Kuala_Lumpur	2021-04-17
+1735572	Kuala Krai	Kuala Krai	Kuala Kerai,Kuala Krai,Kuala Krail,Kuala Lebir,Куала Краи	5.5313	102.19925	P	PPL	MY		03	0305			105007		36	Asia/Kuala_Lumpur	2026-09-14
+1735634	Kuching	Kuching	KCH,Kuching,Kucingas,Kučingas,gu jin,ku ching,kuchin,kuching,kuciga,kucim,kucinga,kuciniግ,kwchyng,kwtshyngh,kwtshynj,qwzyng,Кучинг,קוצינג,كوتشينغ,کوتشينج,کوچینگ,कुचिंग,কুচিং,ਕੁਚਿੰਗ,กูชิง,ኩቺንግ,クチン,古晉,쿠칭	1.55	110.33333	P	PPLA	MY		11	1311			402738		8	Asia/Kuching	2026-04-14
+1735681	Simunjan	Simunjan	Simunjan	1.38333	110.75	P	PPL	MY		11	1328			23011		7	Asia/Kuching	2024-04-22
+1735753	Pantu	Pantu	Pantu,Pantu Bazaar,Pasar Pantu	1.13968	111.11771	P	PPL	MY		11	1330			9852		7	Asia/Kuching	2024-04-22
+1735799	Sri Aman	Sri Aman	Bandar Sri Aman,SGG,Simanggang,Simmangang,Simmanggang,Sri Aman	1.24722	111.45278	P	PPL	MY		11	1330			47313		11	Asia/Kuching	2024-04-22
+1735837	Sarikei	Sarikei	Sarikei,Seriki,Siriki,salikei,사리케이	2.11667	111.51667	P	PPL	MY		11	1324			44039		11	Asia/Kuching	2024-04-22
+1735851	Maradong	Maradong		2.08333	111.61667	P	PPL	MY		11	1318			20299		10	Asia/Kuching	2024-04-22
+1735881	Binatang	Binatang	Bandar Bintangor,Binatan,Binatang,Bintangor	2.16667	111.63333	P	PPL	MY		11	1318			7912		6	Asia/Kuching	2024-10-19
+1735889	Julau	Julau	Julau,Nanga Julan,Nanga Julau,jwlaw,lu lou xian,جولاو,芦楼县,蘆樓縣	2.01667	111.91667	P	PPL	MY		11	1308			15333		27	Asia/Kuching	2024-04-22
+1735902	Sibu	Sibu	Fort Brooke,SBW,Siboe,Sibu,shi wu,shibu,sibu,sybw,Сибу,سيبو,سیبو,シブ,詩巫,시부	2.3	111.81667	P	PPL	MY		11	1327			198239		0	Asia/Kuching	2021-04-17
+1735963	Pakan	Pakan	Pakan	1.88333	111.68333	P	PPL	MY		11	1321			15462		63	Asia/Kuching	2024-04-22
+1736097	Kampung Oran	Kampung Oran	Kampung Oran,Oran	6.46529	100.24558	P	PPL	MY		08	1001			5210		9	Asia/Kuala_Lumpur	2024-04-19
+1736108	Kampung Titi Tinggi	Kampung Titi Tinggi	Kampung Titi Tinggi,Kampung Titi Tinggi Ulu,zhi zhi ding yi,知知丁宜	6.63726	100.26271	P	PPL	MY		08	1001			13403		42	Asia/Kuala_Lumpur	2024-10-11
+1736123	Kampung Chuping	Kampung Chuping	Kampung Chuping,zhu bin,朱宾	6.5013	100.25576	P	PPL	MY		08	1001			14428		16	Asia/Kuala_Lumpur	2024-10-11
+1736278	Kangar	Kangar	Kangar,Perlis,Poelit,Polit,jia yang,kang-aleu,kangara,kangaru,kangr,kanigari,kanjar,kankar,kngr,Кангар,كانجار,کانجار,کانگر,کنگر,कांगार,কাঙ্গার,ਕਾਂਗਾਰ,கங்கார்,ካንጋር,カンガル,加央,캉아르	6.4414	100.19862	P	PPLA	MY		08	1001			63869		8	Asia/Kuala_Lumpur	2026-04-14
+1736284	Changloon	Changloon	Canglun,Changloon,Changlun,cang lun,xiang long,zhang lun,จังลุน,樟侖,象隆	6.43422	100.43133	P	PPL	MY		02	0205			18872		34	Asia/Kuala_Lumpur	2024-04-19
+1736292	Kuala Perlis	Kuala Perlis	Kampong Kuala Perlis,Kampong Perlis,Kuala Perlis,Perlis Port,bo li shi gang kou,玻璃市港口	6.4	100.13333	P	PPL	MY		08	1001			13917		6	Asia/Kuala_Lumpur	2024-10-11
+1736302	Jitra	Jitra	Jitra,ci tra,jitra,jittora,ri de la,ஜித்ரா,จีตรา,ジットラ,日得拉	6.26812	100.42167	P	PPL	MY		02	0205			63489		17	Asia/Kuala_Lumpur	2021-04-17
+1736303	Kepala Batas	Kepala Batas	Kepala Bataih,Kepala Batas,Kepala Batas  Kedah	6.20411	100.40754	P	PPL	MY		02	0203			12397		12	Asia/Kuala_Lumpur	2024-04-21
+1736305	Kuala Kedah	Kuala Kedah	Kedah Port,Kouala Kentach,Kuala Kedah,Kuala-Kedakh,ji da gang kou,kola keta,Κουάλα Κεντάχ,Куала-Кедах,கோலா கெடா,吉打港口	6.1	100.3	P	PPL	MY		02	0203			19231		7	Asia/Kuala_Lumpur	2026-08-30
+1736308	Langgar	Langgar	Langgar	6.14762	100.43238	P	PPL	MY		02	0210			5872		6	Asia/Kuala_Lumpur	2024-04-19
+1736309	Alor Setar	Alor Setar	AOR,AS,Alor Setar,Alor Setaras,Alor Star,Alor-Setar,Alor-Star,Alostar,Alur Setar,Kota Setar,Loqstaq,Saiburu,Thai,Yaluo Shida,Yàluó Shìdǎ,alloleuseutaleu,alor star,alora setara,alwr star,alwr sytar,arosuta,xlxrstar,ya luo shi da,ʿelori setari,Алор Стар,Алор-Сетар,Алор-Стар,ألور ستار,الور ستار,الور سیتار,अलोर सेतार,আলোর সেতার,ਅਲੋਰ ਸੇਤਾਰ,அலோர் ஸ்டார்,อลอร์สตาร์,አሎር ሴታር,アロースター,亚罗士打,亞羅士打,알로르스타르	6.12104	100.36014	P	PPLA	MY		02	0203			417800		7	Asia/Kuala_Lumpur	2026-04-14
+1736314	Tokai	Tokai	Tokai,duo jie,多皆	6.02867	100.40691	P	PPL	MY		02	0209			30000		7	Asia/Kuala_Lumpur	2024-10-27
+1736316	Kangkong	Kangkong	Kampong Kuala Kangkong,Kampung Kuala Kang Kung,Kampung Kuala Kangkong	6.0005	100.34463	P	PPL	MY		02	0203			6034		7	Asia/Kuala_Lumpur	2024-04-20
+1736326	Sintok	Sintok	Sintok,Sintuk	6.44233	100.5235	P	PPL	MY		02	0205			12942		66	Asia/Kuala_Lumpur	2024-04-21
+1736331	Kuala Nerang	Kuala Nerang	Kuala Nerang	6.25844	100.61264	P	PPL	MY		02	0208			7802		29	Asia/Kuala_Lumpur	2024-04-19
+1736338	Pokok Sena	Pokok Sena	Pokok Sena,bo ge xian na,波各先那	6.17055	100.51885	P	PPL	MY		02	0210			19677		24	Asia/Kuala_Lumpur	2024-10-11
+1736356	Tumpat	Tumpat	Tumpat	6.19775	102.17098	P	PPLA2	MY		03	0310			12280		7	Asia/Kuala_Lumpur	2025-11-03
+1736363	Pengkalan Chepa	Pengkalan Chepa	Pengkalan Cepa,Pengkalan Chepa	6.17471	102.28802	P	PPL	MY		03	0304			14000		7	Asia/Kuala_Lumpur	2024-10-28
+1736366	Wakaf Baharu	Wakaf Baharu	Huaka Balu,WB,Wakaf Baharu,Wakaf Bharu,hua ka ba lu,waqf bharw,واقف بهارو,华卡峇鲁,華卡峇魯	6.11667	102.2	P	PPL	MY		03	0310			17033		10	Asia/Kuala_Lumpur	2024-10-08
+1736372	Pasir Mas	Pasir Mas	Pasir Mas,Пасир Мас	6.04934	102.13987	P	PPLA2	MY		03	0307			230424		13	Asia/Kuala_Lumpur	2026-09-14
+1736376	Kota Bharu	Kota Bharu	Bharu,KBR,Khota Baharu,Khota Bahru,Ko-ta-hap-lu-su,Kota Baharu,Kota Bahru,Kota Baru,Kota Bharu,Kota-Baru,Kô-tá-ha̍p-lû-sṳ,ge da ba lu,kota bharu,kotabalu,kotabaru,kweta baru,kwta bharw,kwٹa bھarw,Кота Бару,Кота-Бару,كوتا بهارو,کوتا بهارو,کوٹا بھارو,कोटा भारु,কোটা ভারু,ਕੋਟਾ ਭਾਰੂ,โกตาบารู,ኮታ ባሩ,コタバル,哥打巴鲁,코타바루	6.12361	102.24333	P	PPLA	MY		03	0304			568900		10	Asia/Kuala_Lumpur	2026-04-14
+1736405	Jertih	Jertih	Jerteh,Jertih	5.7336	102.4897	P	PPL	MY		13	1501			13526		16	Asia/Kuala_Lumpur	2021-04-17
+1736458	Kudat	Kudat	KUD,Kudat	6.88732	116.82364	P	PPL	MY		16				32393		1	Asia/Kuching	2020-11-01
+1736509	Bandau	Bandau	Bandau,Bandau Kota Marudu	6.5205	116.7534	P	PPL	MY		16	1207			8716		9	Asia/Kuching	2024-10-21
+1736633	Kampung Kundassang	Kampung Kundassang	Kampong Kundassan,Kampung Kundassang,Kundasang,Kundassan	5.9824	116.5712	P	PPL	MY		16	1217			11251		1229	Asia/Kuching	2024-10-21
+1736660	Kota Belud	Kota Belud	Khota Balud,Kota Belud,gu da mao lu,gu da mao lu xian,kotta pelut,Кота Белуд,கோத்தா பெலுட்,コタ・ブルッ,古打毛律,古打毛律縣	6.351	116.4305	P	PPL	MY		16	1205			12825		31	Asia/Kuching	2021-04-17
+1736716	Spaoh	Spaoh	Spaoh,shi ba he fu xian,实巴荷副县	1.5	111.5	P	PPL	MY		11	1304			11063		15	Asia/Kuching	2024-04-22
+1736718	Roban	Roban		1.91667	111.33333	P	PPL	MY		11	1323			6722		17	Asia/Kuching	2024-04-22
+1736722	Pusa	Pusa	Pusa	1.58333	111.25	P	PPL	MY		11	1304			14273		2	Asia/Kuching	2024-04-22
+1736734	Debak	Debak	Debak,dbak,ning mu,دباک,宁木	1.56667	111.41667	P	PPL	MY		11	1304			7907		14	Asia/Kuching	2024-04-22
+1736754	Maludam	Maludam	Maludam,yu nan fu xian,裕南副县	1.65	111.03333	P	PPL	MY		11	1304			5284		4	Asia/Kuching	2024-04-22
+1736760	Saratok	Saratok	Saratok,Seratok,sha la zhuo,shi la zhuo xian,Сараток,實拉卓縣,砂拉卓	1.73333	111.33333	P	PPL	MY		11	1323			19009		8	Asia/Kuching	2026-08-30
+1736781	Daro	Daro	Daro	2.51688	111.43002	P	PPL	MY		11	1307			19477		1	Asia/Kuching	2025-12-14
+1736827	Oya	Oya	Dya,Oya	2.86667	111.88333	P	PPL	MY		11	1306			6027		3	Asia/Kuching	2024-04-22
+1736834	Matu	Matu	Matu	2.68333	111.53333	P	PPL	MY		11	1317			13327		12	Asia/Kuching	2024-04-22
+1736868	Lubok Antu	Lubok Antu	Lubok Antu	1.04186	111.83398	P	PPL	MY		11	1314			9542		34	Asia/Kuching	2024-04-22
+1736870	Engkilili	Engkilili	Engkelili,Engkilili,ying ji li li,英吉利裏,英吉利里	1.13864	111.66665	P	PPL	MY		11	1330			15031		11	Asia/Kuching	2024-04-20
+1736902	Betong	Betong	Beton'nk,Betong,Betonga,Betongas,UBL,baitonga,berang,betam,betang,betanga,beton,betong,betonga,bex tng,bytwnj,bytwnj   sarawak,mu zhong,mu zhong xian,peton,Μπετόνγκ,Бетонг,بيتونج,بیتونج ، ساراواک,बेटोंग,बैतोंग,বেতং,બેટંગ,பெடோங்,బెరాంగ్,ಬೆಟಾಂಗ್,බෙටෝන්ග්,เบอตง,ベトン,木中,木中縣,베통	1.4	111.51667	P	PPL	MY		11	1304			36303		41	Asia/Kuching	2026-11-12
+1736929	Dalat	Dalat	Dalat	2.66667	112.08333	P	PPL	MY		11	1306			21147		28	Asia/Kuching	2024-04-22
+1736973	Kanowit	Kanowit	Fort Emma,Kanowit,jia na yi,jia na yi xian,kanovit,kanwyt,کانویت,கனோவிட்,加拿逸,加拿逸縣	2.1	112.15	P	PPL	MY		11	1309			24700		16	Asia/Kuching	2024-04-22
+1737012	Lundu	Lundu	Kampong Lundu,Lundu	1.67439	109.85171	P	PPL	MY		11	1315			26372		9	Asia/Kuching	2024-04-22
+1737015	Sematan	Sematan	BSE,Sematan,Simatan	1.8	109.76667	P	PPL	MY		11	1315			7107		9	Asia/Kuching	2024-04-22
+1737184	Song	Song	Song,Song Fort	2.01667	112.55	P	PPL	MY		11	1329			9961		63	Asia/Kuching	2024-04-22
+1737185	Kapit	Kapit	KPI,Kapit,Kapit Fort,Капит	1.99546	112.93254	P	PPL	MY		11	1310	1737066		33014		43	Asia/Kuching	2024-04-22
+1737247	Niah	Niah	Kampong Niah,Niah	3.86203	113.71521	P	PPL	MY		11	1319			48875		16	Asia/Kuching	2024-04-22
+1737314	Belaga	Belaga	BLG,Belaga,Belaga Fort	2.7	113.78333	P	PPL	MY		11	1303			22502		75	Asia/Kuching	2024-04-22
+1737486	Bintulu	Bintulu	BTU,Bintulu,bintullu,byntwlw,min dou lu,Бинтулу,بينتولو,بینتولو,民都魯,民都鲁,빈툴루	3.16667	113.03333	P	PPL	MY		11	1305			151617		8	Asia/Kuching	2021-04-17
+1737489	Sebauh	Sebauh		3.11667	113.26667	P	PPL	MY		11	1305			29606		10	Asia/Kuching	2024-04-22
+1737589	Lawas	Lawas	LWY,Lawas,lao yue,老越	4.8604	115.409	P	PPL	MY		11	1312			26002		10	Asia/Kuching	2024-05-05
+1737628	Sundar	Sundar	Sundar,Sundar Bazaar	4.88953	115.20752	P	PPL	MY		11	1312			6806		10	Asia/Kuching	2026-03-10
+1737694	Nanga Medamit	Nanga Medamit		4.46667	114.91667	P	PPL	MY		11	1313			6968		17	Asia/Kuching	2024-04-20
+1737714	Limbang	Limbang	LMN,Limbang,Лимбанг	4.75477	115.01011	P	PPL	MY		11	1313			38093		5	Asia/Kuching	2024-04-22
+1737919	Marudi	Marudi	Claudetown,MUR,Marudi	4.18333	114.31667	P	PPL	MY		11	1316			90100		15	Asia/Kuching	2023-08-20
+1737936	Beluru	Beluru		3.98333	114.1	P	PPL	MY		11	1316			28695		14	Asia/Kuching	2024-04-22
+1737957	Long Lama	Long Lama	Long Lama	3.76667	114.4	P	PPL	MY		11	1316			5870		16	Asia/Kuching	2024-04-22
+1738050	Miri	Miri	Bandar Miri,MYY,Marabu,Miri,mei li,mili,miri,myry,Мири,ميري,میری,മിറി,მირი,ミリ,美里,미리	4.39928	113.99163	P	PPL	MY		11	1319			300543		8	Asia/Kuching	2022-12-06
+1738294	Ulu Tiram	Ulu Tiram	Ulu Tiram,Ulu Tiram Village,ulu tiram,wu lu de nan,wu lu die nan,உலு திராம்,乌鲁地南,烏魯哋南,烏魯地南	1.6	103.81667	P	PPL	MY		01	0102			75350		28	Asia/Kuala_Lumpur	2021-04-17
+1738403	Ulu Kinta	Ulu Kinta		4.66667	101.21667	P	PPL	MY		07				9799		227	Asia/Kuala_Lumpur	2024-04-22
+1738412	Ulu Kelang	Ulu Kelang	Ulu Kelang,Ulu Klang	3.18	101.773	P	PPL	MY		12	1701			28222		186	Asia/Kuala_Lumpur	2024-04-22
+1740836	Telaga Batu	Telaga Batu	Telaga Batu,Телага Бату	5.46667	100.23333	P	PPL	MY		09				10000		-9999	Asia/Kuala_Lumpur	2016-03-10
+1741550	Tanjung Tokong	Tanjung Tokong	Tanjong Tokong,Tanjung Tokong,dan rong dao guang,丹绒道光	5.46061	100.30742	P	PPL	MY		09	1105			12550		10	Asia/Kuala_Lumpur	2024-04-19
+1741562	Tanjung Sepat	Tanjung Sepat	Kampong Tanjong Sepat,Tanjong Sepat,Tanjung Sepat	2.6579	101.5629	P	PPL	MY		12	1705			22340		6	Asia/Kuala_Lumpur	2021-04-17
+1742667	Sungai Pelek New Village	Sungai Pelek New Village	Sungai Pelek New Village	2.65	101.7	P	PPL	MY		12	1709			13829		12	Asia/Kuala_Lumpur	2021-04-17
+1742731	Sungai Lalang	Sungai Lalang	Sungai Lalang	5.6998	100.51449	P	PPL	MY		02	0204			34947		7	Asia/Kuala_Lumpur	2024-10-17
+1742741	Sungai Kob	Sungai Kob	Kampung Sungai Kob,Sungai Kob	5.42998	100.64484	P	PPL	MY		02	0206			5777		45	Asia/Kuala_Lumpur	2024-10-27
+1742815	Sungai Dua	Sungai Dua	Sungai Dua	5.44266	100.42972	P	PPL	MY		09	1104			28100		7	Asia/Kuala_Lumpur	2024-10-11
+1742906	Sungai Sumun	Sungai Sumun	Sumun,Sungai Sumun	3.8915	100.8532	P	PPL	MY		07	0902			10781		5	Asia/Kuala_Lumpur	2024-10-23
+1743587	Simpang	Simpang	Simpang	4.81667	100.7	P	PPL	MY		07	0908			5132		7	Asia/Kuala_Lumpur	2024-10-23
+1744246	Seri Kembangan	Seri Kembangan	Serdang,Seri Kembangan,Сери Кембанган	3.03333	101.71667	P	PPL	MY		12	1707			130252		57	Asia/Kuala_Lumpur	2026-09-14
+1744288	Serian	Serian	Serian,Serian Bazaar	1.16667	110.56667	P	PPL	MY		11	1326			58059		20	Asia/Kuching	2024-04-22
+1744366	Serdang	Serdang	Bandar Serdang,Gedong,Serdang	5.20372	100.62476	P	PPL	MY		07				6793		28	Asia/Kuala_Lumpur	2024-10-23
+1744508	Seputeh	Seputeh		3.11667	101.68333	P	PPL	MY		14	0401			18605		57	Asia/Kuala_Lumpur	2024-04-21
+1744763	Sentul	Sentul	Sentul,Сентул	3.18333	101.68333	P	PPL	MY		14	0401			100000		41	Asia/Kuala_Lumpur	2026-10-22
+1748731	Relau	Relau	Mukim 10,Relau	5.33096	100.28296	P	PPL	MY		09	1105			18755		7	Asia/Kuala_Lumpur	2024-05-14
+1749659	Pulau Sebang	Pulau Sebang	Pulau Sebang	2.455	102.2329	P	PPL	MY		04	0601			11879		42	Asia/Kuala_Lumpur	2021-04-17
+1749805	Pudu	Pudu	Pudoh,Pudu	3.13333	101.71667	P	PPL	MY		14	0401			15000		54	Asia/Kuala_Lumpur	2024-10-24
+1749822	Puchong	Puchong	Puchong,Puchong New Village,Пучонг	3	101.61667	P	PPL	MY		12	1707			375181		27	Asia/Kuala_Lumpur	2026-09-14
+1750500	Permatang Kuching	Permatang Kuching	Permatang Kuching	5.46339	100.38144	P	PPL	MY		09	1104			27191		10	Asia/Kuala_Lumpur	2021-04-17
+1750582	Peringat	Peringat	Peringat	6.03333	102.28333	P	PPL	MY		03	0304			23288		11	Asia/Kuala_Lumpur	2021-04-17
+1750974	Ladang Seri Kundang	Ladang Seri Kundang	Ladang Seri Kundang,Pengkalan Kundang	3.2856	101.519	P	PPL	MY		12	1701			23307		25	Asia/Kuala_Lumpur	2021-04-17
+1752256	Pantai Remis	Pantai Remis	Kampong Pantai Remis,Pantai Remis,Pantei Remis,ban tai,pantay remis,பந்தாய் ரெமிஸ்,班台	4.4557	100.6288	P	PPL	MY		07	0909			16317		6	Asia/Kuala_Lumpur	2021-04-17
+1753004	Padang Besar	Padang Besar	Padang Besar	6.38333	100.3	P	PPL	MY		02	0205			16235		7	Asia/Kuala_Lumpur	2024-04-21
+1756720	Lukut	Lukut	Lukut,lu gu,lukkut,lwkwt,لوكوت,لوکوت,லுக்குட்,盧骨,芦骨,蘆骨	2.5703	101.833	P	PPL	MY		05	0704			16450		12	Asia/Kuala_Lumpur	2024-04-27
+1759378	Kubang Semang	Kubang Semang	Kubang Semang	5.40375	100.45745	P	PPL	MY		09	1103			27194		9	Asia/Kuala_Lumpur	2024-10-17
+1759486	Kuang	Kuang	Kuang,Куанг	3.2594	101.5541	P	PPL	MY		12	1701			21185		46	Asia/Kuala_Lumpur	2021-04-17
+1759513	Kuala Sungai Baru	Kuala Sungai Baru	Kuala Sungai Baharu,Kuala Sungai Baru	2.3594	102.0353	P	PPL	MY		04	0601			12269		9	Asia/Kuala_Lumpur	2021-04-17
+1759564	Kuala Ketil	Kuala Ketil	Kuala Ketil,gua la ji di,kola kettil,கோலா கெட்டில்,クアラ・ケチル,瓜拉吉底	5.6	100.65	P	PPL	MY		02	0201			19209		23	Asia/Kuala_Lumpur	2024-04-20
+1760605	Kepong	Kepong	Kepong	3.21398	101.64018	P	PPL	MY		14	0401			85960		79	Asia/Kuala_Lumpur	2024-10-17
+1761242	Klebang Besar	Klebang Besar	Kelebang Besar,Klebang Besar	2.2186	102.1995	P	PPL	MY		04	0603			38643		5	Asia/Kuala_Lumpur	2021-04-17
+1761293	Kelapa Sawit	Kelapa Sawit	Kelapa Sawit,Sawit,jia la ba sha wei,加拉巴沙威	1.6698	103.5327	P	PPL	MY		01	0105			13239		24	Asia/Kuala_Lumpur	2024-04-21
+1762110	Kampung Kangkar Teberau	Kampung Kangkar Teberau	Kampung Kangkar Teberau,Kangkai Tebrau,Kangkar Teberau,Tbrau,Teberau,Tebrau,Кампунг Кангкар Теберау	1.532	103.7549	P	PPL	MY		01	0102			412373		10	Asia/Kuala_Lumpur	2026-09-14
+1763240	Tebengau	Tebengau	Kampong Tebengau,Kampung Tebengau	6.04603	100.33137	P	PPL	MY		02	0203			5415		6	Asia/Kuala_Lumpur	2024-04-20
+1763251	Kampung Tawar Besar	Kampung Tawar Besar	Kampong Tawar Besar,Kampung Tawar Besar	5.55658	100.81204	P	PPL	MY		02	0201			8642		81	Asia/Kuala_Lumpur	2024-04-20
+1763378	Kampung Tanjung Minyak	Kampung Tanjung Minyak	Kampong Tanjong Minyak,Kampung Tanjung Minyak,Tanjong Minyak,Tanjung Minyak	2.2666	102.2004	P	PPL	MY		04	0603			23074		22	Asia/Kuala_Lumpur	2024-10-23
+1763410	Kampung Tanjung Keling	Kampung Tanjung Keling	Kampong Tanjong Keling,Kampong Tanjong Kling,Kampung Tanjung Keling,Tanjong Keling,Tanjong Kling,Tanjung Keling,Tanjung Kling	2.2267	102.1716	P	PPL	MY		04	0603			10552		8	Asia/Kuala_Lumpur	2024-10-23
+1763412	Kampung Tanjung Karang	Kampung Tanjung Karang	Kampung Tanjung Karang,Tanjong Karang	3.4242	101.1849	P	PPL	MY		12	1706			16393		7	Asia/Kuala_Lumpur	2021-04-17
+1763436	Kampong Tanjong Chat	Kampong Tanjong Chat	Chat,Kampong Tanjong Chat,Tanjong Chat,Tanjung Chat	6.15	102.25	P	PPL	MY		03	0304			5462		8	Asia/Kuala_Lumpur	2024-10-11
+1763649	Kampong Tajar	Kampong Tajar	Kampong Tajar,Tajar	6.1	100.41667	P	PPL	MY		02	0210			9441		2	Asia/Kuala_Lumpur	2024-05-14
+1763999	Kampung Sungai Kajang	Kampung Sungai Kajang	Kampong Sungai Kajang,Kampung Sungai Kajang	3.4161	101.173	P	PPL	MY		12	1706			84031		5	Asia/Kuala_Lumpur	2024-04-22
+1764027	Kampung Sungai Glugur	Kampung Sungai Glugur	Glugor,Kampong Glugor,Kampong Sungai Gelugor,Kampung Sungai Glugur,Кампунг Сунгаи Глугур	5.36966	100.31353	P	PPL	MY		09	1105			145600	4	9	Asia/Kuala_Lumpur	2026-09-14
+1764160	Kampung Sungai Ara	Kampung Sungai Ara	Kampong Sungai Ara,Kampung Sungai Ara,Sungei Ara,Кампунг Сунгаи Ара	5.32699	100.27348	P	PPL	MY		09	1101			140849		21	Asia/Kuala_Lumpur	2026-09-14
+1764281	Kampung Siong	Kampung Siong	Kampong Siong,Kampung Siong	5.78863	100.90862	P	PPL	MY		02	0201			9413		110	Asia/Kuala_Lumpur	2024-04-20
+1764318	Kampung Simpang Renggam	Kampung Simpang Renggam	Kampong Simpang Rengam,Kampung Simpang Renggam	1.8278	103.3	P	PPL	MY		01	0103			17528		16	Asia/Kuala_Lumpur	2021-04-17
+1764319	Kampung Simpang Pulai	Kampung Simpang Pulai	Kampong Simpang Pulai,Kampung Simpang Pulai,Simpang Pulai	5.71057	100.99651	P	PPL	MY		07	0903			8102		339	Asia/Kuala_Lumpur	2024-04-22
+1764366	Kampong Sijangkang	Kampong Sijangkang	Kampong Sijangkang,Kampung Sijangkang,Sijangkang	2.94048	101.46367	P	PPL	MY		12	1705			5723		8	Asia/Kuala_Lumpur	2024-10-22
+1764375	Kampong Sidam	Kampong Sidam	Kampong Sidam,Sidam,xi tang,西塘	5.53333	100.56667	P	PPL	MY		02	0206			60983		11	Asia/Kuala_Lumpur	2024-11-13
+1764685	Kampung Selang	Kampung Selang	Kampong Selang,Kampung Selang,Selang	2.35	102.876	P	PPL	MY		01	0108			20000		22	Asia/Kuala_Lumpur	2024-10-27
+1765323	Kampung Pulai	Kampung Pulai	Kampong Pulai,Kampung Pulai	5.65838	100.89172	P	PPL	MY		02	0201			6129		51	Asia/Kuala_Lumpur	2024-04-20
+1765357	Kampung Pondok Upih	Kampung Pondok Upih	Kampong Pondok Upeh,Kampung Pondok Upih,Mukim 6,Mukim 6  Daerah Barat Daya,Pondok Upeh,Pondok Upih	5.33733	100.23247	P	PPL	MY		09	1101			7679		20	Asia/Kuala_Lumpur	2024-10-12
+1765613	Kampung Pering	Kampung Pering	Kampong Perin,Kampung Pering,Perin,Pering	6.37598	100.33644	P	PPL	MY		02	0205			7227		16	Asia/Kuala_Lumpur	2024-04-22
+1765718	Pengkalan Kundor	Pengkalan Kundor	Kampong Pengkalan Kundor,Kampung Pengkalan Kundor,wan jia jun le,万加均乐	6.07794	100.36038	P	PPL	MY		02	0203			5328		5	Asia/Kuala_Lumpur	2024-10-14
+1765769	Pendang	Pendang	Kampong Pendang,Pendang,ben tong,pentan,பெண்டாங்,本同	5.99516	100.47885	P	PPL	MY		02	0209			94033		8	Asia/Kuala_Lumpur	2024-11-13
+1766249	Kampong Pangkal Kalong	Kampong Pangkal Kalong	Kampong Pangkal Kalong	5.91667	102.21667	P	PPL	MY		03	0304			39904		31	Asia/Kuala_Lumpur	2021-04-17
+1766484	Kampung Padang Lalang	Kampung Padang Lalang	Kampong Padang Lalang,Kampung Padang Lalang,Padang Lalang	6.16368	100.3099	P	PPL	MY		02	0203			5216		7	Asia/Kuala_Lumpur	2024-04-19
+1766686	Kampung Naga Lilit	Kampung Naga Lilit	Kampong Nega Lilit,Kampung Naga Lilit,Naga	5.47646	100.55087	P	PPL	MY		02	0206			5547		18	Asia/Kuala_Lumpur	2024-04-20
+1766795	Kampung Minyak Beku	Kampung Minyak Beku	Kampong Minyak Beku,Kampung Minyak Beku,Minyak Beku	1.7954	102.8971	P	PPL	MY		01	0101			19374		12	Asia/Kuala_Lumpur	2024-04-21
+1766841	Kampong Merbok	Kampong Merbok	Bandar Merbok,Kampong Merbok,Merbok	5.71667	100.41667	P	PPL	MY		02	0204			12940		20	Asia/Kuala_Lumpur	2024-10-23
+1767021	Kampong Masjid Tanah	Kampong Masjid Tanah	Kampong Masjid Tanah,Masjid Tanah	2.35	102.11667	P	PPL	MY		04	0601			29185		17	Asia/Kuala_Lumpur	2024-10-17
+1767194	Kampung Machap Baru	Kampung Machap Baru	Kampong Machap Baharu,Kampung Machap Baru,Machap Baru	2.3829	102.3311	P	PPL	MY		04	0601			16000		55	Asia/Kuala_Lumpur	2024-10-23
+1767492	Lenggong	Lenggong	Lenggong,Lenggongdalen,Valle di Lenggong,lengagona,lenkon,ling long,rengon xi gu,Ленггонг,עמק לנגונג,लेङ्गगोङ,லெங்கோங்,レンゴン渓谷,玲珑,玲瓏	5.10633	100.96792	P	PPL	MY		07	0903			12722		97	Asia/Kuala_Lumpur	2024-04-20
+1768201	Kobang	Kobang	Kampung Kobang	4.44188	118.69287	P	PPL	MY		16				11682		1	Asia/Kuching	2024-04-22
+1768286	Kampung Kerubong	Kampung Kerubong	Kampong Kerubong,Kampong Krubong,Kampung Kerubong,Krubong	2.2958	102.2537	P	PPL	MY		04	0603			31936		7	Asia/Kuala_Lumpur	2024-10-23
+1768334	Kampong Datuk Keramat	Kampong Datuk Keramat	Datuk Keramat,Datuk Keramat Village	3.16667	101.73333	P	PPL	MY		14	0401			13061		37	Asia/Kuala_Lumpur	2024-10-28
+1768664	Kampong Kadok	Kampong Kadok	Kampong Kadok	6	102.25	P	PPL	MY		03	0304			19233		12	Asia/Kuala_Lumpur	2021-04-17
+1768739	Kampung Jerlun	Kampung Jerlun	Jerlun,Kampong Jerlun,Kampung Jerlun	6.21392	100.26581	P	PPL	MY		02	0205			11094		5	Asia/Kuala_Lumpur	2024-04-19
+1769014	Ijok	Ijok	Ijok,Kampong Ijok,Kampung Ijok,Ийок	3.31667	101.4	P	PPL	MY		12	1706			100899		10	Asia/Kuala_Lumpur	2026-09-14
+1769120	Kampong Gunong	Kampong Gunong	Gunong,Kampong Gunong	5.71667	101.75	P	PPL	MY		03	0303			5800		93	Asia/Kuala_Lumpur	2024-05-14
+1769612	Kampong Dungun	Kampong Dungun	Dungun,Kampong Dungan,Kampong Dungun	3.21667	101.31667	P	PPL	MY		07				58674		9	Asia/Kuala_Lumpur	2024-04-23
+1769827	Kampung Cheng	Kampung Cheng	Cheng,Kampong Cheng,Kampung Cheng	2.2635	102.2179	P	PPL	MY		04	0603			19158		20	Asia/Kuala_Lumpur	2024-10-23
+1770137	Bukit Pinang	Bukit Pinang		5.93333	100.45	P	PPL	MY		02	0212			5012		2	Asia/Kuala_Lumpur	2024-04-20
+1770351	Kampung Bukit Baharu	Kampung Bukit Baharu	Kampong Bukit Baru,Kampung Bukit Baharu	2.2152	102.2851	P	PPL	MY		04	0603			55656		9	Asia/Kuala_Lumpur	2021-04-17
+1771023	Kampung Baru Subang	Kampung Baru Subang	Kampung Baru Subang,SZB,Subang,Кампунг Бару Субанг	3.15	101.53333	P	PPL	MY		12	1707			833571		27	Asia/Kuala_Lumpur	2026-09-14
+1771266	Kampong Bakai	Kampong Bakai		5.53333	100.73333	P	PPL	MY		02	0201			12235		32	Asia/Kuala_Lumpur	2024-04-20
+1771287	Kampung Baharu Nilai	Kampung Baharu Nilai	Kampong Baharu Nilai,Kampong Bahru Nilai,Kampong Nilai,Kampung Baharu Nilai,Kampung Bharu Nilai,Nilai,Rulai,ru lai,汝来	2.8033	101.7972	P	PPL	MY		05	0706			38612		32	Asia/Kuala_Lumpur	2024-10-18
+1771298	Kampong Baharu Cheras Batu Sebelas	Kampong Baharu Cheras Batu Sebelas	Batu 11,Batu 11 Cheras,Cheras,Cheras Batu 11,Kampong Baharu Cheras Batu Sa-Belas,Kampong Bakharu Cheras Batu Sebelas,Кампонг Бахару Черас Бату Себелас	3.05	101.76667	P	PPLX	MY		12	1702			232100		67	Asia/Kuala_Lumpur	2026-09-14
+1771304	Kampung Baru Balakong	Kampung Baru Balakong	Balakong,Kampong Baharu Balakong,Kampung Baru Balakong	3.02938	101.74714	P	PPL	MY		12	1702			69302		80	Asia/Kuala_Lumpur	2023-10-18
+1771419	Kampung Bagan	Kampung Bagan	Bagan,Kampong Bagan,Kampung Bagan	1.8481	102.8588	P	PPL	MY		01	0101			8506		10	Asia/Kuala_Lumpur	2024-04-23
+1771469	Kampung Ayer Puteh	Kampung Ayer Puteh	Ayer Puteh,Kampong Ayer Puteh,Kampung Ayer Puteh	5.18223	100.60191	P	PPL	MY		02	0202			5724		31	Asia/Kuala_Lumpur	2024-09-19
+1771485	Kampung Ayer Molek	Kampung Ayer Molek	Kampong Ayer Molek,Kampung Ayer Molek	2.2139	102.3278	P	PPL	MY		04	0603			15497		26	Asia/Kuala_Lumpur	2021-04-17
+1771606	Anak Bukit	Anak Bukit	Kampong Anak Bukit,Kampung Anak Bukit	6.184	100.37752	P	PPL	MY		02	0203			16525		8	Asia/Kuala_Lumpur	2024-04-20
+1771665	Alor Merah	Alor Merah		6.16667	100.38333	P	PPL	MY		02	0203			7273		3	Asia/Kuala_Lumpur	2024-04-20
+1772148	Juru	Juru	Juru,Rou Fu,rou fu,柔府	5.31201	100.44229	P	PPL	MY		09	1103			12265		10	Asia/Kuala_Lumpur	2024-04-19
+1772389	Jinjang	Jinjang	J-Town,zeng jiang,增江	3.20881	101.65623	P	PPL	MY		14	0401			13000		66	Asia/Kuala_Lumpur	2024-10-28
+1772808	Jelutong	Jelutong	Jelutong,Ri luo dong	5.38998	100.31885	P	PPL	MY		09	1105			63507		4	Asia/Kuala_Lumpur	2024-04-19
+1772983	Jawi	Jawi	Jawi	5.21525	100.49211	P	PPL	MY		09	1102			36601		8	Asia/Kuala_Lumpur	2024-04-19
+1774217	Guar Chempedak	Guar Chempedak	Cempedak,E zhan bi le,Guar Chempedak,Hilly Land,e zhan bi le,莪占必叻	5.85846	100.45928	P	PPL	MY		02	0212			13781		17	Asia/Kuala_Lumpur	2024-10-21
+1774382	Glenmarie Estate	Glenmarie Estate	Glenmarie	3.08333	101.58333	P	PPL	MY		12	1707			7265		25	Asia/Kuala_Lumpur	2024-04-22
+1777077	Cheras	Cheras	Cheras,Chiau-nai,Chiau-nāi,Tsiau-lai,Tsiâu-lai,Ziu Laai,ceras,jiao lai,Черас,செராஸ்,蕉賴	3.108	101.726	P	PPL	MY		12				135823		60	Asia/Kuala_Lumpur	2026-09-14
+1778252	Bukit Tengah	Bukit Tengah	Bukit Tengah,wu ji ding ya,武吉丁雅	5.34605	100.43917	P	PPL	MY		09	1103			54416		9	Asia/Kuala_Lumpur	2024-10-27
+1778262	Bukit Tambun	Bukit Tambun	Bukit Tambun	5.27179	100.4601	P	PPL	MY		09	1102			22900		9	Asia/Kuala_Lumpur	2024-04-19
+1778290	Bukit Rambai	Bukit Rambai	Bukit Rambai	2.2594	102.1838	P	PPL	MY		04	0603			17391		12	Asia/Kuala_Lumpur	2021-04-17
+1778385	Bukit Gambir	Bukit Gambir	Bukit Gambir	2.211	102.6546	P	PPL	MY		01	0106			40000		12	Asia/Kuala_Lumpur	2024-10-25
+1778409	Machap	Machap	Bukit Bulat,Kampung Baharu Bukit Bulat,Kampung Bukit Bulat	2.3862	102.2907	P	PPL	MY		04	0601			5770		55	Asia/Kuala_Lumpur	2024-10-23
+1779395	Kampung Bertam Ulu	Kampung Bertam Ulu	Bertam,Bertam Ulu,Bertam Ulu Village,Kampung Bertam Ulu	2.2898	102.1928	P	PPL	MY		04	0603			17119		15	Asia/Kuala_Lumpur	2024-10-12
+1779790	Bentong Town	Bentong Town		3.52229	101.90866	P	PPL	MY		06	0801			49213		95	Asia/Kuala_Lumpur	2021-04-17
+1779926	Bemban	Bemban	Bemban,Benbam,pempan,wang wan,Бембан,பெம்பான்,望万,望萬	2.2684	102.3746	P	PPL	MY		04	0602			14329		27	Asia/Kuala_Lumpur	2026-08-30
+1780034	Pantai Belimbing	Pantai Belimbing	Belimbing,Kampong Pamai Belimbing,Kampong Pantai Belimbing,Pantai Belimbing	2.3436	102.2567	P	PPL	MY		04	0601			8056		10	Asia/Kuala_Lumpur	2024-10-21
+1780777	Batu Kawan	Batu Kawan	Batu Kawan,ba dou jiao wan,峇都交湾	5.25822	100.42876	P	PPL	MY		09	1102			11409		6	Asia/Kuala_Lumpur	2024-04-19
+1780841	Kampung Batu Empat	Kampung Batu Empat	Batu 4,Batu Empat,Batu Empat Lekir,Kampong Batu Ampat,Kampong Batu Empat,Kampung Batu Empat	1.776	103.8736	P	PPL	MY		01	0104			21898		15	Asia/Kuala_Lumpur	2024-04-22
+1780890	Batu Berendam	Batu Berendam	Batu Berendam,Berendam,ba zhu an nan,pattu pirantam,பத்து பிரண்டாம்,バトゥ・ブレンダム,峇株安南	2.2487	102.246	P	PPL	MY		04	0603			25028		5	Asia/Kuala_Lumpur	2021-04-17
+1781996	Bagan Datoh	Bagan Datoh		3.98333	100.78333	P	PPL	MY		07	0902			9046		4	Asia/Kuala_Lumpur	2024-04-19
+1782366	Ayer Itam	Ayer Itam	Air Itam,Ayer Itam	5.40158	100.27815	P	PPL	MY		09	1105			16974		118	Asia/Kuala_Lumpur	2024-04-19
+1887974	Penaga	Penaga	Penaga	5.52719	100.3841	P	PPL	MY		09	1104			10138		5	Asia/Kuala_Lumpur	2024-10-17
+1887985	Kampung Teluk Kumbar	Kampung Teluk Kumbar	Kampung Teluk Kumbar,Mukim 11,Telok Kumbar,Teluk Kumbar	5.289	100.247	P	PPL	MY		09	1101			21481		52	Asia/Kuala_Lumpur	2025-05-05
+6695755	Templer Bestari	Templer Bestari	Taman Templer,Templer,Templer Park	3.29111	101.63802	P	PPL	MY		12	1701			6300		85	Asia/Kuala_Lumpur	2024-07-12
+6697380	Putrajaya	Putrajaya		2.93527	101.69112	P	PPLG	MY		17	1601			50000		35	Asia/Kuala_Lumpur	2024-11-13
+6804851	Kampung Baru Ulu Melaka	Kampung Baru Ulu Melaka	Kampung Baru Ulu Melaka,Ulu Melaka	6.35196	99.78791	P	PPL	MY		02	0207			18898		30	Asia/Kuala_Lumpur	2024-10-12
+6805029	Kampung Batu Lima	Kampung Batu Lima	Batu 5,Batu 5 Sik,Batu Lima Sik,Kampung Batu Lima	5.79345	100.68937	P	PPL	MY		02	0211			6739		40	Asia/Kuala_Lumpur	2024-04-27
+6805124	Sik	Sik	Sik,Sik Dalam,Syed	5.83333	100.75	P	PPL	MY		02	0211			32565		76	Asia/Kuala_Lumpur	2024-04-22
+6805130	Kampung Sok	Kampung Sok	Kampung Sok,Sok	5.77361	100.73051	P	PPL	MY		02	0211			8781		56	Asia/Kuala_Lumpur	2024-09-19
+6807244	Kampung Alor Mengkudu	Kampung Alor Mengkudu	Kampung Alor Mengkudu,ya luo meng gu dou,亚罗孟古都	6.08838	100.39167	P	PPL	MY		02	0203			38193		6	Asia/Kuala_Lumpur	2024-10-11
+6807283	Gunong	Gunong	Kampung Gunong	6.19011	100.34135	P	PPL	MY		02	0203			9200		6	Asia/Kuala_Lumpur	2024-04-20
+6807291	Simpang Empat	Simpang Empat	Simpang 4,Simpang Empat	6.02674	100.39603	P	PPL	MY		02	0203			9149		8	Asia/Kuala_Lumpur	2024-04-19
+6819209	Kampung Hutan Arau	Kampung Hutan Arau	Arau,Kampung Hutan Arau	6.42942	100.28174	P	PPL	MY		08	1001			20000		16	Asia/Kuala_Lumpur	2024-04-19
+6826913	Tanjung Bungah	Tanjung Bungah	Tanjung Bunga,dan rong wu ya,丹绒武雅	5.46491	100.28165	P	PPL	MY		09	1105			14271		18	Asia/Kuala_Lumpur	2024-04-19
+6833189	Glugor	Glugor	Glugor	5.37215	100.30708	P	PPL	MY		09	1105			18662		29	Asia/Kuala_Lumpur	2024-04-21
+6847278	Teloi Kanan	Teloi Kanan	Teloi Kanan	5.71681	100.65819	P	PPL	MY		02	0201			17972		38	Asia/Kuala_Lumpur	2024-04-20
+6847549	Tikam Batu	Tikam Batu	Tikam Batu	5.58718	100.44018	P	PPL	MY		02	0204			8323		8	Asia/Kuala_Lumpur	2024-10-25
+6847550	Kota Kuala Muda	Kota Kuala Muda	Kota Kuala Muda,Кота Куала Муда	5.58822	100.37085	P	PPL	MY		02	0204			544984		4	Asia/Kuala_Lumpur	2026-09-14
+6875842	Bagan Samak	Bagan Samak	Bagan Samak	5.0895	100.56191	P	PPL	MY		02	0202			5391		7	Asia/Kuala_Lumpur	2024-04-20
+6930887	Cyberjaya	Cyberjaya	Ciberjaya,Saybercaya,sai cheng,saibajaya,saibeojaya,sibexr ca ya,ไซเบอร์จายา,サイバージャヤ,赛城,사이버자야	2.92281	101.65718	P	PPL	MY		12	1709			79200		24	Asia/Kuala_Lumpur	2025-02-26
+7302815	Bandar Labuan	Bandar Labuan		5.28319	115.25371	P	PPL	MY		16				54752		1	Asia/Kuching	2023-01-21
+7473418	Bercham	Bercham	Bercham,Taman Bercham Aman,Берчам	4.6411	101.1393	P	PPL	MY		07	0906			150000		67	Asia/Kuala_Lumpur	2026-09-14
+7473443	Kampung Manjoi	Kampung Manjoi	Kampung Manjoi,Manjoi,wan rui,万锐	4.6192	101.0685	P	PPL	MY		07	0906			86266		47	Asia/Kuala_Lumpur	2024-10-14
+7566098	Kampung Perak	Kampung Perak	Kampung Perak,Perak	3.8682	102.5862	P	PPL	MY		06	0804			44964		65	Asia/Kuala_Lumpur	2024-09-26
+7614200	Bandar Tenggara	Bandar Tenggara	Bandar Tenggara,Tenggara,dong nan zhen,东南镇,東南鎮	1.87	103.6158	P	PPL	MY		01	0104			15278		49	Asia/Kuala_Lumpur	2024-10-24
+7619704	Johor Jaya	Johor Jaya	Rou fu zai ye,Roufu zaiye,Róufú zàiyě,Taman Johor Jaya,jokur jeya,rou fu zai ye,ஜொகூர் ஜெயா,柔佛再也	1.5392	103.8092	P	PPL	MY		01	0102			66000		24	Asia/Kuala_Lumpur	2024-10-21
+7619709	Taman Permas Jaya	Taman Permas Jaya	Permas Jaya,Taman Permas Jaya	1.511	103.8198	P	PPL	MY		01	0102			45000		18	Asia/Kuala_Lumpur	2024-10-24
+7620438	Kawasan Penempatan Ulu Sungai Benut	Kawasan Penempatan Ulu Sungai Benut	Kawasan Penempatan Ulu Sungai Benut,Ulu Benut Sungai	1.7541	103.2798	P	PPL	MY		01	0103			32226		13	Asia/Kuala_Lumpur	2024-04-21
+7620439	Kawasan Penempatan Ulu Benut Tiga	Kawasan Penempatan Ulu Benut Tiga	Kawasan Penempatan Ulu Benut Tiga,Ulu Benut 3	1.7497	103.277	P	PPL	MY		01	0109			32226		14	Asia/Kuala_Lumpur	2024-04-21
+7620470	Kawasan Penempatan Ulu Benut Lima	Kawasan Penempatan Ulu Benut Lima	Kawasan Penempatan Ulu Benut Lima,Ulu Benut 5	1.7439	103.3207	P	PPL	MY		01	0103			32226		9	Asia/Kuala_Lumpur	2024-04-21
+7622196	Bandar Al-Muktafi Billah Shah	Bandar Al-Muktafi Billah Shah	Al-Muktafi Billah Shah,Al-Muktafi Billah Shah City,Bandar Al-Muktafi Billah Shah	4.6111	103.2092	P	PPL	MY		13	1502			5853		33	Asia/Kuala_Lumpur	2024-10-21
+7650956	Kemajuan Tanah Bukit Goh	Kemajuan Tanah Bukit Goh	Bukit Goh,FELDA Bukit Goh,Kemajuan Tanah Bukit Goh	3.9128	103.2572	P	PPL	MY		06	0805			6053		43	Asia/Kuala_Lumpur	2024-10-27
+7697167	Muadzam Shah	Muadzam Shah	Bandar Muadzam Shah,Muadzam Shah,Muadzam Shah City	3.0627	103.0892	P	PPL	MY		06	0808			15000		36	Asia/Kuala_Lumpur	2024-10-18
+7697699	Dengkil	Dengkil	Dengkil,dei ngkil,long xi,tenkil,டெங்கில்,เดิงกิล,龍溪,龙溪	2.86	101.6806	P	PPL	MY		12	1709			7672		25	Asia/Kuala_Lumpur	2024-04-20
+7697762	Bandar Tun Razak	Bandar Tun Razak	Bandar Jengka,Bandar Tun Razak,Tun Razak	2.9029	102.8877	P	PPL	MY		06	0810			23247		54	Asia/Kuala_Lumpur	2024-10-18
+7698858	Bandar Penawar	Bandar Penawar	Bandar Penawar,Desaru	1.5513	104.226	P	PPL	MY		01	0104			10000		22	Asia/Kuala_Lumpur	2024-04-22
+7779082	Sri Petaling	Sri Petaling	Bandar Baru Sri Petaling,Seri Petaling	3.06881	101.68971	P	PPL	MY		14	0401			50000		60	Asia/Kuala_Lumpur	2024-04-22
+7792200	Seri Manjung	Seri Manjung	Seri Manjung,si li man rong,sri mancon,Сери Манюнг,ஸ்ரீ மஞ்சோங்,斯里曼絨,斯里曼绒	4.1987	100.67	P	PPL	MY		07	0909			100000		5	Asia/Kuala_Lumpur	2026-09-14
+7793958	Kampung Teh	Kampung Teh	Kampung Teh,Teh	3.9607	102.347	P	PPL	MY		06	0804			8350		69	Asia/Kuala_Lumpur	2024-09-26
+7795834	Selayang Baru Utara	Selayang Baru Utara	Selajang Baru Utara,Selayang,Selayang Baru Utara,Селаянг Бару Утара	3.2549	101.6668	P	PPL	MY		12	1701			542409		76	Asia/Kuala_Lumpur	2026-09-14
+7796279	Kemajuan Tanah Rentam	Kemajuan Tanah Rentam	FELDA Rentam,Kemajuan Tanah Rentam,Rentam	3.2679	102.6228	P	PPL	MY		06	0802			5110		68	Asia/Kuala_Lumpur	2024-10-27
+7797211	Taman Seremban Jaya	Taman Seremban Jaya	Seremban Jaya,Taman Seremban Jaya,long cheng hua yuan,龍城花園,龙城花园	2.6831	101.97	P	PPL	MY		05	0706			31016		88	Asia/Kuala_Lumpur	2024-04-27
+7797910	Kawasan Perindustrian Cheng	Kawasan Perindustrian Cheng	Cheng,Kawasan Perindustrian Cheng	2.2618	102.2317	P	PPLX	MY		04				19158		9	Asia/Kuala_Lumpur	2024-10-12
+7798288	Taman Pelangi	Taman Pelangi	Taman Pelangi	2.428	102.6801	P	PPL	MY		01	0110			32000		39	Asia/Kuala_Lumpur	2024-04-20
+7857580	Kemajuan Tanah Lok Heng Barat	Kemajuan Tanah Lok Heng Barat	Kemajuan Tanah Lok Heng Barat,Lok Heng	1.7225	104.0913	P	PPLL	MY		01				6262		32	Asia/Kuala_Lumpur	2024-10-27
+7857897	Pekan Serkat	Pekan Serkat	Kampong Serkat,Pekan Serkat,Serkat	1.3033	103.4894	P	PPL	MY		01	0109			8668		9	Asia/Kuala_Lumpur	2024-10-27
+7858022	Taman Universiti	Taman Universiti	Taman Universiti,University Town,da xue cheng,tamana i'unibharsiti,তামান ইউনিভার্সিটি,大学城,大學城	1.5331	103.6155	P	PPL	MY		01	0102			30000		37	Asia/Kuala_Lumpur	2024-04-21
+7858028	Kampung Jelutong Tengah	Kampung Jelutong Tengah	Kampung Jelutong Tengah	1.4714	103.5675	P	PPL	MY		01	0102			24765		15	Asia/Kuala_Lumpur	2024-04-23
+8306753	Kemayan	Kemayan	Kemayan,jin ma yang,kemayan,கெமாயான்,金馬揚,金马扬	3.1364	102.362	P	PPL	MY		06	0802			5977		72	Asia/Kuala_Lumpur	2024-10-21
+8504423	Subang Jaya	Subang Jaya	Subang Dzhaja,Subang Jaya,shu bang,shu bang zai ye,subangjaya,swbang jaya,swbangh jaya,Субанг Джая,سوبانغ جايا,سوبانگ جایا,スバン・ジャヤ,梳邦,梳邦再也,수방자야	3.04384	101.58062	P	PPLX	MY		12	1707			708296		41	Asia/Kuala_Lumpur	2026-08-30
+8714611	Taman Rajawali	Taman Rajawali		5.89477	118.04576	P	PPL	MY		16	1218			10000		4	Asia/Kuching	2021-07-27
+10063567	Iskandar Puteri	Iskandar Puteri	Iskandar Puteri,Nusajaya,Yisiganda,iskantar puttiri,yi si gan da gong zhu cheng,Искандар Путери,இஸ்கந்தர் புத்திரி,依斯干达公主城	1.39324	103.62322	P	PPL	MY		01	0102			575977		16	Asia/Kuala_Lumpur	2026-09-14
+10792382	Putra Heights	Putra Heights		2.99361	101.57255	P	PPL	MY		12	1707			60000	25	27	Asia/Kuala_Lumpur	2021-04-17
+10941913	Kajang	Kajang	Bandar kajang,Jiaying,Jiāyǐng,Kajang,jia ying,Каянг,加影	2.99424	101.78875	P	PPL	MY		12	1702			236240		34	Asia/Kuala_Lumpur	2026-09-14
+11002069	Pantai Cenang	Pantai Cenang	Pantai Cenang,Pantaj Chenang,Pantaj-Senang,Pantaj-Tengakh,Пантай Ченанг,Пантай-Сенанг,Пантай-Тенгах	6.29369	99.72786	P	PPL	MY		02				15000		8	Asia/Kuala_Lumpur	2025-11-24
+11054399	Bukit Bintang	Bukit Bintang	Bukit Bintang,Star Hill,Starhill,Букит Бинтанг	3.14657	101.71023	P	PPL	MY		14	0401			120529	0	56	Asia/Kuala_Lumpur	2026-09-14
+11054411	Bandar Sunway	Bandar Sunway	Bandar Sunvaj,Sunway,Sunway City,Бандар Сунвай	3.0693	101.6074	P	PPLX	MY		12	1707			200000	0	-18	Asia/Kuala_Lumpur	2026-09-14
+11184859	Seri Iskandar	Seri Iskandar		4.35993	100.98491	P	PPL	MY		07	0910			14827		25	Asia/Kuala_Lumpur	2024-04-22
+11429145	Bandar Puncak Alam	Bandar Puncak Alam	Puncak Alam	3.2389	101.42793	P	PPL	MY		12	1706			25000		15	Asia/Kuala_Lumpur	2024-10-21
+12514556	Kota Damansara	Kota Damansara	Kota Damansara,Кота Дамансара	3.15454	101.58022	P	PPL	MY		12	1707			500000		70	Asia/Kuala_Lumpur	2026-09-14
+12514620	Damansara Damai	Damansara Damai		3.19893	101.59184	P	PPL	MY		12	1707			85000		74	Asia/Kuala_Lumpur	2024-10-24
+12524224	Bandar 16 Sierra	Bandar 16 Sierra	16 Sierra	2.97135	101.65464	P	PPL	MY		12	1709			12000		42	Asia/Kuala_Lumpur	2024-04-21
+12534340	Kuala Nerus	Kuala Nerus	Guala Nilusi,gua la ni lu si xian,瓜拉尼鲁斯县	5.37293	103.02053	P	PPL	MY		13	1505			93485		146	Asia/Kuala_Lumpur	2024-04-23
+12535033	Bandar Sri Damansara	Bandar Sri Damansara	Bandar Sri Damansara,Sri Damansara City	3.1903	101.61061	P	PPL	MY		12	1707			48556		82	Asia/Kuala_Lumpur	2024-10-17
+12547009	Selangau	Selangau	Pekan Selangau	2.52477	112.32543	P	PPL	MY		11	1325			19844		96	Asia/Kuching	2024-04-22
+12557764	Taman Petaling	Taman Petaling	Taman Petaling,Таман Петалинг	3.19916	101.64983	P	PPL	MY		14	0401			423062		76	Asia/Kuala_Lumpur	2026-09-14
+12622018	Elmina	Elmina	Elmina	3.18523	101.52461	P	PPL	MY		12	1707			45000		59	Asia/Kuala_Lumpur	2024-04-21
+12625525	Denai Alam	Denai Alam	Denai Alam	3.16027	101.51501	P	PPL	MY		12	1707			35000		72	Asia/Kuala_Lumpur	2024-10-24
+12625526	Tropicana Indah	Tropicana Indah	Tropicana,Tropicana Indah	3.14165	101.59089	P	PPL	MY		12	1707			20000		61	Asia/Kuala_Lumpur	2024-10-28
+12640280	Laman Permai	Laman Permai	Laman Permai,Laman Permai  U5,Subang Bestari	3.17374	101.54204	P	PPL	MY		12	1707			8800		67	Asia/Kuala_Lumpur	2024-10-24
+12648574	Taman Greenwood	Taman Greenwood	Greenwood,Greenwood Park,Taman Greenwood	3.23208	101.70484	P	PPL	MY		12	1701			41699		63	Asia/Kuala_Lumpur	2024-10-28
+12680194	Taman Melati	Taman Melati	Taman Melati	3.22124	101.72324	P	PPL	MY		14	0401			50000		83	Asia/Kuala_Lumpur	2024-04-22
+12746668	Ara Damansara	Ara Damansara	Ara Damansara	3.11898	101.58656	P	PPL	MY		12	1707			60000		66	Asia/Kuala_Lumpur	2024-05-03
+12746672	Desa Parkcity	Desa Parkcity	Desa Parkcity	3.18611	101.62875	P	PPL	MY		14	0401			16500		78	Asia/Kuala_Lumpur	2024-10-28
+12746683	Kampung Setia	Kampung Setia	Gombak Setia,Kampung Setia,Setia	3.24177	101.53296	P	PPL	MY		12	1701			38870		64	Asia/Kuala_Lumpur	2024-04-22
+12750571	Mont Kiara	Mont Kiara		3.16866	101.65076	P	PPL	MY		14	0401			30643		120	Asia/Kuala_Lumpur	2024-04-21
+12750572	Taman OUG	Taman OUG	OUG,Overseas Union Garden,Taman OUG	3.07292	101.6763	P	PPL	MY		14	0401			25989		79	Asia/Kuala_Lumpur	2024-04-21
+12750573	Taman Ikan Emas	Taman Ikan Emas	Golden Fish,Ikan Emas,Taman Ikan Emas	3.11619	101.7202	P	PPL	MY		14	0401			10046		71	Asia/Kuala_Lumpur	2024-06-13
+12750574	Taman Tun Dr Ismail	Taman Tun Dr Ismail	Taman Tun Dr Ismail,Ttdi	3.14506	101.62617	P	PPL	MY		14	0401			37500		115	Asia/Kuala_Lumpur	2024-04-21
+12750575	Bangsar	Bangsar		3.12945	101.67004	P	PPL	MY		14	0401			40000		77	Asia/Kuala_Lumpur	2024-04-21
+12750576	Bukit Damansara	Bukit Damansara	Damansara,Damansara Heights	3.15045	101.65483	P	PPL	MY		14	0401			5161		126	Asia/Kuala_Lumpur	2024-04-21
+12750582	Seremban 2	Seremban 2		2.68982	101.90766	P	PPL	MY		05	0706			62000		67	Asia/Kuala_Lumpur	2024-10-03
+12750583	Bukit Indah	Bukit Indah		1.47999	103.65959	P	PPL	MY		01	0102			60000		23	Asia/Kuala_Lumpur	2024-04-21
+12750602	Eco Sanctuary	Eco Sanctuary	Bandar Eco Sanctuary,Eco Sanctuary,Eco Santuari	2.93703	101.53527	P	PPL	MY		12	1705			5827		28	Asia/Kuala_Lumpur	2024-04-22
+12750606	Wangsa Maju	Wangsa Maju	Hawthornden,Vangsa Maju,Wangsa,Вангса Маю	3.20056	101.73972	P	PPL	MY		14	0401			215600		92	Asia/Kuala_Lumpur	2026-09-14
+12750607	Seminyih	Seminyih	Bandar Seminyih,Shi Mao Yue,shi mao yue,士毛月	2.94761	101.84695	P	PPL	MY		12	1702			19724		40	Asia/Kuala_Lumpur	2024-04-22
+12750614	Kuchai Lama	Kuchai Lama	Kuchai,Taman Kuchai	3.08469	101.69086	P	PPL	MY		14	0401			50000		69	Asia/Kuala_Lumpur	2024-04-22
+12750617	Bukit Gemuroh	Bukit Gemuroh	Mukim 9	5.29775	100.21147	P	PPLL	MY		09	1101			17379		109	Asia/Kuala_Lumpur	2024-04-22
+12750644	Taman Melawati	Taman Melawati	Malawati,Melawati,Taman Malawati	3.21083	101.74825	P	PPL	MY		12	1701			99304		129	Asia/Kuala_Lumpur	2024-04-23
+12750652	Perling	Perling	Perling,Перлинг	1.48061	103.68381	P	PPL	MY		01	0102			101263		7	Asia/Kuala_Lumpur	2026-09-14
+12750653	Chaah Bahru	Chaah Bahru		2.09934	103.02219	P	PPL	MY		01	0101			5509		17	Asia/Kuala_Lumpur	2024-04-23
+12750654	Mukim Pulai	Mukim Pulai	Mukim Pulai,Pulai,pu lai,velai,Муким Пулаи,வேளை,蒲來	1.53333	103.66667	P	PPL	MY		01	0102			505661		9	Asia/Kuala_Lumpur	2026-09-14
+12808700	Seremban 3	Seremban 3		2.67361	101.93111	P	PPL	MY		05	0706			8403		61	Asia/Kuala_Lumpur	2024-04-27
+13061022	Bandar Mahkota Cheras	Bandar Mahkota Cheras	Bandar Makhkota Cheras,Бандар Махкота Черас	3.0542	101.79844	P	PPL	MY		12	1702			100000	51	80	Asia/Kuala_Lumpur	2026-09-14
+13100478	Paya Terubong	Paya Terubong	Long wei,Long-bue,Lóng-bué,Lǒng wěi,Mukim 13,Paja Terubong,Paya terupon,Pāyā terupōṅ,long wei,Пая Терубонг,垄尾,壟尾	5.37278	100.27972	P	PPL	MY		09	1105			226712		156	Asia/Kuala_Lumpur	2026-09-14
+13100481	Kampung Wakaf Stan	Kampung Wakaf Stan	Stan,Wakaf Stan	6.07985	102.28969	P	PPLS	MY		03	0304			5823		1	Asia/Kuala_Lumpur	2024-10-08
+13117827	Bandar Tun Hussein Onn	Bandar Tun Hussein Onn	Tun Hussein Onn	3.05469	101.75939	P	PPL	MY		12	1702			40000		84	Asia/Kuala_Lumpur	2024-10-17
+13117900	Bandar Baru Enstek	Bandar Baru Enstek	Baru Enstek,Enstek,Enstek New Town	2.75106	101.76544	P	PPL	MY		05	0706			11591		36	Asia/Kuala_Lumpur	2024-10-17
+13117901	Bandar Baru Ayer Itam	Bandar Baru Ayer Itam	Farlim	5.38907	100.28177	P	PPL	MY		09	1105			10290		95	Asia/Kuala_Lumpur	2024-10-17
+13118054	Kota Samarahan	Kota Samarahan		1.46031	110.48821	P	PPL	MY		11	1322			12724		6	Asia/Kuching	2024-10-18
+13118055	Bukit Beruntung	Bukit Beruntung		3.41558	101.55709	P	PPL	MY		12	1703			20023		76	Asia/Kuala_Lumpur	2024-10-19
+13118084	Felda Gugusan Adela	Felda Gugusan Adela	Adela,FELDA Kledang,FELDA Sening,Kledang,Perkampungan (Felda) Adela Tunggal Sening & Keleda,Sening	1.47877	104.17744	P	PPL	MY		01	0104			6736		53	Asia/Kuala_Lumpur	2024-10-21
+13118085	Sibu Jaya	Sibu Jaya		2.24026	111.97135	P	PPL	MY		11	1327			35000		68	Asia/Kuching	2024-10-21
+13118086	Petagas	Petagas		5.91161	116.04991	P	PPL	MY		16	1216			35844		29	Asia/Kuching	2024-10-21
+13118087	Kinabatangan	Kinabatangan		5.58602	117.85083	P	PPL	MY		16	1204			10256		205	Asia/Kuching	2024-10-21
+13118089	Kampung Olak Lempit	Kampung Olak Lempit	Olak Lempit	2.83558	101.59472	P	PPL	MY		12	1705			6020		19	Asia/Kuala_Lumpur	2024-10-21
+13118091	Setia Alam	Setia Alam	Setia Alam,Сетиа Алам	3.10155	101.45565	P	PPL	MY		12	1707			150000		142	Asia/Kuala_Lumpur	2026-09-14
+13118094	Ketengah Jaya	Ketengah Jaya	FELDA Kerteh 1,FELDA Kerteh 4,FELDA Kerteh 6,Kerteh 1,Kerteh 4,Kerteh 6	4.57218	103.31879	P	PPL	MY		13	1502			9993		46	Asia/Kuala_Lumpur	2024-10-21
+13118095	Taman Sri Sinar	Taman Sri Sinar		3.1868	101.65085	P	PPL	MY		14	0401			40000		77	Asia/Kuala_Lumpur	2024-10-21
+13118096	Bandar Kinrara	Bandar Kinrara	Kinrara	3.04926	101.64153	P	PPL	MY		12	1707			93822		79	Asia/Kuala_Lumpur	2024-10-21
+13118145	Bandar Bukit Raja	Bandar Bukit Raja	Bandar Bukit Raja,Bukit Raja,Бандар Букит Рая	3.08737	101.43339	P	PPL	MY		12	1704			146534		108	Asia/Kuala_Lumpur	2026-09-14
+13118146	Pandamaran	Pandamaran		3.01083	101.42081	P	PPL	MY		12	1704			53916		4	Asia/Kuala_Lumpur	2024-10-22
+13118147	Bandar Parklands	Bandar Parklands	Bandar Bukit Tinggi 3,Bayuemas,Bukit Tinggi 3,Bukit Tinggi 3 City,Parklands,Parklands City	2.97457	101.45721	P	PPL	MY		12	1704			9000		4	Asia/Kuala_Lumpur	2024-10-22
+13118148	Bandar Botanic	Bandar Botanic	Bandar Botanik,Botanic City	2.98794	101.43966	P	PPL	MY		12	1704			8670		5	Asia/Kuala_Lumpur	2024-10-22
+13118149	Bandar Sri Sendayan	Bandar Sri Sendayan	Sendayan,Sri Sendayan,Sri Sendayan City	2.67375	101.8721	P	PPL	MY		05	0706			26127		61	Asia/Kuala_Lumpur	2024-10-22
+13118150	Bandar Springhill	Bandar Springhill	Springhill,Springhill City	2.60127	101.86408	P	PPL	MY		05	0704			11000		30	Asia/Kuala_Lumpur	2024-10-22
+13118193	Bandar Country Homes	Bandar Country Homes	Country Homes,Country Homes City	3.32752	101.53106	P	PPL	MY		12	1701			39000		74	Asia/Kuala_Lumpur	2024-10-23
+13118194	Proton City	Proton City	Bandar Raya Proton,Bandaraya Proton,Proton	3.74287	101.5352	P	PPL	MY		07	0901			12009		141	Asia/Kuala_Lumpur	2024-10-23
+13118195	FELDA Soeharto	FELDA Soeharto	FELDA Sungai Tengi,Kampong Soeharto,Kampung Soeharto,Soeharto,Sungai Dusun,Sungai Tengi	3.67963	101.39261	P	PPL	MY		12	1703			6060		66	Asia/Kuala_Lumpur	2024-10-23
+13118197	Alam Damai	Alam Damai		3.06028	101.7408	P	PPL	MY		14	0401			35000		92	Asia/Kuala_Lumpur	2024-10-23
+13118198	SS2	SS2	Sungai Way-Subang 2	3.12036	101.62246	P	PPL	MY		14	0401			25500		51	Asia/Kuala_Lumpur	2024-10-23
+13118220	Sungai Koyan	Sungai Koyan	Sungai Koyan 1,Sungai Koyan 2,Sungai Koyan 3	4.21864	101.8015	P	PPL	MY		06	0806			13356		118	Asia/Kuala_Lumpur	2024-10-24
+13118223	Sungai Jawi	Sungai Jawi		5.19779	100.49244	P	PPL	MY		09	1102			19586		20	Asia/Kuala_Lumpur	2024-10-24
+13118224	Bandar Saujana Utama	Bandar Saujana Utama	Saujana Utama,Saujana Utama City	3.20663	101.47729	P	PPL	MY		12	1706			72000		66	Asia/Kuala_Lumpur	2024-10-24
+13118225	Bukit Rahman Putra	Bukit Rahman Putra	Bukit Rakhman Putra,Букит Рахман Путра	3.21727	101.5608	P	PPL	MY		12	1707			607000		76	Asia/Kuala_Lumpur	2026-09-14
+13118227	FELDA Maokil	FELDA Maokil	Maokil	2.29562	102.96786	P	PPL	MY		01	0108			5630		50	Asia/Kuala_Lumpur	2024-10-24
+13118228	Setia Tropika	Setia Tropika		1.54631	103.71829	P	PPL	MY		01	0102			60279		21	Asia/Kuala_Lumpur	2024-10-24
+13118229	Bandar Tasik Puteri	Bandar Tasik Puteri	Bandar Tasik Puteri,Puteri Lake City,Tasik Puteri,bndr tasyq vwtry,Бандар Тасик Путери,بندر تاسيق ڤوتري	3.28531	101.4741	P	PPL	MY		12	1701			150000		60	Asia/Kuala_Lumpur	2026-09-14
+13118230	Desa Petaling	Desa Petaling		3.08385	101.70895	P	PPL	MY		14	0401			20000		76	Asia/Kuala_Lumpur	2024-10-24
+13118231	Bukit Kerinchi	Bukit Kerinchi	Bangsar South	3.10628	101.66761	P	PPL	MY		14	0401			35000		57	Asia/Kuala_Lumpur	2024-10-24
+13118233	Titiwangsa	Titiwangsa	Titivangsa,Титивангса	3.17822	101.70312	P	PPL	MY		14	0401			122096		60	Asia/Kuala_Lumpur	2026-09-14
+13118253	Bandar Laguna Merbok	Bandar Laguna Merbok	Laguna Merbok	5.68919	100.49622	P	PPL	MY		02	0204			12940		43	Asia/Kuala_Lumpur	2024-10-25
+13118269	Horizon Hills	Horizon Hills		1.45768	103.64554	P	PPL	MY		01	0102			18800		21	Asia/Kuala_Lumpur	2024-10-27
+13118270	Bandar Putra Kulai	Bandar Putra Kulai	Putra Kulai	1.64958	103.62661	P	PPL	MY		01	0105			19793		21	Asia/Kuala_Lumpur	2024-10-27
+13118271	Taman Scientex	Taman Scientex	Scientex,Scientex Park	1.51219	103.9166	P	PPL	MY		01	0102			30000		52	Asia/Kuala_Lumpur	2024-10-27
+13118272	Bandar Seri Alam	Bandar Seri Alam	Bandar Seri Alam,Seri Alam,Seri Alam City,Бандар Сери Алам	1.50434	103.87525	P	PPL	MY		01	0102			220000		23	Asia/Kuala_Lumpur	2026-09-14
+13118274	FELDA Chini	FELDA Chini	Chini	3.37457	102.94343	P	PPL	MY		06	0808			18493		58	Asia/Kuala_Lumpur	2024-10-27
+13118276	Bandar Baru Salak Tinggi	Bandar Baru Salak Tinggi	New Salak Tinggi City,Salak Tinggi	2.81232	101.73562	P	PPL	MY		12	1709			21534		35	Asia/Kuala_Lumpur	2024-10-27
+13118277	Bandar Utama	Bandar Utama	Bandar Utama,Бандар Утама	3.14818	101.61407	P	PPL	MY		14	0401			200000		63	Asia/Kuala_Lumpur	2026-09-14
+13118278	Brickfields	Brickfields		3.12966	101.68424	P	PPL	MY		14	0401			12000		59	Asia/Kuala_Lumpur	2024-10-27
+13118362	Bukit Jalil	Bukit Jalil	Bukit Dzhalil,Букит Джалил	3.04913	101.68036	P	PPL	MY		14	0401			200000		76	Asia/Kuala_Lumpur	2026-09-14
+13118370	Mutiara Damansara	Mutiara Damansara		3.15724	101.60822	P	PPL	MY		14	0401			10000		71	Asia/Kuala_Lumpur	2024-10-28
+13118381	Taman Desa	Taman Desa		3.10591	101.68683	P	PPL	MY		14	0401			25000		61	Asia/Kuala_Lumpur	2024-10-28

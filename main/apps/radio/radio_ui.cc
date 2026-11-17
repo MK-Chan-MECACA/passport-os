@@ -714,7 +714,7 @@ void build_settings(RadioSettingsPage page, std::size_t selected, uint8_t volume
         "音量", "城市电台", "定时播放", "屏幕设置", "网络设置", "蓝牙", "返回",
     };
     static constexpr const char *kCityItems[] = {
-        "自动定位", "北京", "上海", "广州", "深圳", "长沙", "杭州", "成都",
+        "自动定位", "Kuala Lumpur", "George Town", "Johor Bahru", "Ipoh", "Kota Kinabalu", "Kuching", "Melaka",
     };
     static constexpr const char *kSleepTimerItems[] = {
         "无定时", "15 分钟", "30 分钟", "60 分钟", "90 分钟", "返回",

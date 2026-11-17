@@ -33,35 +33,31 @@ constexpr int kHttpTimeoutMs = 2500;
 bool cancelled(RadioCatalogCancelled fn) { return fn && fn(); }
 
 
-struct CityTranslation {
-    const char *english;
-    const char *chinese;
-    const char *province;
+struct CityPlace {
+    const char *name;
+    const char *state;
 };
 
-// Source-generated prefecture names plus common IP-provider spellings.
-constexpr CityTranslation kChineseCities[] = {
+// Source-generated GeoNames places (population >= 5000) with their state.
+constexpr CityPlace kCities[] = {
 #include "radio_cities.inc"
-    {"Guangzhou", "广州", "广东"}, {"Hohhot", "呼和浩特", "内蒙古"},
-    {"Harbin", "哈尔滨", "黑龙江"}, {"Urumqi", "乌鲁木齐", "新疆"},
-    {"Lhasa", "拉萨", "西藏"}, {"Hong Kong", "香港", "香港"},
-    {"Macau", "澳门", "澳门"}, {"Taipei", "台北", "台湾"},
-    {"Kaohsiung", "高雄", "台湾"},
 };
-struct Province { const char *english; const char *chinese; };
-constexpr Province kProvinces[] = {
-    {"Beijing","北京"},{"Tianjin","天津"},{"Hebei","河北"},{"Shanxi","山西"},
-    {"Inner Mongolia","内蒙古"},{"Liaoning","辽宁"},{"Jilin","吉林"},
-    {"Heilongjiang","黑龙江"},{"Shanghai","上海"},{"Jiangsu","江苏"},
-    {"Zhejiang","浙江"},{"Anhui","安徽"},{"Fujian","福建"},{"Jiangxi","江西"},
-    {"Shandong","山东"},{"Henan","河南"},{"Hubei","湖北"},{"Hunan","湖南"},
-    {"Guangdong","广东"},{"Guangxi","广西"},{"Hainan","海南"},{"Chongqing","重庆"},
-    {"Sichuan","四川"},{"Guizhou","贵州"},{"Yunnan","云南"},{"Tibet","西藏"},
-    {"Shaanxi","陕西"},{"Gansu","甘肃"},{"Qinghai","青海"},{"Ningxia","宁夏"},
-    {"Xinjiang","新疆"},{"Hong Kong","香港"},{"Macau","澳门"},{"Taiwan","台湾"},
+// GeoNames state/federal-territory names plus IP-provider and official spellings.
+struct State { const char *alias; const char *name; };
+constexpr State kStates[] = {
+    {"Johor","Johor"},{"Kedah","Kedah"},{"Kelantan","Kelantan"},{"Melaka","Melaka"},
+    {"Negeri Sembilan","Negeri Sembilan"},{"Pahang","Pahang"},{"Penang","Penang"},
+    {"Perak","Perak"},{"Perlis","Perlis"},{"Sabah","Sabah"},{"Sarawak","Sarawak"},
+    {"Selangor","Selangor"},{"Terengganu","Terengganu"},{"Kuala Lumpur","Kuala Lumpur"},
+    {"Labuan","Labuan"},{"Putrajaya","Putrajaya"},
+    {"Malacca","Melaka"},{"Pulau Pinang","Penang"},{"Negri Sembilan","Negeri Sembilan"},
+    {"Federal Territory of Kuala Lumpur","Kuala Lumpur"},
+    {"Wilayah Persekutuan Kuala Lumpur","Kuala Lumpur"},
+    {"Federal Territory of Labuan","Labuan"},{"Wilayah Persekutuan Labuan","Labuan"},
+    {"Federal Territory of Putrajaya","Putrajaya"},{"Wilayah Persekutuan Putrajaya","Putrajaya"},
 };
 bool same_name(const char *a, const char *b) {
-    // Ignore ASCII punctuation/case in pinyin, retaining UTF-8 name bytes.
+    // Ignore ASCII punctuation, spaces and case.
     while (*a || *b) {
         while (*a && static_cast<unsigned char>(*a) < 128 && !std::isalnum(*a)) ++a;
         while (*b && static_cast<unsigned char>(*b) < 128 && !std::isalnum(*b)) ++b;
@@ -71,22 +67,19 @@ bool same_name(const char *a, const char *b) {
     }
     return true;
 }
-const Province *find_province(const char *name) {
-    for (const auto &p : kProvinces) {
-        if (same_name(name, p.english) || same_name(name, p.chinese) ||
-            std::strncmp(name, p.chinese, std::strlen(p.chinese)) == 0) return &p;
+const State *find_province(const char *name) {
+    for (const auto &s : kStates) {
+        const std::size_t length = std::strlen(s.alias);
+        // Royal titles follow the state name: "Selangor Darul Ehsan".
+        if (same_name(name, s.alias) ||
+            (!std::strncmp(name, s.alias, length) && !std::strncmp(name + length, " Darul ", 7))) return &s;
     }
     return nullptr;
 }
-const CityTranslation *find_city(const char *name, const char *region) {
-    const Province *p = find_province(region);
-    for (const auto &c : kChineseCities) {
-        const std::size_t length = std::strlen(name), city_length = std::strlen(c.chinese);
-        const bool suffix = length == city_length + 3 &&
-            (!std::strcmp(name + city_length, "市") || !std::strcmp(name + city_length, "县")) &&
-            !std::strncmp(name, c.chinese, city_length);
-        if ((!p || !std::strcmp(p->chinese, c.province)) &&
-            (same_name(name, c.english) || same_name(name, c.chinese) || suffix)) return &c;
+const CityPlace *find_city(const char *name, const char *region) {
+    const State *s = find_province(region);
+    for (const auto &c : kCities) {
+        if ((!s || !std::strcmp(s->name, c.state)) && same_name(name, c.name)) return &c;
     }
     return nullptr;
 }
@@ -436,23 +429,19 @@ std::size_t discover_for_location(RadioStation *stations, std::size_t capacity,
                                  RadioLocation *location, RadioCatalogCancelled stop,
                                  const char *voice_station = nullptr) {
     if (cancelled(stop)) return 0;
-    const CityTranslation *city = find_city(location->search_city[0] ? location->search_city : location->city,
-                                            location->region);
+    const CityPlace *city = find_city(location->search_city[0] ? location->search_city : location->city,
+                                      location->region);
     if (city) {
-        copy_text(location->search_city, sizeof(location->search_city), city->chinese);
-        if (!location->region[0]) copy_text(location->region, sizeof(location->region), city->province);
-        if (same_name(location->city, city->english)) copy_text(location->city, sizeof(location->city), city->chinese);
+        copy_text(location->search_city, sizeof(location->search_city), city->name);
+        if (!location->region[0]) copy_text(location->region, sizeof(location->region), city->state);
     } else if (!location->region[0] && find_province(location->city)) {
-        // A spoken province ("广东") is a region, not a city name.
+        // A spoken state ("Selangor") is a region, not a city name.
         copy_text(location->region, sizeof(location->region), location->city);
     }
-    const Province *province = find_province(location->region);
-    if (province) copy_text(location->region, sizeof(location->region), province->chinese);
+    const State *province = find_province(location->region);
     if (province) {
-        const char *country = !std::strcmp(province->chinese, "香港") ? "HK" :
-                              !std::strcmp(province->chinese, "澳门") ? "MO" :
-                              !std::strcmp(province->chinese, "台湾") ? "TW" : "CN";
-        copy_text(location->country_code, sizeof(location->country_code), country);
+        copy_text(location->region, sizeof(location->region), province->name);
+        copy_text(location->country_code, sizeof(location->country_code), "MY");
     }
     const DirectoryServers servers = directory_servers(stop);
     std::size_t count = 0;
@@ -464,13 +453,13 @@ std::size_t discover_for_location(RadioStation *stations, std::size_t capacity,
     };
     const char *query = location->search_city[0] ? location->search_city : location->city;
     query_directory(servers, *location, "name", query, "当地电台 · 网络直播", stations, capacity, count, stop);
-    if (!voice_ready() && province && count < capacity && !same_name(query, province->chinese)) {
-        // Most Chinese stations put the province in their name, not state metadata.
-        query_directory(servers, *location, "name", province->chinese, "省内电台 · 网络直播",
+    if (!voice_ready() && province && count < capacity && !same_name(query, province->name)) {
+        // Many stations put the state in their name, not state metadata.
+        query_directory(servers, *location, "name", province->name, "省内电台 · 网络直播",
                         stations, capacity, count, stop);
     }
     if (!voice_ready() && province && count < capacity) {
-        query_directory(servers, *location, "state", province->english, "省内电台 · 网络直播",
+        query_directory(servers, *location, "state", province->name, "省内电台 · 网络直播",
                         stations, capacity, count, stop);
     } else if (!voice_ready() && location->region[0] && count < capacity) {
         query_directory(servers, *location, "state", location->region, "地区电台 · 网络直播",
@@ -575,8 +564,9 @@ std::size_t radio_catalog_discover(RadioStation *stations, std::size_t capacity,
     *location = {};
     if (!locate(location, stop)) {
         if (cancelled(stop)) return 0;
-        copy_text(location->country_code, sizeof(location->country_code), "CN");
-        copy_text(location->city, sizeof(location->city), "推荐电台");
+        // Default city when IP location fails.
+        copy_text(location->country_code, sizeof(location->country_code), "MY");
+        copy_text(location->city, sizeof(location->city), "Kuala Lumpur");
     }
     return discover_for_location(stations, capacity, location, stop);
 }
@@ -588,7 +578,7 @@ std::size_t radio_catalog_discover_location(const RadioLocation &preferred,
     if (!stations || !capacity || !location || cancelled(stop)) return 0;
     if (!preferred.city[0]) return radio_catalog_discover(stations, capacity, location, stop);
     *location = preferred;
-    if (!location->country_code[0]) copy_text(location->country_code, sizeof(location->country_code), "CN");
+    if (!location->country_code[0]) copy_text(location->country_code, sizeof(location->country_code), "MY");
 #ifdef ESP_PLATFORM
     const RadioLocation want = *location;
     if (s_catalog_cache.load(want, stations, capacity, location, voice_station)) {
