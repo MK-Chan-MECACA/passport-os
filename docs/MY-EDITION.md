@@ -26,19 +26,19 @@ Unchanged on purpose: timezone default (UTC+8 = MYT) and weather (Open-Meteo, gl
 
 One commit per step on branch `my-edition`. Run the relevant host tests after each step.
 
-1. Remove NetEase.
-2. Remove the `aihot.news` client (Tech News added in step 5).
-3. Malaysian city catalog (GeoNames generator, `cities.json.gz`, radio state map).
-4. Radio: `countrycode=MY`, MP3 + AAC/AAC+, Malaysian presets.
-5. Tech News on HN Algolia.
-6. English UI strings and Latin-only fonts.
-7. Setup pages and connectivity fallback.
-8. Branding, version, docs.
-9. Comment translation.
+1. Remove NetEase. (done)
+2. Malaysian city catalog (GeoNames generator, `cities.json.gz`, radio state map).
+3. Radio: `countrycode=MY`, MP3 + AAC/AAC+, Malaysian presets.
+4. Replace the `aihot.news` client with Tech News on HN Algolia (in place, reusing `main/json_scanner`).
+5. English UI strings and Latin-only fonts.
+6. Setup pages and connectivity fallback.
+7. Branding, version, docs.
+8. Comment translation.
 
 ## Risks and acceptance
 
 - **AAC with no PSRAM.** The decoder needs about 23 KiB; upstream logs show out-of-memory retries. This needs a real-device test with Wi-Fi + TLS active. A host test is not acceptance.
 - **Xiaozhi latency.** The backend is in China; expect higher voice round-trip time from Malaysia.
-- **Build path.** ESP-IDF rejects project paths containing spaces. Build from a path without spaces (see `docs/MAINTENANCE.md` once translated).
+- **Build path.** The project must live at a path without spaces: the `esp_audio_codec` component passes an unquoted `-L` path and the link fails. A symlink is not enough because CMake resolves it. The working copy is `~/passport-os`.
+- **Host tests.** Upstream host tests assume Linux GCC. On macOS run them in a container with ESP-IDF mounted at `/opt/esp-idf` (python:3.12-bookworm plus nodejs, cmake, ninja-build).
 - Serial-simulated buttons are not physical-button or real-microphone acceptance.
