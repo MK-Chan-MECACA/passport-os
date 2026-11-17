@@ -15,7 +15,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_DIRS = {'.github', 'bootloader_components', 'components', 'docs', 'main', 'tests', 'third_party', 'tools', 'web'}
 SOURCE_ROOT_FILES = {'.gitignore', 'CMakeLists.txt', 'build.sh', 'dependencies.lock',
-                     'partitions.csv', 'sdkconfig.defaults', 'LICENSE', 'README.md', 'README.zh_CN.md', 'DESIGN.md', 'PRODUCT.md', 'AGENTS.md', 'sdkconfig.diag'}
+                     'partitions.csv', 'sdkconfig.defaults', 'LICENSE', 'README.md', 'DESIGN.md', 'PRODUCT.md', 'AGENTS.md', 'sdkconfig.diag'}
 
 
 def digest(data: bytes) -> str:
@@ -84,20 +84,20 @@ def main() -> None:
     release = ROOT/'release'
     release.mkdir(exist_ok=True)
     target = release/('website-firmware-'+version)
-    bundle = release/('Passport-OS-v'+version+'-candidate.zip')
+    bundle = release/('Passport-OS-MY-v'+version+'-candidate.zip')
     if target.exists() or bundle.exists():
         raise FileExistsError('candidate already exists; preserve it and use a new version')
     source_hashes = {name: digest(data) for name, data in sorted(source.items())}
     with tempfile.TemporaryDirectory(prefix='.package-', dir=release) as temporary:
         stage = Path(temporary)
-        source_name = 'Passport-OS-v'+version+'-source.zip'
+        source_name = 'Passport-OS-MY-v'+version+'-source.zip'
         write_zip(stage/source_name, {'passport-os/'+name: data for name, data in source.items()})
-        app_name = 'FoloToy-AI-Passport-v'+version+'-app.bin'
-        full_name = 'FoloToy-AI-Passport-v'+version+'-full.bin'
+        app_name = 'Passport-OS-MY-v'+version+'-app.bin'
+        full_name = 'Passport-OS-MY-v'+version+'-full.bin'
         (stage/app_name).write_bytes(app)
         (stage/full_name).write_bytes(full)
         (stage/'source-files.sha256.json').write_text(json.dumps(source_hashes, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
-        notes = ROOT/('docs/release-rc'+version.split('rc.')[-1]+'.md')
+        notes = ROOT/('docs/release-'+version+'.md')
         if not notes.is_file():
             raise ValueError('candidate release notes are missing: '+str(notes))
         (stage/'RELEASE-NOTES.md').write_bytes(notes.read_bytes())

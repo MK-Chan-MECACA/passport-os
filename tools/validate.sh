@@ -51,6 +51,9 @@ run_firmware_checks() (
     install -m 0644 \
         "${validation_build_dir}/FoloToy-AI-Passport-full.bin" \
         "${repo_root}/build/FoloToy-AI-Passport-full.bin"
+    install -m 0644 \
+        "${validation_build_dir}/passport-os.bin" \
+        "${repo_root}/build/passport-os.bin"
     echo "Firmware build: PASS"
 )
 

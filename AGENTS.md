@@ -1,12 +1,13 @@
-# AI 维护入口
+# AI maintenance entry point
 
-这是 Passport OS 的当前维护副本，整理于 2026-11-08。默认只读本文件与 `docs/CURRENT.md`，再按任务定位源码；需要构建/烧录时才读 `docs/MAINTENANCE.md`。
+This is the maintenance copy of Passport OS MY, the Malaysia edition of Passport OS. Read this file and `docs/CURRENT.md` by default, then locate the source for the task. Read `docs/MAINTENANCE.md` only when building or flashing. The edition scope is `docs/MY-EDITION.md`.
 
-- 用户认可当前版本，后续以小范围修正为主。不要主动扩功能、重构全项目或重新讨论历史方案。
-- 当前目录是后续修改位置；旧目录 `F:/WORK/AI硬件/passport-os` 保留为历史档案，不要两边同步修改。
-- 不要默认遍历或读取 `firmware/`、`managed_components/`、`build*/`、生成字库、大型测试 fixture 或旧目录的 docs、_diag、release。使用 rg 限定相关模块。
-- `main/`、`components/`、`bootloader_components/` 是完整当前源码；生成资源和第三方许可必须保留。
-- 保留其他未提交改动。默认升级保留配置、身份、名片和存储分区；用户明确要求全新安装/全清时，备份后可以整片擦除，遵循维护说明。
-- 功能测试不等于电流/续航验收；串口模拟按键不等于实体按键或真人麦克风验收。当前版未因这次整理而公开发布。
-- 修改后运行相关测试；交付固件时跑完整主机回归、ESP-IDF 构建和固件布局/SRAM检查。
-- 更新当前状态只编辑 `docs/CURRENT.md` 的必要条目，不再按每轮对话不断新增阶段文档。详细临时日志放忽略的 `output/`，无需让下一轮 AI 默认阅读。
+- Changes should stay small and within MY-EDITION.md. Do not add features, refactor the whole project or reopen settled decisions unless the user asks.
+- The working copy is `~/passport-os` (a path without spaces is required for the build). Do not edit the upstream baseline worktree in `~/.cache/passport-baseline`.
+- Do not read `managed_components/`, `build*/`, generated fonts, large test fixtures or `docs/archive/` by default. Search the relevant module with `rg`.
+- `main/`, `components/` and `bootloader_components/` are the complete current source. Keep generated resources and third-party licences.
+- Keep other uncommitted changes. Upgrades keep the configuration, identity, card and storage partitions by default. When the user explicitly asks for a fresh install or full wipe, back up first, then the whole chip may be erased; follow the maintenance guide.
+- Functional tests are not current-draw or battery-life acceptance. Serial-simulated buttons are not physical-button or real-microphone acceptance.
+- Run the relevant tests after a change. When delivering firmware, run the full host regression, the ESP-IDF build and the firmware layout/SRAM checks.
+- To update status, edit only the necessary entries in `docs/CURRENT.md`; do not add a new document per conversation. Put detailed temporary logs in the ignored `output/`; the next session does not need to read them.
+- All user-visible text must be English and drawable by the Latin-only fonts (`tests/check_fonts.py` enforces this).

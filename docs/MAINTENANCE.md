@@ -1,42 +1,51 @@
-# 维护方法
+# Maintenance
 
-## 日常小改动
+The upstream author's version of this guide (Windows/WSL paths, rc.57–rc.58 handover notes) is kept in Chinese at [archive/zh/MAINTENANCE-upstream.md](archive/zh/MAINTENANCE-upstream.md).
 
-从 `AGENTS.md` 与当前状态定位模块，修改源码，跑对应测试；交付前执行完整主机回归。只更新当前状态中的变化和验证结果，不重复维护多份历史说明。
+## Small changes
 
-## 环境和命令
+Find the module from `AGENTS.md` and [CURRENT.md](CURRENT.md), change the source and run the matching tests. Run the full host regression before handing over firmware. Update only what changed in CURRENT.md, with its verification result; do not keep parallel copies of history.
 
-本机 Windows 使用 WSL `Ubuntu-24.04`，ESP-IDF 安装在 `/opt/esp-idf`（CI 为 5.5.3）。进入本目录对应 WSL 路径：
+## Environment
+
+- The working copy must live at a path **without spaces**. The `esp_audio_codec` component passes an unquoted `-L` path, so the link fails otherwise. A symlink does not help because CMake resolves it. On this machine the repo is `~/passport-os`; `~/Claude Code/Passport OS MY` is only a symlink to it, so build from `~/passport-os`.
+- ESP-IDF 5.5.3 (CI uses 5.5.3). `build.sh` loads it from `/opt/esp-idf` unless `IDF_DIR` is set.
+- Host tests assume Linux GCC. On macOS run them in a container (`python:3.12-bookworm` plus `nodejs`, `cmake`, `ninja-build`) with ESP-IDF mounted at `/opt/esp-idf`:
 
 ```bash
-cd /mnt/f/WORK/AI硬件/passport-os-current
 bash tools/test-host.sh
-bash build.sh
 ```
 
-主机测试需要 Python 3、C/C++ 编译器、Node.js 及脚本用到的常规工具。首次固件构建需按 `dependencies.lock` 准备 managed_components；本精简目录不携带约 210 MB 的下载缓存。原目录有相同依赖缓存，必要时可复用副本，不能改旧目录的依赖。
+Host tests need Python 3, a C/C++ compiler, Node.js and the usual tools the scripts call. The first firmware build fetches `managed_components/` according to `dependencies.lock`.
 
-`build.sh` 每次从 `sdkconfig.defaults` 生成配置，避免旧 sdkconfig 破坏内存预算。不要删 CMake 的内存配置检查。`bash build.sh release` 是独立发布配置构建，不表示已经发布；`diag` 是诊断构建，不能当正式包。
+## Builds
 
-固件交付检查（在载入 ESP-IDF 的 shell 中）：
+```bash
+bash build.sh            # local build in build/
+bash build.sh release    # public release configuration in build-public/
+```
+
+`build.sh` regenerates the configuration from `sdkconfig.defaults` every time, so a stale `sdkconfig` cannot break the memory budget. Do not remove the memory configuration checks in CMake. `release` is a standalone public-configuration build, not a publication; `diag` is a diagnostic build and must not be shipped.
+
+If the repository is moved, existing build directories keep the old path in `CMakeCache.txt`; run `idf.py fullclean` (or delete `build*/`) before building again.
+
+Firmware hand-over checks (in a shell with ESP-IDF loaded):
 
 ```bash
 idf.py -B build merge-bin -o FoloToy-AI-Passport-full.bin
 python3 tools/verify_firmware.py build
 ```
 
-`python3 tools/check_repo.py --firmware-fork` 做仓库检查；`bash tools/validate.sh --static` 还会运行 actionlint 和完整主机测试，首次缺工具时安装脚本需要联网。Git 关联与当前审阅分支以 `docs/CURRENT.md` 为准。
+`python3 tools/check_repo.py --firmware-fork` runs the repository checks. `bash tools/validate.sh --static` also runs actionlint and the full host tests; the first run needs network access to install missing tools. `bash tools/validate.sh --firmware` builds the public configuration in a temporary directory and copies the full and application images to `build/`.
 
-## 设备更新
+## Releases
 
-先确认实际串口和用户当前操作范围。用户明确要求全新安装时，可以在备份后全片擦除并写入完整镜像；其他升级默认保留现场资料；新鲜整片备份留在本地诊断目录，核对分区后仅更新 `0x10000` 应用分区，读回验证并确认非应用区保持。未获得全清授权时，不要全片擦除或将合并镜像覆盖已有设备资料。
+1. Set `PROJECT_VER` in `CMakeLists.txt` and write `docs/release-<version>.md`.
+2. Build and verify the public configuration, then optionally run `tools/package_firmware.py` for a local candidate with a source snapshot and manifest.
+3. Push a tag such as `v0.2.0-my.1`. The `Build firmware` workflow attaches `Passport-OS-MY-<tag>-full.bin`, `Passport-OS-MY-<tag>-app.bin` and `SHA256.txt` to a GitHub Release on `MK-Chan-MECACA/passport-os`.
 
-`firmware/passport-os-app.bin` 已更新为 rc.58 发布配置应用镜像，不是完整初始化镜像；源码改动并构建后，它不会自动更新。只有重新校验并更新状态/校验清单后才替换它。所有固件以 SHA256 为准。
+Creating a tag or release publishes firmware; do it only when the user asks.
 
-## 原目录与交接校验
+## Updating a device
 
-旧项目 `F:/WORK/AI硬件/passport-os` 是本次整理前的完整历史档案，保留旧文档、构建和发布包；旁边 `_diag` 保留实机证据和私密备份。日常只维护新目录。不要让 AI 同时加载两个项目。
-
-`firmware/snapshot-manifest.json` 保存复制文件 SHA256 与源 Git HEAD；该 HEAD 仅供追溯，快照包含未提交及新增文件。源码及生成资源按原字节复制，历史测试输出被排除。2026-11-08 已复制固定版本依赖缓存，并从新目录完成 rc.57 发布配置全量构建与校验。源码快照仍不包含可再生成的 build-public 和 managed_components。
-
-本次整理仅调整 `.gitignore` 和源码打包工具的文件清单：收录 AGENTS 与诊断默认配置；公开文档在后续远程基线整理中恢复，见 `docs/CURRENT.md`。运行源码、资源、测试及构建配置保持原字节。源码打包已做不生成发布包的 dry-run，确认精简文档会随下次打包保留。
+Confirm the actual serial port and what the user wants changed first. If the user explicitly asks for a fresh install, take a full flash backup, then erase and write the full image. Every other upgrade keeps the device data: take a fresh full backup, confirm the partition table, write only the `0x10000` application partition, read it back and confirm the non-application regions are unchanged. Without permission for a full wipe, never erase the whole chip or write a merged image over an existing device's data. Identify every image by SHA256.

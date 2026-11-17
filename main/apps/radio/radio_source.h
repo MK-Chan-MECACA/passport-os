@@ -33,7 +33,7 @@ private:
     bool finished_{}, oom_{};
     uint32_t icy_interval_{};
     uint32_t range_start_{};
-    const char *agent_ = "AI-Passport-Radio/0.2.0-rc.54";
+    const char *agent_ = "Passport-OS-MY-Radio/0.2.0-my.1";
     const char *referer_ = nullptr;
     int tx_bytes_ = 512;
     uint32_t content_length_{};

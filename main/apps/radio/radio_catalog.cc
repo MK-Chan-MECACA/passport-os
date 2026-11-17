@@ -101,7 +101,7 @@ bool http_get(const char *url, char *response, std::size_t capacity,
     config.timeout_ms = kHttpTimeoutMs;
     config.buffer_size = 1024;
     config.buffer_size_tx = 512;
-    config.user_agent = "AI-Passport-Radio/0.2.0-rc.12";
+    config.user_agent = "Passport-OS-MY-Radio/0.2.0-my.1";
     config.keep_alive_enable = false;
     config.disable_auto_redirect = false;
     config.max_redirection_count = 3;
@@ -388,7 +388,7 @@ void query_directory(const DirectoryServers &servers, const RadioLocation &locat
         config.timeout_ms = kHttpTimeoutMs;
         config.buffer_size = 1024;
         config.buffer_size_tx = 512;
-        config.user_agent = "AI-Passport-Radio/0.2.0-rc.12";
+        config.user_agent = "Passport-OS-MY-Radio/0.2.0-my.1";
         esp_http_client_handle_t client = esp_http_client_init(&config);
         if (!client) break;
         esp_http_client_set_header(client, "Accept-Encoding", "identity");

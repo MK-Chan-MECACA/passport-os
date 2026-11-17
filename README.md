@@ -1,187 +1,182 @@
 <div align="center">
 
-# Passport OS
+# Passport OS MY
 
-**把一块小硬件，折腾成每天会用的小玩意。**
+**A small device worth keeping in your daily routine.**
 
-FoloToy AI Passport 社区固件 · ESP32-C3 · 8 MB Flash · 13 款功能与应用
+Malaysia edition of the Passport OS community firmware for the FoloToy AI Passport · ESP32-C3 · 8 MB Flash · 12 apps
 
-**和小智说句话，调音量、点歌听电台、设提醒，让这台小设备替你做点事。**
+**Ask Xiaozhi to adjust the volume, play Malaysian radio, read tech news and set reminders on the device.**
 
-**简体中文** · [English](docs/README.en.md)
-
-[试试语音控制](#你说一句小智来操作) · [看看能玩什么](#十三款应用装进口袋) · [安装固件](#先用起来) · [自己改一版](#把它改成你的版本) · [关联项目](#两个老朋友)
+[Voice control](#ask-xiaozhi-to-operate-the-device) · [Apps](#twelve-apps) · [Install](#install) · [Make your own version](#make-your-own-version) · [Related projects](#related-projects)
 
 </div>
 
 ---
 
-## 从自己想用开始
+## What this edition changes
 
-首先，感谢大家对这个项目的喜欢和支持。收到这么多反馈，让这件原本只为自己做的小事，多了很多继续折腾的理由。
+Passport OS MY is a fork of [Passport OS](https://github.com/manchunx7-bit/passport-os) 0.2.0-rc.59 for English-speaking users in Malaysia. Everything not listed here works as upstream.
 
-制作 Passport OS 的初衷很简单：把这块硬件变成一个我自己会经常使用的“小玩意”。经过一轮轮尝试和筛选，我留下了日常用得上的 13 款功能与应用：能聊两句、听听电台、帮忙输入，也能计个时、玩一局。
+- **English-only interface.** All on-screen text, voice tools and setup pages are in English. Fonts are Latin-only, which makes the app image about 500 KB smaller.
+- **Malaysian cities.** City search uses GeoNames places in Malaysia, grouped by state or Federal Territory. Kuala Lumpur is the default. The phone page still accepts a custom name and coordinates.
+- **Malaysian radio.** The station directory is queried for Malaysia (city, then state, then the whole country). MP3 and AAC/AAC+ streams are accepted. The presets are Traxx FM, BFM 89.9, Nasional FM, Klasik FM, ai FM and 988 FM.
+- **Tech News instead of AI Hot.** Xiaozhi reads Hacker News front-page stories and recent AI stories.
+- **NetEase Cloud Music removed.** Asking Xiaozhi to play music plays live radio instead.
+- **Unchanged on purpose:** Malaysia time (UTC+8), Open-Meteo weather, the official xiaozhi.me backend, and the `Passport-WiFi-xxxx` setup hotspot.
 
-其中，我很喜欢的一件事，是让小智把这些功能串起来。聊天时想到要听歌、记一件事、开始专注，直接说出来，它就能调用设备上的功能，帮你完成操作。
+## Ask Xiaozhi to operate the device
 
-大家提出了不少有意思的个性化需求。每个人的使用习惯不同，与其把所有想法都塞进同一个固件，不如把项目开放出来，让大家自己动手：增加喜欢的功能，删掉用不上的部分，做一个更适合自己的版本。
+**Xiaozhi is the device's voice control entry point.** Double-press OK to start a conversation, then use everyday language to adjust settings, open apps, play radio or manage tasks.
 
-> 希望它既能成为你日常用得上的工具，也能成为值得折腾的小玩具。大家玩得开心！
-
-## 你说一句，小智来操作
-
-**小智是这台设备的语音操作入口。** 双击确定键进入对话，你可以用日常说法调整硬件设置、打开应用，也可以把听歌、计时、记录待办这些事情交给它。
-
-| 你可以这样说 | 设备会做什么 |
+| Example request | Device action |
 | --- | --- |
-| “声音小一点”“把屏幕亮度调到 50%” | 调整并保存设备音量或亮度 |
-| “播放我喜欢的音乐，半小时后停” | 打开网易云音乐，播放你的收藏，并设置定时停止 |
-| “听深圳的交通广播” | 按城市和电台关键词查找，切换到收音机播放 |
-| “开始一个番茄钟”“还剩多长时间？” | 启动 25 分钟专注计时，或查询实际剩余时间；也支持暂停、继续 |
-| “十分钟后提醒我喝水”“每天晚上九点提醒我看书” | 保存一次或重复提醒，到时在设备上提示并响铃 |
-| “建一个出门清单：钥匙、手机、雨伞”“把雨伞标为完成” | 保存清单，读取后按你的要求修改条目和完成状态 |
-| “打开秒表”“回到首页” | 打开对应应用或页面 |
+| "Turn the volume down" or "Set screen brightness to 50%" | Adjust and save the device's volume or brightness |
+| "Play BFM in Kuala Lumpur and stop in half an hour" | Find the station, open Radio to play it, and set a stop timer |
+| "Play some radio from Penang" or "Play some music" | Play a popular station for that place; music requests are answered with live radio |
+| "What's on Hacker News?" or "Any news about Nvidia?" | Read front-page stories, or recent popular stories matching a word (AI by default) |
+| "Start a Pomodoro" or "How much time is left?" | Start a 25-minute focus session or read the actual remaining time; pause and resume are also supported |
+| "Remind me to drink water in ten minutes" or "Remind me to read every day at 9 pm" | Save a one-time or recurring reminder with an on-device alert and chime |
+| "Create a packing list: keys, phone, umbrella" or "Mark umbrella as done" | Save a checklist, then read and update its items and completion state |
+| "Open Stopwatch" or "Go to Home" | Open the requested app or screen |
 
-想听资讯时，也可以问“今天有什么 AI 热点？”，让小智查询并讲给你听。对话中的机器人表情和声波会随着聆听、回复变化，长文本会自动展开，四套主题都能使用。
+Robot expressions and an audio waveform follow listening and speech, longer text expands into a reading area, and all four themes are supported.
 
-使用这些语音能力需要联网并完成小智配置；网易云播放还需相应账号和可用曲目，电台以在线目录为准。打开其他应用或切换到媒体播放后，本轮小智对话会结束；需要继续语音操作时，再次双击确定键进入小智。提醒到点触发需要设备保持开机。
+Voice tools need a network connection and a Xiaozhi device binding. **On [xiaozhi.me](https://xiaozhi.me), set your agent's language and voice to English**, otherwise replies come back in Chinese. The Xiaozhi servers are in China, so expect a slower voice round trip from Malaysia. Radio depends on the online directory. Opening another app or starting playback ends the current Xiaozhi conversation; double-press OK again for further voice control. The device must stay powered on for reminders to trigger.
 
-## 十三款应用，装进口袋
+## Twelve apps
 
-| 应用 | 可以做什么 | 使用条件 |
+| App | What it does | Requirements |
 | --- | --- | --- |
-| 首页 | 时钟、个人资料、头像与名片、天气和空气质量 | 天气与空气质量需要联网 |
-| 收音机 | 选择城市和电台，听广播，设置睡眠计时 | Wi-Fi 与可用的网络电台 |
-| AI 随身语音 | 把设备当成电脑的语音输入工具，联动快捷键 | Windows 配套程序 |
-| 小智 AI | 语音对话，控制音量与亮度、打开应用、点歌选台、管理计时/提醒/清单 | 网络与小智服务配置；媒体另需对应服务 |
-| 网易云音乐 | 搜索歌曲、播放歌单与每日推荐 | Wi-Fi、自己的网易云账号及可用接口 |
-| 备忘提醒 | 创建提醒、重复提醒、到时响铃与延后 | 可离线使用；按设备当前时间触发 |
-| 清单 | 查看、勾选和管理待办事项 | 可离线使用 |
-| Muse | 语音发送给 Muse，在屏幕上阅读回复 | 手机配对、自己的账号与可用网络 |
-| 你在狗叫什么 | 用声音参与一局小游戏 | 可离线使用 |
-| 声音跳一跳 | 长声跳远、短声跳近，停声就跳 | 可离线使用 |
-| 俄罗斯方块 | 熟悉的堆叠、消行，再来一局 | 可离线使用 |
-| 秒表 | 计时、分段、暂停与继续 | 可离线使用 |
-| 番茄钟 | 专注、休息和到时提醒 | 可离线使用 |
+| Home | Clock, profile, portraits, cards, weather and air quality | Network for weather and air quality |
+| Radio | Malaysian city and station selection, playback and sleep timer | Wi-Fi and available online stations |
+| AI Voice | Hardware microphone and configurable desktop hotkeys | Windows companion program |
+| Xiaozhi AI | Voice conversations, volume and brightness, app opening, radio requests, tech news, timers, reminders and lists | Network and a Xiaozhi binding |
+| Reminders | One-time and recurring reminders, chimes and snooze | Works offline; uses the device clock |
+| Lists | View, check off and manage tasks | Works offline |
+| Muse | Send voice messages and read replies on screen | Phone pairing, your own account and a working network |
+| Why Barking | A sound-controlled game | Works offline |
+| Sound Jump | Longer sounds jump farther; stop making sound to jump | Works offline |
+| Tetris | Stack blocks and clear lines | Works offline |
+| Stopwatch | Timing, splits, pause and resume | Works offline |
+| Pomodoro | Focus sessions, breaks and completion chimes | Works offline |
 
-应用之外，还包含主题、音量、亮度、自动熄屏、短按唤醒、Wi-Fi 配网、电池显示与功耗管理等整机功能。
+The device also has themes, volume, brightness, auto screen-off, wake on short press, phone-based Wi-Fi setup, battery reporting and power management.
 
-## 最新固件地址
+## Install
 
-[获取最新固件](https://ai-passport.folotoy.cn/plays/438/?v=5579-4)
+Prebuilt images are on the [GitHub Releases page](https://github.com/MK-Chan-MECACA/passport-os/releases). You do not need AI tools or a firmware development environment to install them.
 
-## 两个老朋友
+Use only the matching FoloToy AI Passport hardware revision with ESP32-C3 and 8 MB Flash. Similar-looking boards may have incompatible displays, audio chips, buttons or partition layouts.
 
-此前单独开源的 Muse 和 AI 随身语音，也有各自的源码、教程和配套内容：
-
-| 项目 | 地址 | 内容 |
+| Situation | Image | Address |
 | --- | --- | --- |
-| Muse | [ai-passport-muse](https://github.com/manchunx7-bit/ai-passport-muse) | Muse 应用模块源码与使用教程 |
-| AI 随身语音 | [folo-ai-passport-voice](https://github.com/manchunx7-bit/folo-ai-passport-voice) | 随身语音源码、Windows 电脑端程序与使用教程 |
+| First installation or a fresh start | `Passport-OS-MY-vX.Y.Z-full.bin` | `0x0` |
+| Existing Passport OS with a verified identical partition layout | `Passport-OS-MY-vX.Y.Z-app.bin` | `0x10000` |
 
-## 先用起来
+> **Back up first.** A full image overwrites configuration in its written range, and a complete reset also needs a flash erase. To keep Wi-Fi, profile and images, verify the partition layout and write only the application image, without erasing the whole flash.
 
-**只想使用现有功能，不需要安装 AI 工具或编译环境。** 前往 [最新固件页面](https://ai-passport.folotoy.cn/plays/438/?v=5579-4) 获取固件。想修改功能，再看下方的源码构建流程。
-
-适用硬件：**相同硬件版本的 FoloToy AI Passport，ESP32-C3、8 MB Flash**。外观相似的其他开发板不能直接套用。
-
-| 你的情况 | 选择镜像 | 烧录地址 |
-| --- | --- | --- |
-| 首次安装，或重新体验完整配网流程 | `*-full.bin` 完整镜像 | `0x0` |
-| 已安装 Passport OS，且确认分区布局一致 | `*-app.bin` 应用镜像 | `0x10000` |
-
-> **先分清完整安装和普通升级。** 完整镜像会覆盖写入范围内的配置；彻底重置还需要擦除 Flash。想保留配网、资料和图片时，先备份并确认分区布局一致，再使用应用镜像，不能先擦除整片 Flash。
-
-详细的文件选择、Windows 烧录命令与常见问题，见 [社区安装说明](docs/open-source-guide-draft-20261025.md)。
+Step-by-step flashing commands and common problems are in the [install guide](docs/install.md).
 
 <details>
-<summary><strong>首次开机，怎么连接手机？</strong></summary>
+<summary><strong>First boot: connect your phone</strong></summary>
 
-1. 手机连接设备发出的 `Passport-WiFi-xxxx` 热点，无需密码。
-2. 在浏览器打开 `http://192.168.4.1`。
-3. 按页面提示选择 Wi-Fi、设置城市和个人资料；头像与名片按需添加。
-4. 完成设置后返回首页，开始使用。
+1. Connect your phone to the device's password-free `Passport-WiFi-xxxx` hotspot.
+2. Open `http://192.168.4.1` in the browser.
+3. Choose Wi-Fi, your city and your profile details. Portraits and cards are optional.
+4. Save, then return to Home.
 
-小智和 Muse 需要使用者自己的服务配置；Muse 使用代理时，填写代理主机的局域网 IP 和 HTTP 端口。AI 随身语音还需要运行上方关联项目中的 Windows 程序。
+Xiaozhi and Muse need your own service setup. For Muse through a proxy, enter the proxy host's LAN IP and HTTP port. AI Voice also needs the Windows companion from the related projects below.
 
 </details>
 
-## 把它改成你的版本
+## Make your own version
 
-**这个仓库包含整机固件源码。** 你可以从现有功能出发，改界面、改交互、增删应用，再编译并烧录到匹配的硬件上。
+**This repository contains the complete device firmware.** Download the source, change apps or the interface, build an image and test it on matching hardware.
 
-**下载源码 → 修改功能 → 编译固件 → 烧录设备 → 真机试一试。**
-
-### 从哪里动手
-
-| 想改什么 | 先看这里 |
+| Area | Source |
 | --- | --- |
-| 某个应用的界面或逻辑 | [`main/apps/`](main/apps/) |
-| 应用入口、切换、设置与系统交互 | [`main/launcher/`](main/launcher/) |
-| 小智语音控制与媒体交接 | [`main/device_control_mcp.cc`](main/device_control_mcp.cc) · [`main/voice_intent.cc`](main/voice_intent.cc) |
-| 通用界面与字体资源 | [`main/ui/`](main/ui/) · [`main/fonts/`](main/fonts/) |
-| 按键、显示、音频、电池等板级驱动 | [`components/bsp/`](components/bsp/) |
-| Wi-Fi 配网与连接管理 | [`components/esp-wifi-connect/`](components/esp-wifi-connect/) |
-| Muse 接入与协议适配 | [`components/passport_muse/`](components/passport_muse/) |
-| 主机测试与构建工具 | [`tests/`](tests/) · [`tools/`](tools/) |
+| Application UI and logic | [`main/apps/`](main/apps/) |
+| Launcher, settings and app lifecycle | [`main/launcher/`](main/launcher/) |
+| Xiaozhi device control and media handover | [`main/device_control_mcp.cc`](main/device_control_mcp.cc) · [`main/voice_intent.cc`](main/voice_intent.cc) |
+| Shared UI and fonts | [`main/ui/`](main/ui/) · [`main/fonts/`](main/fonts/) |
+| Board drivers | [`components/bsp/`](components/bsp/) |
+| Wi-Fi setup | [`components/esp-wifi-connect/`](components/esp-wifi-connect/) |
+| Muse integration | [`components/passport_muse/`](components/passport_muse/) |
+| Tests and development tools | [`tests/`](tests/) · [`tools/`](tools/) |
 
-### 编译第一版
+### Build
 
-准备 **Git、ESP-IDF 5.5.3** 及其配套工具链。Windows 用户可以在 WSL 中构建，再从 Windows 串口烧录。
+Install Git, ESP-IDF 5.5.3 and its toolchain. On Windows you can build in WSL and flash through a Windows serial port.
 
 ```bash
-git clone https://github.com/manchunx7-bit/passport-os.git
+git clone -b my-edition https://github.com/MK-Chan-MECACA/passport-os.git
 cd passport-os
 bash build.sh release
 ```
 
-构建脚本默认从 `/opt/esp-idf` 加载环境。如果安装在其他目录，通过 `IDF_DIR` 指定路径，例如：
+Clone to a path **without spaces**: the `esp_audio_codec` component passes an unquoted linker path and the link fails otherwise. A symlink does not help because CMake resolves it.
+
+The script loads ESP-IDF from `/opt/esp-idf` by default. For another installation path:
 
 ```bash
 IDF_DIR="$HOME/esp/esp-idf" bash build.sh release
 ```
 
-第三方组件由 ESP-IDF Component Manager 根据依赖文件获取。构建后得到：
+ESP-IDF Component Manager downloads the declared dependencies. The build checks distribution defaults, including public mode and empty proxy defaults.
 
-| 文件 | 用途 |
+| File | Use |
 | --- | --- |
-| `build-public/FoloToy-AI-Passport-full.bin` | 完整镜像，写入 `0x0` |
-| `build-public/passport-os.bin` | 应用镜像；相同分区布局的升级写入 `0x10000` |
+| `build-public/FoloToy-AI-Passport-full.bin` | Full image, written at `0x0` |
+| `build-public/passport-os.bin` | Application image, written at `0x10000` only for a verified matching partition layout |
 
-### 改完，先检查
+### Verify
 
-在已激活 ESP-IDF 5.5.3 的环境中执行：
+With ESP-IDF 5.5.3 activated:
 
 ```bash
 bash tools/validate.sh --static
 bash tools/validate.sh --firmware
 ```
 
-第二条命令会重新构建并校验完整镜像，输出到 `build/FoloToy-AI-Passport-full.bin`。编译通过之后，仍需在设备上检查按键、显示、音频、配网及改动涉及的功能。
+The second command builds and verifies a full image at `build/FoloToy-AI-Passport-full.bin`. A successful build does not replace testing buttons, display, audio, networking and the behaviour you changed on real hardware.
 
 <details>
-<summary><strong>准备分享自己的固件包？</strong></summary>
+<summary><strong>Packaging your own release</strong></summary>
 
-本地打包工具可以附带源码快照、manifest 和 SHA256 校验清单：
+The local packaging tool bundles a source snapshot, a manifest and SHA256 checksums:
 
 ```bash
 python3 tools/package_firmware.py --date YYYY-MM-DD --verification /path/to/verification-public.json
 ```
 
-日期和验收文件路径需要替换为实际值。验收记录必须对应当前固件版本，且不包含私人数据。打包工具不会自动发布 GitHub Release；源码变更后要重新构建、验证，不能沿用旧版本的验证结果。
+Replace the date and verification path with real values. The verification record must match the exact firmware version and contain no personal data, and release notes must exist at `docs/release-<version>.md`. Packaging does not publish anything. Pushing a tag builds the firmware in GitHub Actions and attaches the `-full.bin`, `-app.bin` and `SHA256.txt` files to a GitHub Release.
 
 </details>
 
-## 分享代码，保留自己的钥匙
+## Privacy
 
-发布构建会启用 `PASSPORT_PUBLIC_RELEASE=ON`，清空默认代理配置。每位使用者在自己的设备上填写 Wi-Fi、账号和服务凭据。
+Public builds enable `PASSPORT_PUBLIC_RELEASE=ON` and clear proxy defaults. Each user enters their own Wi-Fi, accounts and service credentials on their own device.
 
-提交代码、Issue 或自己的改版时，请勿附上密码、API Token、设备配置导出、私人日志或个人图片。提交问题时，写明固件版本、硬件型号、复现步骤和是否保留了旧数据，会更容易定位。
+Do not commit or attach passwords, API tokens, device exports, private logs or personal images. When reporting a problem, include the firmware version, hardware revision, steps to reproduce and whether old data was kept.
 
-## 许可与致谢
+## Related projects
 
-项目主体采用 [MIT 许可证](LICENSE)。Muse、Noise 协议和其他第三方内容遵循各自目录中的 `LICENSE`、`NOTICE` 及资源说明；Jollybot 形象的使用边界见 [单独声明](main/apps/muse/JOLLYBOT-NOTICE.md)。
+- [Muse: ai-passport-muse](https://github.com/manchunx7-bit/ai-passport-muse): standalone module source and usage guide.
+- [AI Voice: folo-ai-passport-voice](https://github.com/manchunx7-bit/folo-ai-passport-voice): voice application source, Windows companion and usage guide.
 
-感谢 FoloToy 的硬件与上游项目，也感谢所有分享想法、反馈问题和参与改进的朋友。
+## Documentation
 
-**从一个自己想用的小玩意开始，接下来，欢迎把它改成你的样子。**
+- [Install guide](docs/install.md)
+- [Current status](docs/CURRENT.md) and [maintenance](docs/MAINTENANCE.md)
+- [Malaysia edition plan](docs/MY-EDITION.md)
+- [Xiaozhi app notes](docs/xiaozhi-app.md)
+- Upstream reviews, plans and release notes, kept in Chinese: [`docs/archive/zh/`](docs/archive/zh/)
+
+## Licence and credits
+
+The main project uses the [MIT licence](LICENSE). Muse, the Noise protocol code and other third-party content keep their own licences and notices. Jollybot artwork has [separate terms](main/apps/muse/JOLLYBOT-NOTICE.md). The city catalogue uses [GeoNames](third_party/geonames-my/README.md) data under CC BY 4.0.
+
+Thanks to FoloToy for the hardware and upstream project, to the Passport OS author for the community firmware, and to everyone who shares ideas, reports issues and contributes improvements.
+
+Malaysia edition maintained by [MK-Chan-MECACA](https://github.com/MK-Chan-MECACA).
