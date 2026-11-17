@@ -1,11 +1,11 @@
-// main/apps/voice/mode.c —— 链路通道实现
+// main/apps/voice/mode.c - link channel implementation
 //
-// 2026-09-12:通道由 BLE 换成 Wi-Fi UDP(契约见 docs/voice-udp-channel.md)。
-// 本文件从"BLE/USB 双通道抽象"退化为"单通道转发":
-//   - 原 mode_channel_up(APP_CHAN_USB) 恒 false(mode.c 旧实现直接 return false,
-//     仓库里从来没有 usb_link 实现)→ USB 分支整体删除,它从来不可用;
-//   - 原 ble_audio_* 全部换成 udp_audio_*;
-//   - 对外签名保持 mode.h 不变 —— app_state.c 的状态机与 host 测试零改动。
+// 2026-09-12: the channel moved from BLE to Wi-Fi UDP (contract in docs/archive/zh/voice-udp-channel.md).
+// This file went from a "BLE/USB dual-channel abstraction" down to "single-channel forwarding":
+//   - the old mode_channel_up(APP_CHAN_USB) was always false (the old mode.c just returned false,
+//     and the repo never had a usb_link implementation) -> the USB branch is removed entirely, it never worked;
+//   - all old ble_audio_* calls are replaced with udp_audio_*;
+//   - the external signatures in mode.h are unchanged - zero changes to the app_state.c state machine and host tests.
 #include "mode.h"
 #include "audio_streamer.h"
 #include "udp_audio.h"
@@ -17,7 +17,7 @@ bool mode_link_up(void)
 
 bool mode_channel_up(uint8_t chan)
 {
-    // 单通道:无线(APP_CHAN_BLE)即 UDP 通道。USB 已移除,恒 false。
+    // Single channel: wireless (APP_CHAN_BLE) is the UDP channel. USB has been removed, always false.
     return chan == APP_CHAN_BLE && udp_audio_event_subscribed();
 }
 
@@ -37,9 +37,9 @@ int mode_send_event_line_important(uint8_t chan, const char *line, size_t len,
 const char *mode_audio_format(uint8_t chan)
 {
     (void)chan;
-    // UDP 下仍是每帧一个独立 IMA ADPCM block(4:1,8KB/s):块自带
-    // predictor/index 头,丢一块只损失 100ms 且不失步 —— 与 UDP 丢包模型
-    // 天然契合,比"高带宽就不用压缩"的直觉更优(见 docs/voice-udp-channel.md §6)。
+    // Over UDP it is still one independent IMA ADPCM block per frame (4:1, 8KB/s): each block carries its own
+    // predictor/index header, so losing a block costs only 100ms and never loses sync - a natural fit for UDP's loss model,
+    // and better than the intuition "high bandwidth means no compression" (see docs/archive/zh/voice-udp-channel.md §6).
     return "ima_adpcm";
 }
 
@@ -52,5 +52,5 @@ void mode_select_audio_sender(uint8_t chan)
 
 bool mode_wired(void)
 {
-    return false;   // USB 通道已移除
+    return false;   // USB channel has been removed
 }

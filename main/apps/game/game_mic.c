@@ -10,17 +10,17 @@
 
 static const char *TAG = "game_mic";
 
-#define SAMPLES 256 /* 16ms @16kHz;读块小,延迟低 */
+#define SAMPLES 256 /* 16ms @16kHz; small read blocks, low latency */
 
-/* 原始采样诊断(每 ~2s 一条,供声控阈值校准)。平时关掉:它会额外扫一遍
-   256 个采样并打 UART 日志,属于纯调试开销。改 1 重新打开。 */
+/* Raw-sample diagnostics (one line every ~2s, for calibrating voice thresholds). Off normally: it scans the
+   256 samples again and prints a UART log, pure debug overhead. Set to 1 to re-enable. */
 #define GAME_MIC_DEBUG_LOG 0
 
-/* 丢掉 codec 上电瞬态的块数(10 × 16ms ≈ 160ms)。
-   满量程垃圾曾把狗直接顶上天,不能省。 */
+/* Number of blocks to drop for the codec power-up transient (10 × 16ms ≈ 160ms).
+   Full-scale garbage once shot the dog straight to the ceiling; this cannot be skipped. */
 #define MIC_WARMUP_BLOCKS 10
 
-/* EMA 系数:ema = ema*(4-1)/4 + mean/4 ≈ 48ms 时间常数。 */
+/* EMA coefficient: ema = ema*(4-1)/4 + mean/4 ≈ 48ms time constant. */
 #define MIC_EMA_SHIFT 2
 
 static atomic_uint s_level;
@@ -29,7 +29,7 @@ static atomic_bool s_active;
 static atomic_bool s_running;
 static TaskHandle_t s_task;
 
-/* 等旧任务退出:最多 wait_ticks × 15ms。返回它是否已经消失。 */
+/* Wait for the old task to exit: at most wait_ticks × 15ms. Returns whether it is gone. */
 static bool wait_task_exit(int wait_ticks) {
     for (int i = 0; i < wait_ticks && s_task; ++i) {
         vTaskDelay(pdMS_TO_TICKS(15));
@@ -39,7 +39,7 @@ static bool wait_task_exit(int wait_ticks) {
 
 static void mic_task(void *arg) {
     (void)arg;
-    int16_t pcm[SAMPLES]; /* 512B 在任务栈上,不占堆 */
+    int16_t pcm[SAMPLES]; /* 512B on the task stack, not the heap */
 
     esp_err_t err = bsp_audio_init();
     if (err != ESP_OK) {
@@ -62,7 +62,7 @@ static void mic_task(void *arg) {
             vTaskDelay(pdMS_TO_TICKS(50));
             continue;
         }
-        /* 均值整流:比 RMS 便宜(无乘法),对响度映射足够 */
+        /* Mean rectification: cheaper than RMS (no multiplies), good enough for loudness mapping */
         int32_t sum = 0;
 #if GAME_MIC_DEBUG_LOG
         int32_t mn = 32767, mx = -32768;
@@ -76,7 +76,7 @@ static void mic_task(void *arg) {
 #endif
         }
 #if GAME_MIC_DEBUG_LOG
-        if (++dbg >= 120) { /* ~2s 一条,供声控阈值校准 */
+        if (++dbg >= 120) { /* one line every ~2s, for calibrating voice thresholds */
             dbg = 0;
             int32_t mean_s = 0;
             for (int i = 0; i < SAMPLES; ++i) mean_s += pcm[i];
@@ -90,9 +90,9 @@ static void mic_task(void *arg) {
             if (--warmup == 0) atomic_store(&s_ready, true);
             continue;
         }
-        /* EMA 全程无符号:ema*3/4 + mean/4。原来的 (mean-ema)/4 在 mean<ema 时
-           发生无符号下溢,电平瞬间顶满 4095 并永远卡死 —— 已用真机抓到。
-           首块直接播种(而不是从 0 慢慢爬),省掉约 64ms 的收敛,出声更跟手。 */
+        /* EMA fully unsigned: ema*3/4 + mean/4. The old (mean-ema)/4 underflowed (unsigned) when mean<ema,
+           instantly pinning the level at 4095 and staying stuck forever - caught on real hardware.
+           Seed directly from the first block (instead of climbing up from 0), saving ~64ms of convergence for snappier response. */
         ema = (ema == 0) ? mean : (ema * ((1u << MIC_EMA_SHIFT) - 1u) + mean) >> MIC_EMA_SHIFT;
         atomic_store(&s_level, (unsigned)(ema > 4095u ? 4095u : ema));
     }
@@ -104,17 +104,17 @@ static void mic_task(void *arg) {
 }
 
 void game_mic_start(void) {
-    /* 关键修复:原来这里只有 `if (s_task) return;`。退出 App 后立刻重进时旧任务
-       往往还在 read 里(最多 16ms)没退出,s_task 非空 → 直接 return,于是
-       这一局静默地没有麦克风、完全不可玩。现在改为"先请它退出并等它"。 */
+    /* Key fix: this used to be just `if (s_task) return;`. When re-entering right after leaving the app, the old task
+       was often still inside read (up to 16ms) and had not exited; s_task non-null → return, so
+       that round silently had no mic and was completely unplayable. Now it "asks it to exit and waits" first. */
     if (s_task) {
         atomic_store(&s_active, false);
-        if (!wait_task_exit(40)) { /* 最多 600ms */
+        if (!wait_task_exit(40)) { /* at most 600ms */
             ESP_LOGW(TAG, "previous capture task still running, skipping this start");
             return;
         }
     }
-    /* 清掉上一局残留的电平/就绪位,避免进场第一帧就带着旧响度起飞。 */
+    /* Clear the leftover level/ready flag from the last round so the first frame doesn't take off on stale loudness. */
     atomic_store(&s_level, 0);
     atomic_store(&s_ready, false);
     atomic_store(&s_active, true);
@@ -130,7 +130,7 @@ void game_mic_start(void) {
 void game_mic_stop(void) {
     if (!s_task) return;
     atomic_store(&s_active, false);
-    if (!wait_task_exit(40)) { /* 最多等 600ms */
+    if (!wait_task_exit(40)) { /* wait at most 600ms */
         ESP_LOGW(TAG, "mic task slow to exit, leaving it to self-delete");
     }
 }

@@ -1,5 +1,5 @@
-// 首页时钟:Wi-Fi 就绪后用 SNTP 校系统时钟,UI 从系统时间 + 本地时区偏移
-// 格式化日期。时区复用 time_sync(语音应用)的 NVS 设置,全系统一致。
+// Home clock: once Wi-Fi is up, SNTP sets the system clock; the UI formats the date from system time + local
+// time zone offset. The time zone reuses the time_sync (voice app) NVS setting, consistent system-wide.
 #pragma once
 
 #include <stdbool.h>
@@ -10,13 +10,13 @@
 extern "C" {
 #endif
 
-// 幂等启动 SNTP(需网络已就绪)。重复调用无害。
+// Idempotently start SNTP (network must be ready). Repeated calls are harmless.
 void home_clock_start(void);
 
-// 停止 SNTP 并释放网络依赖(离开首页时调用)。已校准的系统时间继续走时。
+// Stop SNTP and release the network dependency (call when leaving Home). An already-synced system clock keeps running.
 void home_clock_stop(void);
 
-// 系统时钟是否已校准(2023 年之后视为有效;PC 校时或 SNTP 均可达成)。
+// Whether the system clock is synced (valid if after 2023; set by either PC sync or SNTP).
 bool home_clock_valid(void);
 
 // "12:34" / "--:--"

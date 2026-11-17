@@ -19,7 +19,7 @@ Git: the working copy is `~/passport-os` (it must be a path without spaces, see 
 
 ## Malaysia edition changes
 
-See [MY-EDITION.md](MY-EDITION.md) for detail. In short: NetEase removed (music requests go to Radio); Malaysian GeoNames city catalogue; Radio queries Malaysia and accepts MP3 and AAC/AAC+, with six Malaysian MP3 presets; AI Hot replaced by Hacker News Tech News; English UI and Latin-only fonts; English setup pages and a Cloudflare connectivity probe; name "Passport OS MY", version `0.2.0-my.1`; English living docs.
+See [MY-EDITION.md](MY-EDITION.md) for detail. In short: NetEase removed (music requests go to Radio); Malaysian GeoNames city catalogue; Radio queries Malaysia and accepts MP3 and AAC/AAC+, with six Malaysian MP3 presets; AI Hot replaced by Hacker News Tech News; English UI and Latin-only fonts; English setup pages and a Cloudflare connectivity probe; name "Passport OS MY", version `0.2.0-my.1`; English living docs; English code comments.
 
 ## Behaviour inherited from upstream rc.59
 
@@ -46,7 +46,6 @@ See [MY-EDITION.md](MY-EDITION.md) for detail. In short: NetEase removed (music 
 
 1. Flash 0.2.0-my.1 to a device and check the items listed under "Not yet checked".
 2. If AAC is unstable on hardware, keep the MP3-only presets and consider filtering AAC out of directory results. HLS stays disabled.
-3. Step 8 of MY-EDITION.md: translate hand-written code comments in a separate commit with identical build output. Comments in `main/apps/voice/` still point at `docs/voice-udp-channel.md`, which now lives in `docs/archive/zh/`.
-4. When a current meter is available, build A/B images that differ only in the three power-saving policies and measure Home screen-on, networked screen-off, Xiaozhi idle screen-off and offline scanning (voltage, average and peak current, energy, time), excluding the effect of a computer's USB port on light sleep.
+3. When a current meter is available, build A/B images that differ only in the three power-saving policies and measure Home screen-on, networked screen-off, Xiaozhi idle screen-off and offline scanning (voltage, average and peak current, energy, time), excluding the effect of a computer's USB port on light sleep.
 
 Do not expand scope beyond MY-EDITION.md unless the user asks.

@@ -1,28 +1,28 @@
-// main/app_protocol.c —— 协议实现。
-// 字段契约见 prd.md 协议小节;任何解析失败只返回 false,绝不崩溃。
+// main/app_protocol.c - protocol implementation.
+// Field contract in the protocol section of prd.md; any parse failure just returns false, never crashes.
 #include "app_protocol.h"
 #include "app_events.h"
 #include "cJSON.h"
 #include <stdlib.h>
 #include <string.h>
 
-// JSON 嵌套深度上限:解析在 NimBLE host task(默认栈 4KB,审查起算 2048B 栈
-// 路径也在用)上下文执行,cJSON 的递归解析没有深度限制——2KB 载荷内的深层
-// 嵌套(如 [[[[...]]]])可爆栈崩溃。审查 P1:32 层 × 每层 cJSON 递归帧
-// (~150B)≈ 4.8KB,已超 4KB 栈余量;12 层 ≈ 1.8KB,任何解析上下文都安全。
-// 协议实际载荷最深 ~5 层(type → payload → list → item → field),12 层富余。
-// 预检只扫结构字符({ [ 计数配对),跳过字符串(含转义),O(len) 微秒级早退。
+// JSON nesting depth limit: parsing runs in the NimBLE host task (default 4KB stack, also used by the 2048B-stack
+// path counted in review) context, and cJSON's recursive parser has no depth limit - deep nesting within a 2KB payload
+// (e.g. [[[[...]]]]) can overflow the stack and crash. Review P1: 32 levels × one cJSON recursion frame per level
+// (~150B) ≈ 4.8KB, already past the 4KB stack headroom; 12 levels ≈ 1.8KB, safe in any parsing context.
+// Real protocol payloads are at most ~5 levels deep (type -> payload -> list -> item -> field), so 12 leaves margin.
+// The pre-check only scans structural characters (counting { [ pairs), skips strings (including escapes), O(len), exits early in microseconds.
 #define APP_PROTO_JSON_DEPTH_MAX 12
 
 static bool json_depth_ok(const char *json, size_t len) {
     int depth = 0;
     bool in_str = false;
-    // 遇 '\0' 即停:与 cJSON_ParseWithLength 的宽容语义一致(len 只是上限,
-    // 调用方可能传入含尾 NUL 的短行);按 len 硬扫会越界读。
+    // Stop at '\0': matches cJSON_ParseWithLength's lenient semantics (len is only an upper bound,
+    // callers may pass a short line with a trailing NUL); scanning strictly to len would read out of bounds.
     for (size_t i = 0; i < len && json[i] != '\0'; i++) {
         char c = json[i];
         if (in_str) {
-            if (c == '\\' && i + 1 < len) i++;   // 跳过转义字符(含 \" 本身)
+            if (c == '\\' && i + 1 < len) i++;   // skip the escaped character (including \" itself)
             else if (c == '"') in_str = false;
             continue;
         }
@@ -50,7 +50,7 @@ static void str_take(char *dst, size_t cap, const char *src) {
     dst[cap - 1] = '\0';
 }
 
-// riskLevel: "low" | "medium" | "high",缺省 medium
+// riskLevel: "low" | "medium" | "high", defaults to medium
 static uint8_t parse_risk(const cJSON *o) {
     const cJSON *r = cJSON_GetObjectItemCaseSensitive(o, "riskLevel");
     if (cJSON_IsString(r)) {
@@ -102,21 +102,21 @@ static bool parse_transcript(const cJSON *o, app_event_t *ev) {
     const cJSON *im = cJSON_GetObjectItemCaseSensitive(o, "inject_mode");
     ev->u.transcript.inject_mode = (cJSON_IsString(im) && strcmp(im->valuestring, "paste") == 0)
         ? APP_INJECT_PASTE : APP_INJECT_TYPE;
-    // final 缺省 false:旧 Mac 端/旧帧不带该字段一律按预览态处理
+    // final defaults to false: old Mac clients / old frames without the field are all treated as preview
     const cJSON *fin = cJSON_GetObjectItemCaseSensitive(o, "final");
     ev->u.transcript.final = cJSON_IsBool(fin) && cJSON_IsTrue(fin);
     ev->type = APP_EV_TRANSCRIPT;
     return true;
 }
 
-// 校时下行:epoch 为 UTC 秒。double 承载 int64 精度到 2^53(≈9e15 秒,
-// 约 2.9 亿年),epoch 实际量级 1.7e9,精度无损;范围检查防御恶意大值
-// (cJSON valuedouble 可到 1.8e308,防 int64 转换 UB)。
+// Time-set downlink: epoch is UTC seconds. A double holds int64 exactly up to 2^53 (≈9e15 s,
+// ~290 million years); real epochs are ~1.7e9, so no precision loss; the range check defends against malicious huge values
+// (cJSON valuedouble can reach 1.8e308; prevents UB in the int64 conversion).
 static bool parse_time_set(const cJSON *o, app_event_t *ev) {
     const cJSON *ep = cJSON_GetObjectItemCaseSensitive(o, "epoch");
     if (!cJSON_IsNumber(ep)) return false;
     double d = ep->valuedouble;
-    if (d < -9.2e18 || d > 9.2e18) return false;   // 超出 int64 范围:拒绝
+    if (d < -9.2e18 || d > 9.2e18) return false;   // outside int64 range: reject
     ev->u.time_set.epoch = (int64_t)d;
     ev->type = APP_EV_TIME_SET;
     return true;
@@ -124,7 +124,7 @@ static bool parse_time_set(const cJSON *o, app_event_t *ev) {
 
 bool app_protocol_parse(const char *json, size_t len, app_event_t *ev) {
     if (!json || len == 0 || len > APP_PROTO_RX_CAP) return false;
-    if (!json_depth_ok(json, len)) return false;   // 深层嵌套:拒绝,保护解析者栈
+    if (!json_depth_ok(json, len)) return false;   // deep nesting: reject, protects the parser's stack
     cJSON *root = cJSON_ParseWithLength(json, len);
     if (!root) return false;
     bool ok = false;
@@ -144,7 +144,7 @@ bool app_protocol_parse(const char *json, size_t len, app_event_t *ev) {
                 ok = true;
             }
         }
-        // 未知 type:丢弃(返回 false,调用方记日志)
+        // Unknown type: drop (return false; the caller logs it)
     }
     cJSON_Delete(root);
     return ok;
@@ -153,22 +153,22 @@ bool app_protocol_parse(const char *json, size_t len, app_event_t *ev) {
 void app_protocol_dispatch_event(const app_event_t *ev)
 {
     if (ev->type == APP_EV_APPROVAL_REQUEST) {
-        app_event_post_important(ev, 100);   // 安全关键:满则等 100ms,不丢
+        app_event_post_important(ev, 100);   // safety-critical: waits 100ms when full, never dropped
     } else {
-        app_event_post(ev);                  // 常规事件:零阻塞,满则丢(设计语义)
+        app_event_post(ev);                  // regular event: zero-blocking, dropped when full (by design)
     }
 }
 
-// ---- 序列化 ----
+// ---- Serialization ----
 static size_t serialize(cJSON *root, char *buf, size_t cap) {
-    if (!root || !buf || cap < 2) return 0;   // cap<2 时 (cap-2) 下溢成超大 memcpy
+    if (!root || !buf || cap < 2) return 0;   // with cap<2, (cap-2) underflows into a huge memcpy
     char *s = cJSON_PrintUnformatted(root);
-    if (!s) return 0;                         // 序列化失败(OOM):不发残缺帧
+    if (!s) return 0;                         // serialization failed (OOM): do not send a partial frame
     size_t n = strlen(s);
-    if (n + 2 > cap) n = cap - 2;             // 截断保护(本协议帧都远小于 cap)
+    if (n + 2 > cap) n = cap - 2;             // truncation guard (every frame in this protocol is far smaller than cap)
     memcpy(buf, s, n);
     free(s);
-    buf[n++] = '\n';                          // 行分隔
+    buf[n++] = '\n';                          // line delimiter
     buf[n] = '\0';
     return n;
 }
@@ -185,11 +185,11 @@ size_t app_protocol_device_hello(char *buf, size_t cap, int proto) {
 size_t app_protocol_voice_start(char *buf, size_t cap, const char *audio_format) {
     cJSON *o = cJSON_CreateObject();
     cJSON_AddStringToObject(o, "event", "voice.start");
-    // 音频格式(App 据此分发):ima_adpcm = 每帧一个独立 IMA ADPCM block
-    // (4B 首部 [int16 predictor][uint8 index][rsv] + 800B 4bit 数据 = 804B,
-    // 100ms/帧 → 8KB/s),App 解回 16kHz PCM 后走既有 pcm ASR 通道;
-    // pcm = 3200B PCM 块直传(USB 带宽充裕,不压缩)。
-    // 未知格式 App 侧按 pcm 兜底,换编解码器(如退 ulaw)不需要改协议。
+    // Audio format (the App dispatches on it): ima_adpcm = one independent IMA ADPCM block per frame
+    // (4B header [int16 predictor][uint8 index][rsv] + 800B of 4-bit data = 804B,
+    // 100ms/frame -> 8KB/s); the App decodes back to 16kHz PCM and feeds the existing pcm ASR path;
+    // pcm = raw 3200B PCM chunks (USB has bandwidth to spare, no compression).
+    // The App falls back to pcm for unknown formats, so swapping codecs (e.g. back to ulaw) needs no protocol change.
     if (!audio_format) audio_format = "pcm";
     cJSON_AddStringToObject(o, "audio", audio_format);
     size_t n = serialize(o, buf, cap);

@@ -19,9 +19,9 @@
 static const char *TAG = "home_weather";
 
 #define NVS_NAMESPACE "home_profile"
-#define RESPONSE_MAX 1024 /* forecast?current= 响应 < 500B,留余量 */
+#define RESPONSE_MAX 1024 /* forecast?current= response < 500B, with headroom */
 #define HTTP_TIMEOUT_MS 15000
-#define EPOCH_VALID_MIN 1700000000LL /* 与 home_clock 一致:早于此视为未校时 */
+#define EPOCH_VALID_MIN 1700000000LL /* Same as home_clock: anything earlier counts as not synced */
 
 static home_weather_t s_weather;
 static uint32_t s_version;
@@ -131,7 +131,7 @@ uint32_t home_weather_version(void) {
 }
 
 const char *home_weather_code_text(uint16_t code) {
-    // 短语只由 buddy 字体已有的字组成(雨雪雾雷冰雹晴阴多云大小中等均已验证)
+    // Short English phrases that fit the weather word box (52 px) in the Latin-only buddy font
     if (code == 0 || code == 1) return "Clear";
     if (code == 2 || code == 3) return "Cloudy";
     if (code == 45 || code == 48) return "Fog";
@@ -167,7 +167,7 @@ static void persist_cache(const home_weather_t *weather, const char *lat, const 
     nvs_close(handle);
 }
 
-// 蒲福风级:km/h → 0..12 级,阈值来自国标蒲福风级表。
+// Beaufort scale: km/h → level 0..12, thresholds from the Chinese national-standard Beaufort table.
 int home_weather_beaufort(uint8_t wind_kmh) {
     static const uint8_t kThresh[] = {1, 6, 12, 20, 29, 39, 50, 62, 75, 89, 103, 118};
     int level = 0;
@@ -175,7 +175,7 @@ int home_weather_beaufort(uint8_t wind_kmh) {
     return level;
 }
 
-// 风向 16 点位就近归到 8 方位(北=0°,顺时针)。字形 东南西北风无 均在 buddy 字库内。
+// Snap the wind direction to the nearest of 8 compass points (north=0°, clockwise). Labels are ASCII compass abbreviations.
 const char *home_weather_wind_dir_text(uint16_t deg) {
     static const char *kDirs[8] = {
         "N", "NE", "E", "SE", "S", "SW", "W", "NW",
@@ -196,8 +196,8 @@ void home_weather_age_text(uint32_t updated_at, int64_t now, char *out, size_t c
     else snprintf(out, capacity, "%dd ago", (int)(age / 86400 > 99 ? 99 : age / 86400));
 }
 
-// 坐标所在地的 UTC 偏移(timezone=auto 时返回,含夏令时):设备时区跟着城市走,
-// 出国或跨时区不用再手动改。只接受 15 分钟整倍数的合理值。
+// UTC offset at the coordinates (returned with timezone=auto, includes DST): the device time zone follows the city,
+// so traveling abroad or across time zones needs no manual change. Only sane multiples of 15 minutes are accepted.
 static void apply_utc_offset(const cJSON *root) {
     const cJSON *offset = cJSON_GetObjectItemCaseSensitive(root, "utc_offset_seconds");
     if (!cJSON_IsNumber(offset) || !isfinite(offset->valuedouble)) return;
@@ -208,7 +208,7 @@ static void apply_utc_offset(const cJSON *root) {
     time_sync_set_tz_offset_min(seconds / 60);
 }
 
-// Open-Meteo current 响应形如
+// Open-Meteo current response looks like
 // {"latitude":39.9,"current_units":{...},"current":{"time":"...","temperature_2m":26.1,"weather_code":2,...}}
 static esp_err_t weather_parse(const char *body, const char *lat, const char *lon) {
     cJSON *root = cJSON_Parse(body);
@@ -298,7 +298,7 @@ static esp_err_t fetch_current(const char *url, const char *lat, const char *lon
     esp_http_client_config_t config = {
         .url = url,
         .timeout_ms = 2000, /* connection poll; shortened to 500ms after TLS */
-        .buffer_size = 1024, /* TLS 接收缓冲,小内存约束 */
+        .buffer_size = 1024, /* TLS receive buffer, kept small for memory */
         .buffer_size_tx = 512,
         .crt_bundle_attach = esp_crt_bundle_attach,
         .event_handler = receive_current,

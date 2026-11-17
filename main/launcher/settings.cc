@@ -216,7 +216,7 @@ void create_ui() {
 }
 
 void settings_init() {
-    // 启动配置已由 settings_bootstrap 恢复；这里不创建 UI，保持惰性加载。
+    // Boot config was already restored by settings_bootstrap; no UI is created here, it stays lazily loaded.
 }
 
 void settings_start() {

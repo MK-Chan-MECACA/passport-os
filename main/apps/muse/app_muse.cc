@@ -120,7 +120,7 @@ void refresh() {
         case PASSPORT_MUSE_PHONE_SETUP: status = "Almost there"; detail = "Finish Wi-Fi setup on phone"; action = "Continue on phone"; break;
         case PASSPORT_MUSE_CONNECTING:
             status = "Connecting"; action = "Connecting to your Muse"; guidance = false;
-            // Reconnect reasons ("内存不足，正在重连" ...) explain a long wait.
+            // Reconnect reasons ("Low memory, reconnecting" ...) explain a long wait.
             detail = std::strcmp(state.detail, action) == 0 ? "" : state.detail; break;
         case PASSPORT_MUSE_READY: status = "I'm ready"; detail = ""; action = "Hold Up · Release to send"; guidance = false; break;
         case PASSPORT_MUSE_LISTENING: status = "Listening"; action = "Release Up to send"; detail = ""; guidance = false; break;

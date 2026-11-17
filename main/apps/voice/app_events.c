@@ -1,4 +1,4 @@
-// main/app_events.c —— 应用事件队列实现。
+// main/app_events.c - application event queue implementation.
 #include "app_events.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
@@ -8,12 +8,12 @@ static const char *TAG = "app_evt";
 
 #define APP_EVENT_QUEUE_DEPTH 8
 
-// 静态队列:8×240B ≈ 1.9KB 静态分配,消除启动堆峰值与创建失败分支(M2)。
-// 深度 16→8(性能轮,省 1856B):消费 ~µs/条,积压仅发生在 app_task 长动作
-// 窗口(voice.end drain ≤500ms / cancel ≤200ms),与高突发源(转写/CTRL 行)
-// 时间正交;满即丢+日志兜底不变,关键收束事件走 post_important 阻塞投递
-// 不丢;被丢的最坏是 display-only 转写行(逐行覆盖自愈,日志可观测)。
-// 注:TIME_SET 引入 int64 后结构 240B(8 深 = 1920B),上述分析不变(长度无关)。
+// Static queue: 8×240B ≈ 1.9KB statically allocated, removing the boot heap peak and the creation-failure branch (M2).
+// Depth 16->8 (performance pass, saves 1856B): consuming takes ~µs per event; backlog only builds during app_task's long-action
+// windows (voice.end drain ≤500ms / cancel ≤200ms), which are orthogonal in time to high-burst sources (transcript/CTRL lines);
+// drop-when-full + logging is unchanged, and critical wind-down events use the blocking post_important
+// so they are not lost; the worst that gets dropped is a display-only transcript line (overwritten line by line, self-healing, visible in logs).
+// Note: after TIME_SET added an int64 the struct is 240B (depth 8 = 1920B); the analysis above is unchanged (independent of size).
 static StaticQueue_t s_queue_struct;
 static uint8_t s_queue_storage[APP_EVENT_QUEUE_DEPTH * sizeof(app_event_t)];
 static QueueHandle_t s_queue;
@@ -21,7 +21,7 @@ static QueueHandle_t s_queue;
 esp_err_t app_events_init(void) {
     s_queue = xQueueCreateStatic(APP_EVENT_QUEUE_DEPTH, sizeof(app_event_t),
                                  s_queue_storage, &s_queue_struct);
-    if (!s_queue) {   // 静态创建仅在存储对齐异常时失败,防御保留
+    if (!s_queue) {   // static creation only fails on a storage alignment fault; kept as a defensive check
         ESP_LOGE(TAG, "event queue create failed");
         return ESP_FAIL;
     }

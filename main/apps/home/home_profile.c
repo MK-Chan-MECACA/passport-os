@@ -21,8 +21,8 @@ static const char *TAG = "home_profile";
 #ifndef SPIFFS_BASE
 #define SPIFFS_BASE "/storage"
 #endif
-// 换名以弃用旧版 64×64 RGB565 头像(avatar.bin,8192B)—— 旧文件因尺寸校验
-// 不再被识别,重新上传一次即可;文件留在 SPIFFS 里无害。
+// Renamed to retire the old 64×64 RGB565 avatar (avatar.bin, 8192B) - the old file fails the size check
+// and is no longer recognized; just upload again. Leaving the file in SPIFFS is harmless.
 #define AVATAR_PATH SPIFFS_BASE "/portrait.bin"
 static const char *const s_avatar_paths[] = {
     SPIFFS_BASE "/portrait-a.bin", SPIFFS_BASE "/portrait-b.bin"
@@ -45,14 +45,14 @@ static uint8_t s_upload_slot;
 static char s_upload_bank;
 static char s_upload_path[HOME_SHARE_PATH_MAX];
 
-// 资料读写在 httpd 任务与首页任务间并发,用临界区保护结构体与版本号。
-// 单核 C3 上临界区会阻断其他任务,写路径(NVS/SPIFFS IO)必须放在临界区外。
+// Profile reads/writes run concurrently in the httpd task and the Home task; a critical section guards the struct and version.
+// On the single-core C3 a critical section blocks other tasks, so the write path (NVS/SPIFFS IO) must stay outside it.
 static portMUX_TYPE s_mux = portMUX_INITIALIZER_UNLOCKED;
 static home_profile_t s_profile;
 static uint32_t s_version = 1;
 
 static bool utf8_len_ok(const char *s, size_t cap) {
-    return s && strnlen(s, cap) < cap; /* strlen 已含结尾 0 之外的全部字节 */
+    return s && strnlen(s, cap) < cap; /* strlen covers every byte except the terminating 0 */
 }
 
 static bool coordinate_valid(const char *s, double min, double max) {
@@ -138,7 +138,7 @@ esp_err_t home_profile_set_text(const home_profile_t *in) {
     if (!home_profile_coordinates_valid(in->lat, in->lon) ||
         (in->country_code[0] && strcmp(in->country_code, "MY"))) return ESP_ERR_INVALID_ARG;
 
-    // 先持久化再上屏:NVS 写失败时保持旧资料,UI 永远与存储一致。
+    // Persist before displaying: if the NVS write fails the old profile stays, so the UI always matches storage.
     nvs_handle_t handle;
     esp_err_t err = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &handle);
     if (err != ESP_OK) {
@@ -171,10 +171,10 @@ esp_err_t home_profile_set_text(const home_profile_t *in) {
     return ESP_OK;
 }
 
-// storage 分区若残留其他固件(常见:刷过小智,其 OTA/资源分区覆盖 0x420000 起的
-// 区域)或从未初始化,SPIFFS 挂载必失败,头像/名片永远存不进去。分区只存本机
-// 头像与名片,可由手机重新上传,因此挂载失败一律重新格式化。整片擦除约 10~15s,
-// 开机由 home_profile_storage_prepare() 在后台完成,不再落在手机的 HTTP 请求里。
+// If the storage partition holds leftovers of other firmware (common: Xiaozhi was flashed and its OTA/asset partitions cover the area from
+// 0x420000 on) or was never initialized, SPIFFS mount always fails and the avatar/card can never be saved. The partition only holds this device's
+// avatar and card, which the phone can re-upload, so any mount failure triggers a reformat. A full erase takes about 10~15s,
+// done in the background at boot by home_profile_storage_prepare(), no longer inside the phone's HTTP request.
 static StaticSemaphore_t s_storage_lock_buf;
 static SemaphoreHandle_t s_storage_lock;
 static bool s_storage_mounted, s_storage_preparing, s_storage_deferred;
@@ -187,7 +187,7 @@ static SemaphoreHandle_t storage_lock(void) {
     return lock;
 }
 
-// 仅用于日志:说明被覆盖的是什么,便于社区反馈定位。
+// Logging only: say what was overwritten, to help diagnose community reports.
 static const char *storage_contents(const esp_partition_t *partition) {
     uint8_t head[16];
     if (esp_partition_read(partition, 0, head, sizeof(head)) != ESP_OK) return "unreadable";
@@ -197,8 +197,8 @@ static const char *storage_contents(const esp_partition_t *partition) {
     return "blank";
 }
 
-// 格式化后旧名片文件已不存在;清空顺序索引,避免相册列出打不开的条目。
-// 头像索引无需处理:文件缺失即视为无头像,下次上传写另一组并重新提交。
+// After formatting the old card files are gone; clear the order index so the gallery doesn't list entries that can't open.
+// The avatar index needs no handling: a missing file means no avatar; the next upload writes the other slot and commits again.
 static void storage_forget_files(void) {
     nvs_handle_t h;
     if (nvs_open(NVS_NAMESPACE, NVS_READWRITE, &h) == ESP_OK) {
@@ -255,7 +255,7 @@ static esp_err_t ensure_spiffs(void) {
     return err;
 }
 
-// 首页显示路径不等待开机格式化:格式化完成时 s_version 递增,首页会重新加载。
+// The Home display path doesn't wait for the boot-time format: s_version increments when it finishes and Home reloads.
 static bool storage_busy(void) {
     portENTER_CRITICAL(&s_mux);
     bool busy = s_storage_preparing;

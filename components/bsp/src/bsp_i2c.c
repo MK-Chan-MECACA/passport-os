@@ -8,7 +8,7 @@ static const char *TAG = "bsp_i2c";
 static i2c_master_bus_handle_t s_bus;
 
 esp_err_t bsp_i2c_init(void) {
-    if (s_bus) return ESP_OK;                 // 幂等
+    if (s_bus) return ESP_OK;                 // idempotent
     i2c_master_bus_config_t cfg = {
         .i2c_port = BSP_I2C_PORT,
         .sda_io_num = BSP_I2C_SDA,
@@ -31,17 +31,17 @@ esp_err_t bsp_i2c_init(void) {
 i2c_master_bus_handle_t bsp_i2c_bus(void) { return s_bus; }
 
 esp_err_t bsp_i2c_scan(void) {
-    // ⚠ 千万别为了"隔离 NACK"另开一条临时总线扫描 —— 那会把整条 I2C 打死:
-    //   同一个 port 二次 i2c_new_master_bus() 必然失败,但 i2c_common.c 里
-    //   "已被 acquire" 的分支仍会把【正式总线】的 bus 对象从 *i2c_new_bus 交出去;
-    //   紧接着 err 清理路径 i2c_master_bus_destroy() 拿着它调 i2c_common_deinit_pins(),
-    //   把 SDA/SCL 从 I2C 外设上解绑。此后每次事务都卡在 "clear bus failed",
-    //   ES8311 与 CW2017 一起失联。
-    //   (IDF v5.5.3 实测;症状是满屏 reset hardware failed,极难反查到扫描这一步。)
+    // ⚠ NEVER open a temporary bus to scan in order to "isolate NACKs" - it kills the whole I2C bus:
+    //     a second i2c_new_master_bus() on the same port always fails, but the "already acquired" branch in
+    //     i2c_common.c still hands the MAIN bus's bus object out through *i2c_new_bus;
+    //     the err cleanup path then calls i2c_master_bus_destroy() with it, which calls i2c_common_deinit_pins(),
+    //     detaching SDA/SCL from the I2C peripheral. After that every transaction hangs on "clear bus failed",
+    //     and ES8311 and CW2017 both drop off.
+    //     (Measured on IDF v5.5.3; the symptom is a screen full of reset hardware failed, very hard to trace back to the scan.)
     //
-    // 正式总线上直接扫是安全的:i2c_master_probe() 收尾会把 status 复位成
-    // I2C_STATUS_DONE("in order not influence next time transaction"),NACK 不留残留;
-    // 它临时设的 100kHz 时序也会被下一次设备事务按各自的 scl_speed_hz 覆盖。
+    // Scanning directly on the main bus is safe: i2c_master_probe() resets status to
+    // I2C_STATUS_DONE at the end ("in order not influence next time transaction"), so a NACK leaves nothing behind;
+    // the temporary 100kHz timing it sets is also overridden by the next device transaction's own scl_speed_hz.
     if (!s_bus) {
         ESP_LOGE(TAG, "call bsp_i2c_init() successfully first");
         return ESP_ERR_INVALID_STATE;

@@ -29,7 +29,7 @@
 
 static const char *TAG = "app_registry";
 
-// 外部 App 实例前向声明
+// Forward declarations of external app instances
 extern const passport_app_t g_radio_app;
 extern const passport_app_t g_voice_app;
 extern const passport_app_t g_xiaozhi_app;
@@ -47,10 +47,10 @@ extern const passport_app_t g_lists_app;
 
 namespace {
 
-// 应用板块(Launcher 轮播)里展示的应用。
-// 首页(APP_ID_HOME)**不在这里** —— 它是底座而非一张卡,改由
-// app_registry_get_by_id() 单独寻址,这样 switch_to(APP_ID_HOME) 才不会找不到而黑屏。
-// AI设备(AI设备/Codex 陪伴精灵)已于 2026-09-12 移除,见 docs/app-review-2026-09-12.md。
+// Apps shown in the app section (Launcher carousel).
+// Home (APP_ID_HOME) is **not here** - it is the base, not a card, and is instead
+// addressed separately by app_registry_get_by_id(), so switch_to(APP_ID_HOME) does not fail to find it and go black.
+// AI Device (AI Device/Codex companion sprite) was removed on 2026-09-12, see docs/app-review-2026-09-12.md.
 const passport_app_t *s_apps[] = {
     &g_xiaozhi_app,
     &g_radio_app,
@@ -63,7 +63,7 @@ const passport_app_t *s_apps[] = {
     &g_tetris_app,
     &g_game_app,
     &g_sound_jump_app,
-    &g_settings_app,   // 设置放最后(应用惯用收尾位置)
+    &g_settings_app,   // Settings goes last (the usual closing position)
 };
 
 constexpr size_t kAppCount = sizeof(s_apps) / sizeof(s_apps[0]);
@@ -75,12 +75,12 @@ std::atomic<passport_app_id_t> s_active_id{APP_ID_LAUNCHER};
 wake_gate_t s_wake_gate{};
 bool s_initialized[APP_ID_COUNT] = {};
 
-// 2026-09-13:switch_to() 会被三个不同任务调用(input_task 按键/长按、
-// main.cc 的串口命令任务、wifi_setup 的 connect_worker),而它内部是
-// "stop 旧 App → start 新 App" 的多步序列 —— 并发执行会出现双 start、
-// 双建任务、s_active_id 撕裂。这里用互斥量把整个切换串行化。
-// 取锁用 3s 超时而不是死等:宁可丢一次切换,也不能把调用方永久挂住
-// (参考 A2:C3 上任何无上界等待最终都会变成"按键没反应")。
+// 2026-09-13: switch_to() is called from three different tasks (input_task key/long-press,
+// the serial command task in main.cc, connect_worker in wifi_setup), and internally it is
+// a multi-step "stop old app → start new app" sequence - running concurrently causes double start,
+// double task creation and a torn s_active_id. A mutex serializes the whole switch here.
+// The lock is taken with a 3s timeout instead of waiting forever: better to drop one switch than hang the caller forever
+// (see A2: on the C3 any unbounded wait eventually turns into "the button does nothing").
 SemaphoreHandle_t s_switch_mutex = nullptr;
 
 struct SwitchGuard {
@@ -95,9 +95,9 @@ struct SwitchGuard {
     }
 };
 
-// 按前台应用选择 Wi-Fi 省电档:流媒体/语音需要即时下行,保持 MIN modem sleep;
-// 桌面/首页/设置等待机前台放宽到 MAX modem sleep(下行延迟可到 ~1s,对
-// 天气/SNTP/上传服务无感),是待机电流的最大单项优化。
+// Pick the Wi-Fi power-save level by foreground app: streaming/voice need immediate downlink, so keep MIN modem sleep;
+// desktop/home/settings and other standby foregrounds relax to MAX modem sleep (downlink latency up to ~1s, which
+// weather/SNTP/upload services do not notice); this is the single biggest standby current optimization.
 WifiPowerSaveLevel power_save_level_for(passport_app_id_t id) {
     switch (id) {
         case APP_ID_RADIO:
@@ -110,23 +110,23 @@ WifiPowerSaveLevel power_save_level_for(passport_app_id_t id) {
     }
 }
 
-// 收音机/小智/Muse 的 TLS、解码与音频缓冲需要大块连续内存。C3 无 PSRAM,
-// 这些应用退出后残留的小块(lwIP、Wi-Fi、启动器界面)会把堆切碎,再次进入时
-// 总量够而最大连续块不够,表现为连接失败或运行中崩溃。碎片无法原地整理:
-// 只有当前堆确实放不下目标应用,或上一次重型会话已出现过分配失败时,
-// 才记下目标后软重启,开机直接进入该应用。
+// Radio/Xiaozhi/Muse need large contiguous blocks for TLS, decoding and audio buffers. C3 has no PSRAM,
+// and the small blocks these apps leave behind on exit (lwIP, Wi-Fi, launcher UI) fragment the heap, so on re-entry
+// the total is enough but the largest contiguous block is not, showing up as connection failures or crashes. Fragmentation cannot be fixed in place:
+// only when the current heap really cannot fit the target app, or the previous heavy session already saw allocation failures,
+// do we record the target and soft-reboot, booting straight into that app.
 constexpr uint32_t kCleanLaunchMagic = 0x434c4e31; // "CLN1"
 constexpr uint32_t kCleanTalkMagic = 0x54414c4b; // "TALK", same two RTC words
 RTC_NOINIT_ATTR uint32_t s_clean_launch[2];
 bool s_start_xiaozhi_conversation = false; // lifecycle mutex owns this intent
 
 struct HeapNeed {
-    size_t largest; // 单块连续需求加余量
-    size_t free;    // 整个会话的总占用加余量
+    size_t largest; // Single contiguous block requirement plus margin
+    size_t free;    // Total usage for the whole session plus margin
 };
-// rc.51 实测(堆追踪诊断版):收音机 MP3 解码器一次申请约 22.9 KiB,会话约占 34 KiB;
-// 小智最大单块 12 KiB(任务栈);2026-11-07 实测(设备工具、提醒、清单后)会话峰值约 58 KiB,
-// 会话内音乐搜索另有自身预检(24 KiB);Muse 工作任务栈 12 KiB 加 TLS 8 KiB。
+// rc.51 measured (heap-tracking diagnostic build): the Radio MP3 decoder allocates ~22.9 KiB at once, the session uses ~34 KiB;
+// Xiaozhi's largest single block is 12 KiB (task stack); measured 2026-11-07 (after device tools, reminders, lists) session peak is ~58 KiB,
+// in-session music search has its own precheck (24 KiB); Muse worker task stack 12 KiB plus TLS 8 KiB.
 HeapNeed heap_need(passport_app_id_t id) {
     switch (id) {
         case APP_ID_RADIO: return {24 * 1024, 48 * 1024};
@@ -136,18 +136,18 @@ HeapNeed heap_need(passport_app_id_t id) {
     }
 }
 
-// 进入重型应用时记下分配失败计数;离开时若计数增加,说明该会话已在缺内存
-// 状态下挣扎过,下一次进入重型应用直接换一个干净的堆。
+// Record the allocation failure count when entering a heavy app; if it grew on exit, the session
+// struggled with low memory, so the next heavy app entry goes straight to a clean heap.
 unsigned s_failures_at_entry = 0;
 bool s_heap_strained = false;
-// 刚为某应用重启过:堆已是最干净的状态,即使仍不达标也不再重启,避免循环。
+// Just rebooted for this app: the heap is as clean as it gets, so do not reboot again even if still short, to avoid a loop.
 bool s_fresh_heap = false;
 
 bool heavy_app(passport_app_id_t id) {
     return id == APP_ID_RADIO || id == APP_ID_XIAOZHI || id == APP_ID_MUSE;
 }
 
-// 在旧应用 stop() 之后调用:此时测到的才是新应用可用的堆。
+// Call after the old app's stop(): only then does the measured heap reflect what the new app can use.
 bool needs_clean_launch(passport_app_id_t id, size_t largest, size_t free) {
     if (!heavy_app(id)) return false;
     const HeapNeed need = heap_need(id);
@@ -169,14 +169,14 @@ void show_clean_launch_notice(passport_app_id_t id);
     esp_restart();
 }
 
-// 息屏与背光管理
+// Screen-off and backlight management
 std::atomic<bool> s_screen_on{true};
 std::atomic<passport_app_id_t> s_pending_target{APP_ID_COUNT};
 esp_pm_lock_handle_t s_display_awake_lock = nullptr;
 std::atomic<int64_t> s_last_activity_us{0};
 std::atomic<uint16_t> s_screen_timeout_seconds{60};
 
-// 长按 OK 强制返回标志
+// Flag for long-press OK forced return
 bool s_ok_long_triggered = false;
 
 // Keep the last image in the panel while releasing the old LVGL tree. This
@@ -313,8 +313,8 @@ void app_registry_init(void) {
     bsp_lvgl_unlock();
     s_last_activity_us.store(esp_timer_get_time(), std::memory_order_release);
     s_active_id = APP_ID_LAUNCHER;
-    // 不在这里初始化/加载 Launcher 界面:开机直接由 main 走开机动画后进首页,
-    // 提前加载会让应用页在开机时闪现一两帧。抽屉进入时 launcher_ui_show() 自建。
+    // Do not initialize/load the Launcher UI here: at boot main goes through the boot animation straight to home,
+    // and loading early would flash an app page for a frame or two. launcher_ui_show() builds it on drawer entry.
 }
 
 size_t app_registry_get_count(void) {
@@ -327,8 +327,8 @@ const passport_app_t *app_registry_get_by_index(size_t index) {
 }
 
 const passport_app_t *app_registry_get_by_id(passport_app_id_t id) {
-    // 首页不在 s_apps 轮播列表里,但仍必须能被 switch_to() 直接寻址。
-    // 少了这个特判,切回首页会因为找不到 app 实例而停在过渡屏(黑屏)。
+    // Home is not in the s_apps carousel list, but must still be directly addressable by switch_to().
+    // Without this special case, switching back home would fail to find an app instance and stay on the transition screen (black screen).
     if (id == APP_ID_HOME) return &g_home_app;
     if (id == APP_ID_WIFI) return &g_wifi_app; // hidden system setup, never a launcher card
     for (size_t i = 0; i < kAppCount; ++i) {
@@ -342,7 +342,7 @@ const passport_app_t *app_registry_get_by_id(passport_app_id_t id) {
 passport_app_id_t app_registry_take_clean_launch(void) {
     const uint32_t magic = s_clean_launch[0];
     const auto id = static_cast<passport_app_id_t>(s_clean_launch[1] ^ magic);
-    s_clean_launch[0] = s_clean_launch[1] = 0; // 一次性:目标应用崩溃时下次开机回首页
+    s_clean_launch[0] = s_clean_launch[1] = 0; // One-shot: if the target app crashes, the next boot goes to home
     if ((magic != kCleanLaunchMagic && magic != kCleanTalkMagic) ||
         esp_reset_reason() != ESP_RST_SW || !heavy_app(id) ||
         (magic == kCleanTalkMagic && id != APP_ID_XIAOZHI))
@@ -361,8 +361,8 @@ bool app_registry_switch_pending(void) {
 }
 
 void app_registry_switch_to(passport_app_id_t id) {
-    // 串行化:见 s_switch_mutex 注释。取不到锁直接放弃本次切换并留日志,
-    // 不做无上界等待。
+    // Serialized: see the s_switch_mutex comment. If the lock cannot be taken, drop this switch and log it,
+    // no unbounded wait.
     SwitchGuard guard;
     if (!guard.try_take()) {
         ESP_LOGE(TAG, "switch_to(%d): registry busy; switch dropped", (int)id);
@@ -378,7 +378,7 @@ void app_registry_switch_to(passport_app_id_t id) {
     if (id != APP_ID_WIFI && !wifi_setup_can_leave()) return;
 
     // Reject unknown destinations before touching the current screen.
-    // 这个守卫在 2026-09-12 移除 AI设备 模块后加,防止残留 id 再次踩坑。
+    // This guard was added after the AI Device module was removed on 2026-09-12, so a stale id cannot trip us again.
     const passport_app_t *next = app_registry_get_by_id(id);
     if (id != APP_ID_LAUNCHER && next == nullptr) {
         ESP_LOGE(TAG, "switch_to(%d): no app registered for this id; switch ignored", (int)id);
@@ -406,7 +406,7 @@ void app_registry_switch_to(passport_app_id_t id) {
     }
     s_pending_target = APP_ID_COUNT;
 
-    // 1. 退出前一个 App 并清理资源
+    // 1. Exit the previous app and clean up resources
     if (s_active_id != APP_ID_LAUNCHER) {
         const passport_app_t *prev = app_registry_get_by_id(s_active_id);
         if (prev && prev->stop) {
@@ -423,7 +423,7 @@ void app_registry_switch_to(passport_app_id_t id) {
     // Each background network task owns its own semaphore independently.
     lwip_socket_thread_cleanup();
 
-    // 2. 打印当前可用空闲内存，确认清理效果
+    // 2. Print current free memory to confirm the cleanup worked
     uint32_t free_heap = esp_get_free_heap_size();
     ESP_LOGI(TAG, "Free heap after app stop: %u KB largest=%u minimum=%u",
              (unsigned)(free_heap / 1024),
@@ -440,10 +440,10 @@ void app_registry_switch_to(passport_app_id_t id) {
 
     bsp_memory_phase(next ? next->name : "launcher");
     s_active_id = id;
-    // manager 未初始化时只记忆档位,StartStation 后自动生效(见 wifi_manager)
+    // If the manager is not initialized, only remember the level; it takes effect after StartStation (see wifi_manager)
     WifiManager::GetInstance().SetPowerSaveLevel(power_save_level_for(id));
 
-    // 3. 启动新目标
+    // 3. Start the new target
     if (id == APP_ID_LAUNCHER) {
         launcher_ui_show();
     } else if (next) {
@@ -493,11 +493,11 @@ void app_registry_dispatch_key(uint8_t btn, app_btn_event_t event, uint16_t mv) 
     if (xiaozhi_shortcut) s_wake_gate = {};
     if (wake_gate_consume(&s_wake_gate, event == BTN_EVT_PRESS)) return;
 
-    // 1. 熄屏唤醒护栏：如果屏幕已休眠，第一按只点亮屏幕，不透传给业务
+    // 1. Screen-off wake guard: if the screen is asleep, the first press only wakes it and is not passed to the app
     if (!s_screen_on.load(std::memory_order_acquire)) {
         if (event == BTN_EVT_PRESS || event == BTN_EVT_CLICK || xiaozhi_shortcut) {
-            // 先唤醒面板(SLPOUT+DISPON,内部含 120ms 稳定等待),再开背光,
-            // 恢复 LVGL 刷新并补一次整屏重绘(睡眠期间的刷屏被面板丢弃过)。
+            // Wake the panel first (SLPOUT+DISPON, includes a 120ms settle wait), then turn on the backlight,
+            // resume LVGL refresh and force one full-screen redraw (refreshes during sleep were dropped by the panel).
             wake_gate_arm(&s_wake_gate);
             if (!bsp_lvgl_lock(500)) return;
             if (s_display_awake_lock) esp_pm_lock_acquire(s_display_awake_lock);
@@ -543,8 +543,8 @@ void app_registry_dispatch_key(uint8_t btn, app_btn_event_t event, uint16_t mv) 
             feedback_allowed(source) && feedback_allowed(s_active_id.load())) ui_sfx_play(kind);
     };
 
-    // 2. 全局拦截:长按 OK = 整机统一的"返回",沿层级上移:
-    //    子应用 → 应用板块 → 首页。首页已是顶层,长按无动作。
+    // 2. Global intercept: long-press OK = the device-wide "back", moving up the hierarchy:
+    //    sub-app → app section → home. Home is already the top level, so long-press does nothing there.
     //    Apps with internal pages may consume Back before the app-level exit.
     if (btn == BSP_BTN_OK && event == BTN_EVT_LONG) {
         const passport_app_t *app = app_registry_get_by_id(source);
@@ -578,7 +578,7 @@ void app_registry_dispatch_key(uint8_t btn, app_btn_event_t event, uint16_t mv) 
             app_registry_switch_to(APP_ID_LAUNCHER);
             return;
         }
-        // 首页是顶层:不拦不吞,首页 on_key 本身不消费长按 OK。
+        // Home is the top level: do not intercept or swallow; home's on_key itself does not consume long-press OK.
     }
     if (btn == BSP_BTN_OK && (event == BTN_EVT_RELEASE || event == BTN_EVT_LONG_UP)) {
         if (s_ok_long_triggered) {
@@ -599,7 +599,7 @@ void app_registry_dispatch_key(uint8_t btn, app_btn_event_t event, uint16_t mv) 
     if (source == APP_ID_HOME && event == BTN_EVT_LONG && btn != BSP_BTN_OK)
         feedback(UI_SFX_CONFIRM);
 
-    // 3. 事件分发
+    // 3. Event dispatch
     if (s_active_id == APP_ID_LAUNCHER) {
         launcher_ui_on_key(btn, event);
     } else {
@@ -628,8 +628,8 @@ void app_registry_tick(void) {
     const int64_t last = s_last_activity_us.load(std::memory_order_acquire);
     const int64_t timeout_us = static_cast<int64_t>(timeout) * 1000000LL;
     if (now - last >= timeout_us) {
-        // 持 LVGL 锁做息屏:与刷屏事务串行,避免 DISPOFF/SLPIN 插进 DMA 传输中间;
-        // 睡眠期间顺手暂停 LVGL 刷新(往睡着的面板刷数据既费电又无意义)。
+        // Turn the screen off while holding the LVGL lock: serialized with flush transactions, so DISPOFF/SLPIN never lands mid-DMA transfer;
+        // also pause LVGL refresh during sleep (flushing to a sleeping panel wastes power and is pointless).
         if (bsp_lvgl_lock(200)) {
             const int64_t latest = s_last_activity_us.load(std::memory_order_acquire);
             if (esp_timer_get_time() - latest < timeout_us) {
@@ -637,7 +637,7 @@ void app_registry_tick(void) {
                 return;
             }
             bsp_display_backlight(0);
-            bsp_display_power(false); // DISPOFF+SLPIN 面板真睡眠,只关背光会有内容残影
+            bsp_display_power(false); // DISPOFF+SLPIN puts the panel into real sleep; turning off only the backlight leaves image retention
             lv_timer_t *refr = lv_display_get_refr_timer(lv_display_get_default());
             if (refr) lv_timer_pause(refr);
             s_screen_on.store(false, std::memory_order_release);
@@ -649,8 +649,8 @@ void app_registry_tick(void) {
 }
 
 void app_registry_keep_awake(void) {
-    // 只续期不唤醒:屏幕已熄灭时刷新计时也无副作用(仍是熄灭态),
-    // 下一次真正的按键依旧走"第一按仅唤醒"护栏。
+    // Only extend, never wake: refreshing the timer while the screen is off has no side effect (it stays off),
+    // and the next real key press still goes through the "first press only wakes" guard.
     s_last_activity_us.store(esp_timer_get_time(), std::memory_order_release);
 }
 

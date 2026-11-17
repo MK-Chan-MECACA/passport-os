@@ -11,7 +11,7 @@
 
 static const char *TAG = "home_clock";
 
-#define CLOCK_EPOCH_MIN 1700000000LL /* 2023-11;早于此视为未校时 */
+#define CLOCK_EPOCH_MIN 1700000000LL /* 2023-11; anything earlier counts as not synced */
 
 static void on_time_sync(struct timeval *tv) {
     if (tv && tv->tv_sec >= CLOCK_EPOCH_MIN) time_sync_set_epoch(tv->tv_sec);
@@ -19,8 +19,8 @@ static void on_time_sync(struct timeval *tv) {
 
 void home_clock_start(void) {
     if (esp_sntp_enabled()) return;
-    // 单服务器(LWIP_SNTP_MAX_SERVERS=1),阿里云节点国内可达性最好;
-    // 解析失败由 SNTP 自身按间隔重试,无需外层重试任务。
+    // Single server (LWIP_SNTP_MAX_SERVERS=1); the Aliyun node is the most reachable within China;
+    // SNTP retries resolution failures on its own interval, so no outer retry task is needed.
     esp_sntp_setoperatingmode(ESP_SNTP_OPMODE_POLL);
     esp_sntp_setservername(0, "ntp.aliyun.com");
     esp_sntp_set_time_sync_notification_cb(on_time_sync);

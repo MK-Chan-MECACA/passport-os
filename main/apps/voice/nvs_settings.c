@@ -1,4 +1,4 @@
-// main/apps/voice/nvs_settings.c —— 设置存储实现。
+// main/apps/voice/nvs_settings.c - settings storage implementation.
 #include "nvs_settings.h"
 #include "esp_log.h"
 #include "nvs.h"

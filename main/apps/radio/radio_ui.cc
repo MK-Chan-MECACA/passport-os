@@ -29,16 +29,16 @@
 
 namespace {
 
-// 2026-09-13 深夜:应用户要求换回"夜间座舱"深色主题(天空蓝+纸面板观感杂乱)。
-// 全部颜色走下面常量,换主题只动这里;琥珀强调是收音机的"电台橙"。
-#define kBackground (UI_BG)   // 深夜蓝黑底
-#define kPanel (UI_SURFACE)        // 面板
-#define kPanelSoft (UI_SURFACE_ALT)    // 次级面板(电平条/音量条底)
-#define kGrid (UI_BORDER)         // 刻度/描边
-#define kText (UI_TEXT)         // 主文字(冷白)
-#define kMuted (UI_TEXT_DIM)        // 次级文字
-#define kAmber (UI_AMBER)        // 琥珀强调(指针/频率/CH 号)
-#define kAmberSoft (UI_SURFACE_ALT)    // 亮琥珀(选中)
+// 2026-09-13 late night: switched back to the dark "night cockpit" theme at the user's request (sky blue + paper panels looked cluttered).
+// All colors go through the constants below; change the theme only here. The amber accent is the radio's "station orange".
+#define kBackground (UI_BG)   // Midnight blue-black background
+#define kPanel (UI_SURFACE)        // Panel
+#define kPanelSoft (UI_SURFACE_ALT)    // Secondary panel (level/volume bar background)
+#define kGrid (UI_BORDER)         // Ticks/outlines
+#define kText (UI_TEXT)         // Primary text (cool white)
+#define kMuted (UI_TEXT_DIM)        // Secondary text
+#define kAmber (UI_AMBER)        // Amber accent (needle/frequency/CH number)
+#define kAmberSoft (UI_SURFACE_ALT)    // Bright amber (selected)
 #define kGreen (UI_GRASS)
 #define kRed (UI_RED)
 
@@ -312,7 +312,7 @@ const char *playback_text() {
 }
 
 void apply_network() {
-    // 共享信号格:已连接满格亮绿,未连接全暗(与首页/Launcher 同语义)
+    // Shared signal bars: all bright green when connected, all dim when not (same semantics as Home/Launcher)
     ui_pixel_wifi_bars_set(s_wifi_bars, s_network_connected ? 3 : 0,
                            s_network_connected ? kGreen : kMuted);
 }
@@ -942,7 +942,7 @@ void update_wifi_list(const WifiNetworkView *networks, std::size_t count,
         lv_obj_set_style_text_font(s_wifi_row_ssid[row],
                                    ssid_font(networks[index].ssid), 0);
         lv_obj_set_style_text_color(s_wifi_row_ssid[row], lv_color_hex(color), 0);
-        // 右侧"WiFi 信号"三格:RSSI 分档与首页一致(-60/-75)
+        // Right-side "WiFi signal" three bars: RSSI thresholds match Home (-60/-75)
         const int rssi = networks[index].rssi;
         const int level = rssi == -128 ? 0 : rssi >= -60 ? 3 : (rssi >= -75 ? 2 : 1);
         for (int b = 0; b < 3; ++b) {
@@ -969,7 +969,7 @@ void build_wifi_list(const WifiNetworkView *networks, std::size_t count,
         s_wifi_row_box[row] = make_box(s_screen, 12, y, 216, 29, kPanel, 5);
         s_wifi_row_ssid[row] = make_label(s_wifi_row_box[row], "", 9, 6, 172,
                                           kMuted, &buddy_font_16);
-        // 右侧"WiFi 信号"三格条:与首页/桌面顶栏同一视觉语言
+        // Right-side "WiFi signal" three-bar meter: same visual language as the Home/desktop top bar
         for (int b = 0; b < 3; ++b) {
             const int h = 5 + b * 4;
             s_wifi_row_bars[row][b] =
@@ -1163,8 +1163,8 @@ bool radio_ui_init() {
     lv_obj_remove_style_all(s_screen);
     lv_obj_set_style_bg_color(s_screen, lv_color_hex(kBackground), 0);
     lv_obj_set_style_bg_opa(s_screen, LV_OPA_COVER, 0);
-    // start() 紧接着会建立目标页面。这里不预建再清空，避免首次进入 Radio
-    // 重复分配整套 LVGL 对象并把启动时间翻倍。
+    // start() builds the target page right after. Don't pre-build and then clear here, to avoid allocating
+    // the whole LVGL object set twice on first Radio entry and doubling startup time.
     s_ui_timer = lv_timer_create(timer_callback, 50, nullptr);
     if (s_ui_timer) lv_timer_pause(s_ui_timer);
     bsp_lvgl_unlock();

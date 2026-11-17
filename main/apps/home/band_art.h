@@ -1,4 +1,4 @@
-// main/apps/home/band_art.h —— 内置底图(A8)。见 band_art.c 头注释。
+// main/apps/home/band_art.h - Built-in background art (A8). See the band_art.c header comment.
 #pragma once
 
 #include <stdint.h>

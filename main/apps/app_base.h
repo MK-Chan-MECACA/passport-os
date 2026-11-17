@@ -39,17 +39,17 @@ typedef enum {
 
 typedef struct passport_app {
     passport_app_id_t id;
-    const char *name;           // 中文显示名称
-    const char *en_name;        // 英文标签
-    const char *desc;           // 简述
-    const char *tag;            // 协议/网络特性标签 (如 "Wi-Fi", "BLE")
-    uint32_t theme_color;       // 主题色 (RGB888)
+    const char *name;           // Chinese display name
+    const char *en_name;        // English label
+    const char *desc;           // Short description
+    const char *tag;            // Protocol/network feature tag (e.g. "Wi-Fi", "BLE")
+    uint32_t theme_color;       // Theme color (RGB888)
 
-    // 生命周期钩子
-    void (*init)(void);         // 启动时初始化
-    void (*start)(void);        // 进入前台运行
-    void (*stop)(void);         // 退出前台（清理任务、注销网络、释放堆内存）
-    void (*on_key)(uint8_t btn, app_btn_event_t event, uint16_t mv); // 按键事件分发
+    // Lifecycle hooks
+    void (*init)(void);         // Initialize at boot
+    void (*start)(void);        // Enter foreground and run
+    void (*stop)(void);         // Leave foreground (clean up tasks, unregister network, free heap)
+    void (*on_key)(uint8_t btn, app_btn_event_t event, uint16_t mv); // Key event dispatch
     // Request cooperative shutdown before releasing the UI or starting another
     // app. Return false while a worker still owns network/audio resources.
 #ifdef __cplusplus

@@ -1,5 +1,5 @@
 // components/bsp/src/bsp_display_lvgl.c
-// LVGL 接入单独成文件:不用 LVGL 的开发者删掉本文件 + idf_component.yml 里的两条依赖即可。
+// LVGL integration lives in its own file: developers not using LVGL can delete this file + the two dependencies in idf_component.yml.
 #include "bsp_display.h"
 #include "bsp_pins.h"
 #include "esp_lvgl_port.h"
@@ -23,9 +23,9 @@ lv_display_t *bsp_lvgl_init(void) {
     }
 
     lvgl_port_cfg_t pc = ESP_LVGL_PORT_INIT_CONFIG();
-    // 默认 7168 太小:天气图标等 JPEG 走 LVGL TJPEG decoder_info/open(文件源),
-    // 栈上 TJPGD_WORKBUFF_SIZE 就有 4KB(lv_tjpgd.c:110),叠加渲染调用链实测
-    // 爆栈(Stack protection fault,2026-09-13,崩溃任务即 taskLVGL)。
+    // The default 7168 is too small: JPEGs such as weather icons go through LVGL TJPEG decoder_info/open (file source),
+    // with TJPGD_WORKBUFF_SIZE alone taking 4KB of stack (lv_tjpgd.c:110); together with the render call chain it was measured to
+    // overflow the stack (Stack protection fault, 2026-09-13, the crashing task was taskLVGL).
     pc.task_stack = 12288;
     if (lvgl_port_init(&pc) != ESP_OK) {
         ESP_LOGE(TAG, "lvgl_port_init failed");
@@ -48,19 +48,19 @@ lv_display_t *bsp_lvgl_init(void) {
         .buffer_size   = (uint32_t)BSP_LCD_W * 12,
         .double_buffer = false,
         .hres = BSP_LCD_W, .vres = BSP_LCD_H,
-        // 旋转/镜像必须在这里配:esp_lvgl_port 注册显示时会重新下发 MADCTL,
-        // 覆盖 bsp_display.c 里 esp_lcd_panel_mirror() 的设置。
+        // Rotation/mirroring must be configured here: esp_lvgl_port re-sends MADCTL when it registers the display,
+        // overriding the esp_lcd_panel_mirror() setting in bsp_display.c.
         .rotation = { .swap_xy = false, .mirror_x = false, .mirror_y = false },
-        // swap_bytes:LVGL 输出小端 RGB565,ST7789 走 SPI 要大端 → 需交换高低字节。
+        // swap_bytes: LVGL outputs little-endian RGB565, ST7789 over SPI wants big-endian → swap the high and low bytes.
         .flags = { .buff_dma = true, .swap_bytes = true },
     };
     s_disp = lvgl_port_add_disp(&dc);
     if (!s_disp) { ESP_LOGE(TAG, "lvgl_port_add_disp failed"); return NULL; }
 
-    // 把 LVGL 的【默认屏】刷成黑。
-    // LVGL 默认主题的 screen 背景是近白色;开机阶段(开机动画之前/切换过程中)
-    // 只要默认屏短暂成为活动屏并被画进 GRAM,背光一亮就是一片白闪。
-    // 统一钉成黑,消除这一整类白闪 —— 与 app_registry 的过渡屏同色。
+    // Paint LVGL's DEFAULT screen black.
+    // The default LVGL theme's screen background is near-white; during boot (before the boot animation / during transitions)
+    // if the default screen briefly becomes active and is drawn into GRAM, a white flash appears as soon as the backlight turns on.
+    // Pin it to black to remove this whole class of white flashes - same color as the app_registry transition screen.
     lv_obj_t *scr = lv_screen_active();
     if (scr) {
         lv_obj_set_style_bg_color(scr, lv_color_hex(0x000000), 0);

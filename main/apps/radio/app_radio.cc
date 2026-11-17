@@ -209,7 +209,7 @@ void radio_app_start(void) {
                             &s_stop_task) != pdPASS) s_stop_running.store(false);
         }
     }
-    // 1. 显示 Radio UI 界面
+    // 1. Show the Radio UI
     radio_ui_show_main();
     radio_ui_set_volume(radio_player_volume());
     if (!s_catalog_commit || s_catalog_running.load()) {
@@ -246,7 +246,7 @@ void radio_app_start(void) {
     s_ui_alive.store(true);
     radio_player_set_playing(false);
 
-    // 2. 挂接全局 Wi-Fi 事件回调
+    // 2. Hook the global Wi-Fi event callback
     WifiManager::GetInstance().SetEventCallback(on_wifi_event);
     if (!WifiManager::GetInstance().IsConnected()) {
         ESP_LOGI(TAG, "Wi-Fi not connected yet, checking station...");
@@ -262,7 +262,7 @@ void radio_app_start(void) {
         start_catalog();
     }
 
-    // 3. 目录查询释放 HTTP/cJSON 内存后再启动播放。
+    // 3. Start playback only after the catalog query has freed its HTTP/cJSON memory.
 }
 
 bool radio_app_prepare_stop(void) {
@@ -288,16 +288,16 @@ void radio_app_stop(void) {
     s_radio_active.store(false);
     if (s_catalog_commit) xSemaphoreGive(s_catalog_commit);
 
-    // 1. 停止播放并等待拉流线程退出
+    // 1. Stop playback and wait for the stream thread to exit
     if (s_player_ready.load()) {
         radio_player_set_playing(false);
         radio_player_wait_idle(3500);
     }
 
-    // 2. 2026-09-13 修复(C2):目录任务**必须 join**。原来只置标志就返回,
-    //    任务还占着 6144B 栈 + 24KB 响应缓冲(单次 HTTP 最长 5s),紧接着进
-    //    小智/语音时极易分配失败。这里等 5s 上界,超时也不 vTaskDelete
-    //    (它可能正持堆锁),只记日志由它自行退出。
+    // 2. 2026-09-13 fix (C2): the catalog task **must be joined**. It used to just set a flag and return,
+    //    while the task still held a 6144B stack + 24KB response buffer (up to 5s per HTTP request), so entering
+    //    Xiaozhi/voice right after easily failed to allocate. Wait up to 5s here; on timeout still do not vTaskDelete
+    //    (it may hold the heap lock); just log and let it exit on its own.
     s_ui_alive.store(false);
     end_stop_timer();
     int waited_ms = 0;
@@ -312,7 +312,7 @@ void radio_app_stop(void) {
     // An unused voice request (no catalog ran) must not apply to a later visit.
     if (!s_catalog_running.load()) delete s_voice.exchange(nullptr);
 
-    // 3. 移除事件回调，保留全局 Wi-Fi 连接
+    // 3. Remove the event callback, keep the global Wi-Fi connection
     WifiManager::GetInstance().SetEventCallback(nullptr);
 
     // 4. Radio is a session, not a boot-lifetime service. Release the 7KB
@@ -322,7 +322,7 @@ void radio_app_stop(void) {
         if (radio_player_deinit(5000)) s_player_ready.store(false);
     }
 
-    // 5. 隐藏 Radio UI 并暂停高频定时器
+    // 5. Hide the Radio UI and pause the high-rate timer
     radio_ui_hide();
 
     ESP_LOGI(TAG, "Radio App stopped. free=%u largest=%u",
@@ -336,24 +336,24 @@ void radio_app_on_key(uint8_t btn, app_btn_event_t event, uint16_t mv) {
 
     if (event == BTN_EVT_CLICK) {
         if (btn == BSP_BTN_UP) {
-            // "+" 短按：切换下一电台
+            // "+" short press: next station
             radio_player_select_relative(1);
         } else if (btn == BSP_BTN_DOWN) {
-            // "-" 短按：切换上一电台
+            // "-" short press: previous station
             radio_player_select_relative(-1);
         } else if (btn == BSP_BTN_OK) {
-            // "OK" 短按：播放 / 暂停切换
+            // "OK" short press: toggle play/pause
             radio_player_toggle();
         }
     } else if (event == BTN_EVT_LONG) {
         if (btn == BSP_BTN_UP) {
-            // "+" 长按: 音量增加
+            // "+" long press: volume up
             uint8_t cur = radio_player_volume();
             uint8_t next = cur >= 90 ? 100 : cur + 10;
             radio_player_set_volume(next);
             ESP_LOGI(TAG, "Radio volume up: %u -> %u", cur, next);
         } else if (btn == BSP_BTN_DOWN) {
-            // "-" 长按: 音量减小
+            // "-" long press: volume down
             uint8_t cur = radio_player_volume();
             uint8_t next = cur <= 10 ? 0 : cur - 10;
             radio_player_set_volume(next);

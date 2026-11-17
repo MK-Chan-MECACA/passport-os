@@ -25,16 +25,16 @@ namespace {
 constexpr char kTag[] = "app_tetris";
 
 /* ---------------------------------------------------------------------------
-   渲染方式(2026-09-13 重写)
-   原来用一整块 canvas 帧缓冲:10*cell × 20*cell × 2B。cell=14 需要 78.4KB
-   **连续**内存,而真机实测 Tetris 启动时 largest 只有 53KB(堆碎片),
-   结果一路降级到 cell=10(100x200 —— 比屏幕一半还窄,这就是"游戏区很小")。
-   切片也救不了:空闲空间基本集中在同一块里,切 4 条只是把同一块切成 4 份。
+   Rendering approach (rewritten 2026-09-13)
+   Originally a single canvas framebuffer: 10*cell × 20*cell × 2B. cell=14 needs 78.4KB of
+   **contiguous** memory, but on real hardware the largest free block at Tetris startup was only 53KB (heap fragmentation),
+   so it kept degrading down to cell=10 (100x200 - narrower than half the screen; that's why "the play area is tiny").
+   Slicing doesn't help either: free space is mostly in one block, so 4 strips just cut that same block into 4 pieces.
 
-   改成 **200 个 lv_obj 小方块网格**:每格一个对象,颜色用**共享静态样式**
-   切换(不产生逐对象局部样式)。单块内存只占 ~110B,碎片堆也放得下,总占用
-   (~22KB)反而比原来 40KB 的帧缓冲更小。每次移动只有个位数格子变色,
-   LVGL 只重绘那些小区域。
+   Switched to a **grid of 200 small lv_obj squares**: one object per cell, colors switched via **shared static styles**
+   (no per-object local styles). Each cell takes only ~110B and fits even in a fragmented heap; the total
+   (~22KB) is actually smaller than the old 40KB framebuffer. Each move only recolors a handful of cells,
+   and LVGL redraws only those small areas.
    --------------------------------------------------------------------------- */
 
 int s_cell;
@@ -42,31 +42,31 @@ ui_pixel_battery_t s_battery{};
 int64_t s_battery_us = 0;
 int s_field_w;
 int s_field_h;
-int s_panel_x;                /* 右侧信息列起点,随格子尺寸联动 */
+int s_panel_x;                /* x of the right info column, follows the cell size */
 constexpr uint32_t kTickMs = 50;
 
-/* 方块配色(与整机调色板同源);下标 = tc_board 值 */
+/* Piece colors (same source as the system palette); index = tc_board value */
 static uint32_t kPieceColors[TC_PIECE_KINDS + 1] = {
-    0, /* 0 空格子底色(深暗岩灰,无眩光,与纯黑网格线形成高对比) */
-    0x1689E8, /* 1 I 天蓝 */
-    0xFFD928, /* 2 O 黄 */
-    0x7557D9, /* 3 T 紫 */
-    0x82BE2D, /* 4 S 绿 */
-    0xE43B2F, /* 5 Z 红 */
-    0x0872C9, /* 6 J 深蓝 */
-    0xFFB23E, /* 7 L 橙 */
+    0, /* 0 empty-cell base color (deep dark slate, no glare, high contrast with the pure-black grid lines) */
+    0x1689E8, /* 1 I sky blue */
+    0xFFD928, /* 2 O yellow */
+    0x7557D9, /* 3 T purple */
+    0x82BE2D, /* 4 S green */
+    0xE43B2F, /* 5 Z red */
+    0x0872C9, /* 6 J dark blue */
+    0xFFB23E, /* 7 L orange */
 };
 
-/* 共享静态样式:每色一份,全部格子复用 —— 不产生逐对象局部样式分配 */
+/* Shared static styles: one per color, reused by every cell - no per-object local style allocations */
 lv_style_t s_cell_styles[TC_PIECE_KINDS + 1];
 bool s_styles_ready = false;
 
 std::atomic<bool> s_active{false};
 lv_timer_t *s_timer = nullptr;
 lv_obj_t *s_screen = nullptr;
-lv_obj_t *s_board = nullptr;                        /* 棋盘容器(底色 = 棋盘墨色) */
-lv_obj_t *s_grid[TC_ROWS][TC_COLS] = {};            /* 格子对象 */
-uint8_t s_shown[TC_ROWS][TC_COLS] = {};             /* 已显示的颜色索引,用于差分 */
+lv_obj_t *s_board = nullptr;                        /* board container (background = board ink color) */
+lv_obj_t *s_grid[TC_ROWS][TC_COLS] = {};            /* cell objects */
+uint8_t s_shown[TC_ROWS][TC_COLS] = {};             /* currently shown color index, for diffing */
 lv_obj_t *s_score_lbl = nullptr;
 lv_obj_t *s_val_score = nullptr;
 lv_obj_t *s_val_lines = nullptr;
@@ -98,7 +98,7 @@ lv_obj_t *block(lv_obj_t *parent, int x, int y, int w, int h, uint32_t color) {
     return o;
 }
 
-/* 格子对象:预设为 0 号样式(暗底+方角+无边距),消除 LVGL 默认主题产生的圆角白点 */
+/* Cell object: preset to style 0 (dark base + square corners + no padding), removing the rounded white dots from LVGL's default theme */
 lv_obj_t *cell_obj(lv_obj_t *parent, int x, int y, int sz) {
     lv_obj_t *o = lv_obj_create(parent);
     if (!o) return nullptr;
@@ -136,7 +136,7 @@ void ensure_styles() {
     s_styles_ready = true;
 }
 
-/* 单格换色(差分:颜色没变就完全不碰 LVGL) */
+/* Recolor a single cell (diffed: if the color hasn't changed, don't touch LVGL at all) */
 void cell_set(int col, int row, uint8_t idx) {
     if (col < 0 || col >= TC_COLS || row < 0 || row >= TC_ROWS) return;
     const uint8_t prev = s_shown[row][col];
@@ -148,7 +148,7 @@ void cell_set(int col, int row, uint8_t idx) {
     s_shown[row][col] = idx;
 }
 
-/* 整板重绘:先算目标色板,再逐格差分 —— 只有真正变色的格子才会触发重绘 */
+/* Full-board redraw: compute the target colors first, then diff cell by cell - only cells that actually change trigger a redraw */
 void render_all() {
     if (!s_board) return;
     uint8_t target[TC_ROWS][TC_COLS];
@@ -203,8 +203,8 @@ void load_best(int *best) {
     nvs_handle_t h;
     if (nvs_open("tetris", NVS_READONLY, &h) == ESP_OK) {
         uint32_t v = 0;
-        /* 2026-09-13 修复:原来用 u16,分数 >65535 会静默回绕成小分。
-           先按新格式 u32 读;读不到再试旧 u16 键,老存档不丢。 */
+        /* 2026-09-13 fix: this used u16, so scores >65535 silently wrapped to a small number.
+           Read the new u32 format first; if missing, try the old u16 key so old saves are kept. */
         if (nvs_get_u32(h, "best", &v) == ESP_OK) {
             *best = (int)v;
         } else {
@@ -229,7 +229,7 @@ void enter_ready() {
     s_gravity_acc = 0;
     sync_labels();
     render_all();
-    if (s_dead_panel) lv_obj_set_y(s_dead_panel, 344); /* 移出屏幕 */
+    if (s_dead_panel) lv_obj_set_y(s_dead_panel, 344); /* move off-screen */
     if (s_controls) lv_obj_remove_flag(s_controls, LV_OBJ_FLAG_HIDDEN);
     if (s_hint_lbl) lv_label_set_text(s_hint_lbl, "OK: Start");
 }
@@ -246,20 +246,20 @@ void on_dead() {
     std::snprintf(text, sizeof(text), "Lines %d   Best %d", tc_lines(), s_best);
     lv_label_set_text(s_dead_best, text);
     sync_labels();
-    if (s_dead_panel) lv_obj_set_y(s_dead_panel, 36 + (s_field_h - 112) / 2); /* 居中盖住棋盘 */
+    if (s_dead_panel) lv_obj_set_y(s_dead_panel, 36 + (s_field_h - 112) / 2); /* centered over the board */
     if (s_hint_lbl) lv_label_set_text(s_hint_lbl, "OK: Play again");
     ESP_LOGI(kTag, "game over: score=%d lines=%d best=%d free=%u",
              score, tc_lines(), s_best, (unsigned)esp_get_free_heap_size());
 }
 
-void build_ui(); /* 定义在 tick 之后;首帧由 tick 在 LVGL 任务里调用 */
+void build_ui(); /* defined after tick; the first frame calls it from tick in the LVGL task */
 
 void tick(lv_timer_t *) {
     if (!s_active.load()) return;
     ++s_frame;
 
-    /* 首帧建 UI:建 200 个格子对象的 LVGL 调用链在 LVGL 任务 7KB 栈上跑;
-       输入任务只有 3KB,直接建会栈保护崩溃(真机踩过)。 */
+    /* Build the UI on the first frame: the LVGL call chain creating 200 cell objects runs on the LVGL task's 7KB stack;
+       the input task only has 3KB, so building there crashes on stack protection (hit on real hardware). */
     if (!s_screen) {
         build_ui();
         lv_screen_load(s_screen);
@@ -272,10 +272,10 @@ void tick(lv_timer_t *) {
     if (!visible && !playing) return;
     const int64_t now = esp_timer_get_time();
     if (now - s_battery_us >= 5000000) { ui_pixel_battery_set(&s_battery, bsp_battery_soc()); s_battery_us = now; }
-    if (!s_board) return; /* 内存不足提示页:没有游戏状态可推进 */
+    if (!s_board) return; /* out-of-memory notice page: no game state to advance */
 
     if (tc_phase() == TC_PLAYING) {
-        app_registry_keep_awake(); /* 下落不依赖按键,进行中必须抑制息屏 */
+        app_registry_keep_awake(); /* falling doesn't depend on keys, so suppress screen sleep while playing */
         int32_t interval = 800 - (tc_level() - 1) * 70;
         if (interval < 120) interval = 120;
         s_gravity_acc += (int32_t)kTickMs;
@@ -283,22 +283,22 @@ void tick(lv_timer_t *) {
         s_gravity_acc = 0;
         tc_gravity();
         render_all();
-        if (tc_phase() == TC_PLAYING) render_next(); /* 锁定出新方块时同步预览 */
+        if (tc_phase() == TC_PLAYING) render_next(); /* sync the preview when a lock spawns a new piece */
         sync_labels();
         if (tc_phase() == TC_DEAD) on_dead();
         }
     }
 }
 
-/* 按当前 s_cell 建立棋盘容器 + 格子网格;任一步失败返回 false(调用方降档) */
+/* Build the board container + cell grid at the current s_cell; return false if any step fails (caller drops a size) */
 bool build_board() {
     ensure_styles();
-    /* 棋盘底色设为纯黑 0x000000,四周与每格之间 1px 缝隙天然呈现纯黑网格线 */
+    /* Board background set to pure black 0x000000; the 1px gaps around and between cells naturally form black grid lines */
     s_board = block(s_screen, 12, 30, s_field_w + 1, s_field_h + 1, 0x000000);
     if (!s_board) return false;
     for (int r = 0; r < TC_ROWS; ++r) {
         for (int c = 0; c < TC_COLS; ++c) {
-            /* (cell-1) 边长 + 1px 偏移,四周自然形成 1px 纯黑像素网格线 */
+            /* (cell-1) side length + 1px offset, naturally forming 1px pure-black pixel grid lines all around */
             lv_obj_t *o = cell_obj(s_board, 1 + c * s_cell, 1 + r * s_cell, s_cell - 1);
             if (!o) return false;
             s_grid[r][c] = o;
@@ -355,8 +355,8 @@ void build_ui() {
 
     ensure_styles();
 
-    /* 逐档尝试:14(140x280,棋盘几乎铺满屏高)→ 13 → 12 → 10 → 8。
-       建不满就删掉重来换小一号,保证不会留下半截棋盘。 */
+    /* Try sizes in turn: 14 (140x280, board almost fills the screen height) → 13 → 12 → 10 → 8.
+       If a size can't be fully built, delete and retry one size smaller, so no half-built board is left behind. */
     const int kCellChoices[] = {12, 10, 8};
     bool ok = false;
     for (int c : kCellChoices) {
@@ -371,14 +371,14 @@ void build_ui() {
         drop_board();
     }
     if (!ok) {
-        /* 连最小的格子都建不出来:给出可读提示,别把蓝色过渡屏晾在屏上 */
+        /* Not even the smallest cells could be built: show a readable notice instead of leaving the blue transition screen up */
         ESP_LOGE(kTag, "board object creation failed (free=%u)", (unsigned)esp_get_free_heap_size());
         build_oom_page();
         return;
     }
 
-    /* 纸色描边框(像素卡片语言),棋盘盖住中间,四周露出 3px。
-       边框后建,所以要把它移到棋盘下面去(不能盖住格子)。 */
+    /* Paper-colored border frame (pixel card style); the board covers the middle, leaving 3px showing around it.
+       The frame is built after the board, so move it below the board (it must not cover the cells). */
     lv_obj_t *frame = block(s_screen, 11, 29, (s_field_w + 1) + 2, (s_field_h + 1) + 2, UI_PAPER);
     if (frame) lv_obj_move_to_index(frame, 0);
 
@@ -392,9 +392,9 @@ void build_ui() {
         lv_obj_t **val;
         int y;
     };
-    /* 四行统计沿棋盘高度均匀铺开;14px 档落点 92/146/200/254。
-       cell 变大后右侧只剩 ~76px,"标题+数值并排"会挤爆,
-       改成**标题在上、数值在下**的堆叠式,数值独占整列宽。 */
+    /* The four stat rows are spread evenly along the board height; at the 14px size they land at 92/146/200/254.
+       With larger cells only ~76px is left on the right, so "title + value side by side" would overflow;
+       switched to a stacked layout with **title on top, value below**, the value taking the full column width. */
     const Row rows[] = {{"Score", &s_val_score, 107}, {"Lines", &s_val_lines, 188}};
     for (const Row &r : rows) {
         auto *caption=mk_label(s_screen,r.cap,&buddy_font_16,UI_TEXT_DIM,LV_TEXT_ALIGN_LEFT);
@@ -451,7 +451,7 @@ static void tetris_start(void) {
     s_active.store(true);
     s_frame = 0;
     bsp_lvgl_lock(-1);
-    s_timer = lv_timer_create(tick, kTickMs, nullptr); /* UI 由首帧 tick 在 LVGL 任务里建 */
+    s_timer = lv_timer_create(tick, kTickMs, nullptr); /* UI is built by the first tick in the LVGL task */
     bsp_lvgl_unlock();
     ESP_LOGI(kTag, "started; free=%u largest=%u", (unsigned)esp_get_free_heap_size(),
              (unsigned)heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL));
@@ -460,15 +460,15 @@ static void tetris_start(void) {
 static void tetris_stop(void) {
     if (!s_active.load()) return;
     s_active.store(false);
-    if (s_timer) { /* 先删定时器,防止 tick 撕屏途中再进来 */
+    if (s_timer) { /* delete the timer first so tick can't re-enter while the screen is being torn down */
         bsp_lvgl_lock(-1);
         lv_timer_del(s_timer);
         s_timer = nullptr;
         bsp_lvgl_unlock();
     }
-    /* 2026-09-13 修复(C1):删屏原来写在 if (s_timer) 里面 —— 定时器创建失败
-       时整段被跳过,screen 与全部子对象(含 200 个格子)永不释放。
-       现在定时器与界面分开,屏幕**无条件**删。 */
+    /* 2026-09-13 fix (C1): deleting the screen used to be inside if (s_timer) - if timer creation failed
+       the whole block was skipped, and the screen and all children (including the 200 cells) were never freed.
+       Now the timer and the UI are handled separately and the screen is deleted **unconditionally**. */
     bsp_lvgl_lock(-1);
     if (s_screen) {
         lv_obj_delete(s_screen);
@@ -499,17 +499,17 @@ static void tetris_stop(void) {
 
 static void tetris_on_key(uint8_t btn, app_btn_event_t event, uint16_t mv) {
     (void)mv;
-    if (!s_active.load() || !s_screen) return; /* 首帧 UI 未建前忽略按键 */
-    if (!s_board) return; /* 内存不足提示页:只响应长按 OK 的全局返回 */
+    if (!s_active.load() || !s_screen) return; /* ignore keys until the first-frame UI is built */
+    if (!s_board) return; /* out-of-memory notice page: only the global long-press OK back works */
 
-    /* 本回调跑在输入任务:lv_* 调用必须持锁,否则与渲染任务竞态(真机踩过)。 */
+    /* This callback runs in the input task: lv_* calls must hold the lock, or they race with the render task (hit on real hardware). */
     if (!bsp_lvgl_lock(-1)) return;
     if (s_timer) lv_timer_set_period(s_timer, kTickMs);
 
     if (event == BTN_EVT_LONG && btn == BSP_BTN_DOWN && tc_phase() == TC_PLAYING) {
         tc_hard_drop();
         render_all();
-        render_next(); /* 硬降锁定后会出新一枚,预览同步 */
+        render_next(); /* a hard drop locks and spawns a new piece, so sync the preview */
         sync_labels();
         if (tc_phase() == TC_DEAD) on_dead();
     } else if (event == BTN_EVT_CLICK) {

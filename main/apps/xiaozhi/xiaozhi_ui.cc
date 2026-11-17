@@ -19,7 +19,7 @@ namespace xiaozhi {
 
 namespace {
 
-// 状态点颜色:与整机状态色语义一致(墨/纸/草/黄/红/天蓝)
+// Status dot colors: same meaning as the system-wide status colors (ink/paper/grass/yellow/red/sky blue)
 #define kTextMain (UI_TEXT)
 #define kTextMuted (UI_SUB)
 #define kUserBlue (UI_SKY_DARK)
@@ -47,7 +47,7 @@ ui_pixel_battery_t s_battery{};
 lv_obj_t *s_wifi_bars[3]{};
 const char *s_default_hint = "OK: Talk · ↑↓ Volume";
 
-// 文本内容也只在持锁时读写，避免与 lv_label 生命周期脱节。
+// Text content is also only read/written while holding the lock, so it stays in step with the lv_label lifetime.
 std::string s_user_text;
 std::string s_ai_reply_buffer;
 bool s_text_expanded = false;
@@ -166,7 +166,7 @@ void conversation_layout() {
     show_companion(companion_needed());
 }
 
-// 滚动到消息区底部，保证最新一轮对话可见
+// Scroll to the bottom of the message area so the latest exchange is visible
 void scroll_to_bottom_locked() {
     if (s_msg_container) {
         lv_obj_update_layout(s_msg_container);
@@ -174,11 +174,11 @@ void scroll_to_bottom_locked() {
     }
 }
 
-// 所有"改文案"的操作都走这里：先加锁、再加一次指针校验。
-// 返回 false 表示控件已销毁（应用正在退出），调用方静默丢弃即可。
+// Every "change text" operation goes through here: lock first, then check the pointer once more.
+// Returns false if the widget is destroyed (the app is exiting); the caller just drops the update silently.
 bool begin_update(uint32_t timeout_ms) {
     if (!bsp_lvgl_lock(timeout_ms)) return false;
-    if (s_screen == nullptr) {                      // 加锁期间被 ui_hide 销毁
+    if (s_screen == nullptr) {                      // Destroyed by ui_hide while we were locking
         bsp_lvgl_unlock();
         return false;
     }

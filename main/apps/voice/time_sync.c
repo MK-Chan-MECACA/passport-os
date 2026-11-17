@@ -1,8 +1,8 @@
-// main/time_sync.c —— wall-clock 校时(校时源仅电脑客户端)。
-// 三通道下发统一入口:BLE 协议行 time.set、USB SYS 命令 time set、REPL 手动。
-// 状态:重启后未校时(valid=false);set_epoch 置位后本会话有效。
-// 时区:分钟偏移 s_tz_min。NVS 键 tz_min(天气接口自动设置)优先,否则用老的
-// tz_hour(int8,默认 +8,±12 校验)。不引入 TZ env。
+// main/time_sync.c - wall-clock time sync (the only time source is the PC client).
+// Single entry point for three channels: BLE protocol line time.set, USB SYS command time set, manual REPL.
+// State: not synced after reboot (valid=false); once set_epoch sets it, it stays valid for this session.
+// Time zone: minute offset s_tz_min. NVS key tz_min (set automatically from the weather API) takes priority, otherwise the old
+// tz_hour (int8, default +8, ±12 check). No TZ env.
 #include "time_sync.h"
 #include "nvs_settings.h"
 #include "esp_log.h"
@@ -15,11 +15,11 @@ static const char *TAG = "time_sync";
 #define TZ_DEFAULT_HOUR 8
 #define TZ_MAX_HOUR     12
 #define TZ_MIN_MINUTES  (-720)
-#define TZ_MAX_MINUTES  840   /* UTC+14(基里巴斯) */
+#define TZ_MAX_MINUTES  840   /* UTC+14 (Kiribati) */
 
-// s_epoch 为校时基线(单写点:set_epoch);settimeofday 同步系统时钟并持续
-// 走时 —— 设备端显示读 time(NULL)(见 format_local),否则永远冻结在校时
-// 时刻(真机实测 13:46 不再走动)。宿主测试无系统时钟,按 s_epoch 直接格式化。
+// s_epoch is the sync baseline (single write point: set_epoch); settimeofday syncs the system clock, which keeps
+// running - the device display reads time(NULL) (see format_local), otherwise it would stay frozen at the sync
+// moment (seen on real hardware: stuck at 13:46). Host tests have no system clock, so they format from s_epoch directly.
 static int64_t s_epoch = 0;
 static bool s_valid = false;
 static int s_tz_min = TZ_DEFAULT_HOUR * 60;
@@ -31,7 +31,7 @@ esp_err_t time_sync_init(void)
         s_tz_min = minutes;
     } else {
         int8_t tz = 0;
-        nvs_settings_get_tz_hour(&tz);   // 内部已兜底:打不开/损坏/缺省 → 8
+        nvs_settings_get_tz_hour(&tz);   // already has a fallback inside: cannot open / corrupt / missing -> 8
         s_tz_min = ((tz >= -TZ_MAX_HOUR && tz <= TZ_MAX_HOUR) ? tz : TZ_DEFAULT_HOUR) * 60;
     }
     s_valid = false;
@@ -44,7 +44,7 @@ void time_sync_set_epoch(int64_t epoch_sec)
     s_valid = true;
 #ifdef ESP_PLATFORM
     struct timeval tv = { .tv_sec = (time_t)epoch_sec, .tv_usec = 0 };
-    settimeofday(&tv, NULL);   // 失败忽略:UI 走 s_epoch,系统时间仅日志时间戳备用
+    settimeofday(&tv, NULL);   // failure ignored: the UI uses s_epoch, system time is only a backup for log timestamps
 #endif
 }
 
@@ -65,7 +65,7 @@ int time_sync_tz_offset_sec(void) { return s_tz_min * 60; }
 esp_err_t time_sync_set_tz_offset_min(int minutes)
 {
     if (minutes < TZ_MIN_MINUTES || minutes > TZ_MAX_MINUTES) return ESP_ERR_INVALID_ARG;
-    if (minutes == s_tz_min) return ESP_OK;   // 每次天气刷新都会调,不重复写 flash
+    if (minutes == s_tz_min) return ESP_OK;   // called on every weather refresh, so do not rewrite flash needlessly
     ESP_LOGI(TAG, "time zone auto-updated %+d -> %+d min", s_tz_min, minutes);
     s_tz_min = minutes;
     return nvs_settings_set_tz_min((int16_t)minutes);
@@ -78,21 +78,21 @@ esp_err_t time_sync_set_tz(int hour)
         return ESP_ERR_INVALID_ARG;
     }
     s_tz_min = hour * 60;
-    nvs_settings_set_tz_min((int16_t)s_tz_min);   // 手动设置覆盖自动值
+    nvs_settings_set_tz_min((int16_t)s_tz_min);   // manual setting overrides the automatic value
     return nvs_settings_set_tz_hour((int8_t)hour);
 }
 
-// 本地时间 = 当前系统时钟 + tz*3600,按 UTC 读(gmtime_r 手动偏移,不依赖
-// TZ env)。设备端系统时钟 set_epoch 时已 settimeofday,持续走时;宿主测试
-// 无系统时钟,按 s_epoch 基线直接格式化(确定性基准)。返回写入长度
-// (未校时固定 "--:--" 5 字符)。
+// Local time = current system clock + tz*3600, read as UTC (manual offset with gmtime_r, no dependence on
+// TZ env). On the device set_epoch already called settimeofday so the clock keeps running; host tests
+// have no system clock and format from the s_epoch baseline (deterministic reference). Returns the length written
+// (fixed "--:--", 5 characters, when not synced).
 int time_sync_format_local(char *buf, size_t cap)
 {
     if (!s_valid) return snprintf(buf, cap, "--:--");
     time_t t;
 #ifdef ESP_PLATFORM
     time_t now = time(NULL);
-    if (now < s_epoch) now = (time_t)s_epoch;   // settimeofday 未生效兜底:冻结在基线
+    if (now < s_epoch) now = (time_t)s_epoch;   // fallback if settimeofday did not take effect: freeze at the baseline
     t = now + (int64_t)s_tz_min * 60;
 #else
     t = (time_t)(s_epoch + (int64_t)s_tz_min * 60);

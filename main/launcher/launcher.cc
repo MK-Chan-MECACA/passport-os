@@ -22,12 +22,12 @@ namespace {
 constexpr int kIconSize = 88;
 constexpr int kTitleY = 110;
 
-// 旅行仪器配色:与首页(app_home.cc)完全同源,风格统一。
-#define kBg (UI_BG)          // 屏底炭黑
-#define kCardBg (UI_SURFACE)      // 卡片底
-#define kPhos (UI_ACCENT)        // 琥珀:图标/标题/选中态
-#define kPhosDim (UI_TEXT_DIM)     // 灰米色:副标题/未选中
-#define kPhosBorder (UI_BORDER)  // 卡片/底板描边
+// Travel-instrument palette: identical to the home screen (app_home.cc), for a consistent style.
+#define kBg (UI_BG)          // Charcoal screen background
+#define kCardBg (UI_SURFACE)      // Card background
+#define kPhos (UI_ACCENT)        // Amber: icons/titles/selected state
+#define kPhosDim (UI_TEXT_DIM)     // Grey-beige: subtitles/unselected
+#define kPhosBorder (UI_BORDER)  // Card/base plate outline
 #define kStatus (ui_theme_is_multicolor() ? UI_TEXT : kPhos)
 
 lv_obj_t *s_screen;
@@ -73,10 +73,10 @@ void draw_neighbour_chevron(lv_event_t *event) {
 }
 
 const char *app_chinese_name(passport_app_id_t id) {
-    // 2026-09-13 修复(D1):名称原本在 launcher 里硬编码一份、在 passport_app_t
-    // 里又各写一份,两边悄悄跑偏(注册表"城市收音机" vs 抽屉"收音机",
-    // "随身 AI 语音" vs "AI语音")。改成**以注册表为唯一来源**,只有没注册进
-    // 注册表的内置页(配网/设置)才走兜底表。
+    // 2026-09-13 fix (D1): names used to be hardcoded once in the launcher and again in each
+    // passport_app_t, and the two silently drifted apart (registry "City Radio" vs drawer "Radio",
+    // "Portable AI Voice" vs "AI Voice"). Now the **registry is the single source**; only built-in pages not in
+    // the registry (provisioning/settings) use the fallback table.
     const passport_app_t *app = app_registry_get_by_id(id);
     if (app != nullptr && app->name != nullptr && app->name[0] != '\0') {
         return app->name;
@@ -441,12 +441,12 @@ void launcher_ui_init(void) {
 
     s_screen = lv_obj_create(nullptr);
     lv_obj_clear_flag(s_screen, LV_OBJ_FLAG_SCROLLABLE);
-    // 与首页一致的绿磷光底(不再用天空/云/草地的像素风背景)
+    // Same green phosphor background as the home screen (no more pixel-art sky/cloud/grass background)
     lv_obj_set_style_bg_color(s_screen, lv_color_hex(kBg), 0);
     lv_obj_set_style_border_width(s_screen, 0, 0);
     lv_obj_set_style_pad_all(s_screen, 0, 0);
 
-    // ---- 状态栏 (y0..24):与首页同款 —— 炭灰条 + 共享 Wi-Fi 格 + 电池 ----
+    // ---- Status bar (y0..24): same as the home screen - charcoal bar + shared Wi-Fi bars + battery ----
     ui_pixel_top_bar(s_screen);
     ui_pixel_wifi_bars_create(s_screen, UI_STATUS_WIFI_X, 18, s_wifi_bars);
     s_battery = ui_pixel_battery_create(s_screen, UI_STATUS_BATTERY_X, 6, kStatus,
@@ -507,8 +507,8 @@ void launcher_ui_show(void) {
 }
 
 void launcher_ui_hide(void) {
-    // Launcher 不与重型 App 同时常驻。Radio 的音频驱动和复杂 UI 会把单核
-    // C3 的内部堆推到极限，进入 App 前释放主页可避免 LVGL 分配失败崩溃。
+    // The Launcher does not stay resident alongside heavy apps. Radio's audio driver and complex UI push the single-core
+    // C3's internal heap to the limit; freeing the home page before entering an app avoids LVGL allocation-failure crashes.
     bsp_lvgl_lock(-1);
     if (s_screen) lv_obj_delete(s_screen);
     s_screen = nullptr;

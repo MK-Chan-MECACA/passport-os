@@ -1,6 +1,6 @@
-// 首页(个人主页):头像 + 姓名/签名 + 时钟 + 天气 + 两张统计卡(占位,恒 --)。
-// 这是一个完整 App(而非 Launcher 的一部分),遵守 registry 的"stop 即删屏"
-// 约定 —— 进应用时 Launcher 已释放界面,退出时本应用同样把 LVGL 对象全部删除。
+// Home (personal page): avatar + name/signature + clock + weather + two stat cards (placeholders, always --).
+// This is a full app (not part of the Launcher) and follows the registry's "stop deletes the screen"
+// convention - the Launcher has freed its UI on entry, and this app likewise deletes all its LVGL objects on exit.
 #pragma once
 
 #include "apps/app_base.h"

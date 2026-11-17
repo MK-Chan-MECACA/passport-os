@@ -1,12 +1,12 @@
-// 声控采音:16kHz/16bit/单声道读麦克风,输出 0..4095 的平滑响度。
-// 独立小任务(3KB 栈),与 LVGL 之间只过一个原子变量 —— 游戏循环零锁零等待。
+// Voice-control audio capture: reads the mic at 16kHz/16bit/mono and outputs a smoothed loudness of 0..4095.
+// Small standalone task (3KB stack); only one atomic variable is shared with LVGL - the game loop never locks or waits.
 //
-// 2026-09-13 优化:
-//   * 新增 game_mic_ready() —— 区分"环境安静"和"麦克风还没热机",上层可据此
-//     决定是否显示提示,而不是把热机期的 0 误判成"玩家没叫";
-//   * game_mic_start() 现在能可靠重入:退出后立刻重进 App 时,旧任务若还在
-//     收尾(s_task 非空)会先等它退出再建新任务,否则会静默跳过建任务 ——
-//     那会导致这一局完全没有声控(原来踩过)。
+// 2026-09-13 optimization:
+//   * Added game_mic_ready() - distinguishes "room is quiet" from "mic not warmed up yet", so the upper layer can
+//     decide whether to show a hint instead of misreading the warm-up 0 as "player isn't barking";
+//   * game_mic_start() is now safely re-entrant: when re-entering the app right after leaving, if the old task is still
+//     finishing (s_task non-null) it first waits for it to exit before creating a new one; before, it silently skipped creating the task -
+//     which left that round with no voice control at all (this happened before).
 #pragma once
 
 #include <stdbool.h>
@@ -16,20 +16,20 @@
 extern "C" {
 #endif
 
-// 启动采音任务(幂等;若上一轮任务尚未退出会先等它退出)。
-// 内部 bsp_audio_init/set_format(16k) 与语音应用同配置,
-// App 互斥运行所以不存在抢占 I2S 的问题。
+// Start the capture task (idempotent; if the previous task has not exited yet, wait for it first).
+// Internally bsp_audio_init/set_format(16k) use the same config as the voice app;
+// apps run mutually exclusively, so there is no contention for I2S.
 void game_mic_start(void);
 
-// 请求退出并等待任务结束(每次 read 最长 16ms,通常 <50ms 返回)。
+// Request exit and wait for the task to finish (each read takes at most 16ms; usually returns in <50ms).
 void game_mic_stop(void);
 bool game_mic_prepare_stop(void);
 
-// 平滑响度(均值整流×EMA)。静音房间约数百,正常说话数千。
-// 未就绪(热机期)恒为 0。
+// Smoothed loudness (mean rectified × EMA). A quiet room is a few hundred, normal speech a few thousand.
+// Always 0 while not ready (warm-up).
 uint16_t game_mic_level(void);
 
-// 麦克风是否已过上电瞬态、输出可信。热机期约 160ms。
+// Whether the mic is past its power-up transient and the output is trustworthy. Warm-up is about 160ms.
 bool game_mic_ready(void);
 
 #ifdef __cplusplus

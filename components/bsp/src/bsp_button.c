@@ -1,5 +1,5 @@
 // components/bsp/src/bsp_button.c
-// 移植自 trae_card/components/platform/platform_esp32/src/btn_iot_button.c
+// Ported from trae_card/components/platform/platform_esp32/src/btn_iot_button.c
 #include "bsp_button.h"
 #include "bsp_pins.h"
 #include "iot_button.h"
@@ -10,12 +10,12 @@
 #include "esp_log.h"
 #include "esp_timer.h"
 
-// 面板上电瞬态抑制窗口:SLPOUT+120ms+DISPON+LVGL 全屏刷新 ~300ms,取 600ms。
+// Panel power-up transient suppression window: SLPOUT+120ms+DISPON+LVGL full-screen refresh ~300ms, use 600ms.
 #define BSP_BTN_PANEL_GLITCH_US (600 * 1000)
 
-// 面板上电 SPI 活动会耦合进 ADC1_CH0(按键分压),此时间窗内的读数不可信。
-// bsp_display_power(true) 在唤醒序列前登记抑制截止时刻,读路径见 read_mv。
-// 历史上这是对 managed_component button_adc.c 的补丁,组件升级会覆盖,故收编到此。
+// Panel power-up SPI activity couples into ADC1_CH0 (the button divider); readings within this window are unreliable.
+// bsp_display_power(true) records the suppression deadline before the wake sequence; see read_mv for the read path.
+// This used to be a patch to managed_component button_adc.c, which component upgrades would overwrite, so it was moved here.
 static volatile int64_t s_ignore_until_us = 0;
 
 void button_adc_set_ignore_until(int64_t until_us) {
@@ -30,16 +30,16 @@ static button_handle_t s_btn[BSP_BTN_COUNT];
 static bsp_btn_cb_t    s_cb;
 static void           *s_user;
 
-// ADC1 是 unit 级独占资源:iot_button 与 bsp_button_read_mv() 必须共用同一个 oneshot
-// 句柄。谁第二个调 adc_oneshot_new_unit() 谁就拿到 "adc1 is already in use"。
+// ADC1 is an exclusive per-unit resource: iot_button and bsp_button_read_mv() must share the same oneshot
+// handle. Whoever calls adc_oneshot_new_unit() second gets "adc1 is already in use".
 static adc_oneshot_unit_handle_t s_adc;
 static adc_cali_handle_t         s_cali;
 
-// BSP 轮询与 button 组件共用衰减档,校准也必须一致,否则读数会与按键阈值错位。
-// managed_components/espressif__button/button_adc.c:26 在 C3 上取 ADC_ATTEN_DB_6+1。
-#define BSP_BTN_ATTEN  ADC_ATTEN_DB_12       // 量程约 0~3100mV,覆盖松开态
+// BSP polling shares the attenuation with the button component, and calibration must match too, or readings drift off the button thresholds.
+// On C3, managed_components/espressif__button/button_adc.c:26 uses ADC_ATTEN_DB_6+1.
+#define BSP_BTN_ATTEN  ADC_ATTEN_DB_12       // range about 0~3100mV, covers the released state
 
-// 每个按键把"哪个键"随回调带回来。button 组件的回调签名固定,故用 usr_data 传索引。
+// Each button carries "which key" back through the callback. The button component's callback signature is fixed, so the index goes in usr_data.
 static void on_event(void *arg, void *usr_data, bsp_btn_ev_t ev) {
     (void)arg;
     if (!s_cb) return;
@@ -55,8 +55,8 @@ static void cb_long_up(void *a, void *u) { on_event(a, u, BSP_BTN_LONG_UP); }
 esp_err_t bsp_button_init(bsp_btn_cb_t cb, void *user) {
     s_cb = cb; s_user = user;
 
-    // 先由 BSP 建 unit,再把句柄交给 button 组件(button_adc.h:adc_handle 非 NULL 即复用),
-    // 这样本文件的 bsp_button_read_mv() 也能读同一路 ADC。
+    // The BSP creates the unit first, then hands the handle to the button component (button_adc.h: a non-NULL adc_handle is reused),
+    // so this file's bsp_button_read_mv() can read the same ADC channel.
     const adc_oneshot_unit_init_cfg_t ucfg = { .unit_id = BSP_BTN_ADC_UNIT };
     esp_err_t ae = adc_oneshot_new_unit(&ucfg, &s_adc);
     if (ae != ESP_OK) {
@@ -65,8 +65,8 @@ esp_err_t bsp_button_init(bsp_btn_cb_t cb, void *user) {
         return ae;
     }
 
-    // 主程序用无回调的轮询模式,不会调用 iot_button_new_adc_device。
-    // 因此通道必须由 BSP 配置,不能依赖 button 组件的创建流程。
+    // The main program uses callback-less polling mode and never calls iot_button_new_adc_device.
+    // So the channel must be configured by the BSP and cannot rely on the button component's creation flow.
     const adc_oneshot_chan_cfg_t channel_cfg = {
         .atten = BSP_BTN_ATTEN,
         .bitwidth = ADC_BITWIDTH_DEFAULT,
@@ -82,7 +82,7 @@ esp_err_t bsp_button_init(bsp_btn_cb_t cb, void *user) {
     if (cb) {
         for (int i = 0; i < BSP_BTN_COUNT; i++) {
             const button_adc_config_t ac = {
-                .adc_handle   = &s_adc,          // 复用上面这一个,别让组件自建
+                .adc_handle   = &s_adc,          // reuse the one above; do not let the component create its own
                 .unit_id      = BSP_BTN_ADC_UNIT,
                 .adc_channel  = BSP_BTN_ADC_CHANNEL,
                 .button_index = i,
@@ -107,8 +107,8 @@ esp_err_t bsp_button_init(bsp_btn_cb_t cb, void *user) {
         }
     }
 
-    // 通道已配置好,这里创建与其衰减档一致的校准句柄给 bsp_button_read_mv() 用。
-    // 轮询模式的按键判定依赖校准电压,失败必须报错;回调模式可用组件自己的校准。
+    // The channel is configured; create a calibration handle with matching attenuation here for bsp_button_read_mv().
+    // Polling-mode button detection depends on calibrated voltage, so failure must be reported; callback mode can use the component's own calibration.
     const adc_cali_curve_fitting_config_t cal = {
         .unit_id  = BSP_BTN_ADC_UNIT,
         .chan     = BSP_BTN_ADC_CHANNEL,
@@ -135,10 +135,10 @@ void bsp_button_suppress_panel_glitch(void) {
 }
 
 int bsp_button_read_mv(void) {
-    // 读的是 bsp_button_init() 建好、并与 iot_button 共用的那一路 ADC。
-    // 单次采样与组件的按键轮询互不干扰(oneshot 内部自带锁)。
+    // Reads the ADC channel created by bsp_button_init() and shared with iot_button.
+    // Single samples do not interfere with the component's button polling (oneshot has its own internal lock).
     if (!s_adc || !s_cali) return -1;
-    if (esp_timer_get_time() < s_ignore_until_us) return -1;  // 抑制窗内读数不可信
+    if (esp_timer_get_time() < s_ignore_until_us) return -1;  // readings within the suppression window are unreliable
 
     int raw = 0, mv = 0;
     if (adc_oneshot_read(s_adc, BSP_BTN_ADC_CHANNEL, &raw) != ESP_OK) return -1;

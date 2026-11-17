@@ -1,29 +1,29 @@
-// 《你在狗叫什么》声控魔性 App。
+// "Why Barking": a quirky voice-controlled app.
 //
-// 内存策略(上线硬约束,优化后仍然成立):
-//   1. 零大缓冲 —— 不用 canvas/framebuffer,狗和管道全部是常驻小对象池
-//      (~40 个 lv_obj),游戏过程零堆分配;
-//   2. 不另起渲染任务 —— 游戏循环是 33ms 的 lv_timer,跑在 LVGL 任务里;
-//      额外任务只有两个:采音(3KB 栈)和音效(2KB 栈,可一键关);
-//   3. stop() 全量回收:先删定时器再拆屏,任务 join/删除后返回,堆回到进入前水平。
+// Memory strategy (hard requirements for release, still hold after the optimization):
+//   1. No large buffers - no canvas/framebuffer; the dog and pipes are a resident pool of small objects
+//      (~40 lv_obj), zero heap allocation during play;
+//   2. No separate render task - the game loop is a 33ms lv_timer running in the LVGL task;
+//      only two extra tasks: mic capture (3KB stack) and sound effects (2KB stack, can be switched off with one flag);
+//   3. stop() reclaims everything: delete the timer first, then tear down the screen; tasks are joined/deleted before returning, heap back to its pre-entry level.
 //
 // ---------------------------------------------------------------------------
-// 2026-09-13 优化总览(详见同目录 OPTIMIZATION.md):
-//   性能  P1 气泡文本不再每帧 lv_label_set_text —— LVGL 9 该接口没有"同文本
-//           短路",每次都是 free+malloc+全文重排+invalidate,原来 30 次/秒地
-//           制造堆碎片与重排开销,是掉帧与堆抖动的头号来源。改为脏检查。
-//        P2 耳朵/嘴/音量条/管道可见性全部走缓存,值没变就不碰 LVGL。
-//        P3 修 s_frame 只在 READY 自增(而 READY 永不进入)导致的金丝雀每帧执行。
-//        P4 采音:热机期跳过 EMA、首块直接播种(出声快 ~64ms);调试日志可关。
-//   结构  S1 拆成 构建 / HUD / 演出 / 循环 四段,px_block·px_label 统一命名;
-//        S2 难度与判定常量集中到 game_core.h 的"调参区";
-//        S3 音效独立成 game_sfx 模块。
-//   手感  F1 死亡坠落 + 结算面板滑入,并按 OK 可快进(不再瞬间重开);
-//        F2 修"退出后立刻重进 → 采音任务残留 → 整局没有麦克风"的致命 bug;
-//        F3 进场先起麦,热机与建屏重叠。
-//   界面  U1 左侧实时音量条(声控游戏最关键的输入可见性);
-//        U2 得分闪白;U3 提示语缩短为单行不换行;U4 新增 20 分段位。
-// 玩法平衡数值(SPEED/GAP/推力映射/判定盒)全部保持原值,未改动。
+// 2026-09-13 optimization overview (details in OPTIMIZATION.md in this directory):
+//   Perf  P1 Bubble text no longer calls lv_label_set_text every frame - in LVGL 9 that API has no "same-text
+//           short-circuit"; every call is free+malloc+full relayout+invalidate, and it used to run 30 times/s,
+//           fragmenting the heap and costing relayouts - the top source of dropped frames and heap churn. Now dirty-checked.
+//        P2 Ears/mouth/volume bar/pipe visibility are all cached; LVGL is untouched when values don't change.
+//        P3 Fixed s_frame only incrementing in READY (which is never entered), which made the canary run every frame.
+//        P4 Mic: skip EMA during warm-up, seed from the first block (~64ms faster response); debug log can be disabled.
+//   Arch  S1 Split into four parts: build / HUD / effects / loop; px_block/px_label share one naming scheme;
+//        S2 Difficulty and hitbox constants centralized in the "tuning section" of game_core.h;
+//        S3 Sound effects split out into their own game_sfx module.
+//   Feel  F1 Death fall + sliding result panel, OK fast-forwards (no more instant restart);
+//        F2 Fixed the fatal bug "re-enter right after leaving → mic task left over → no mic for the whole round";
+//        F3 Start the mic first on entry so warm-up overlaps screen building.
+//   UI    U1 Live volume bar on the left (input visibility, the most critical thing in a voice-controlled game);
+//        U2 Score flash; U3 hint shortened to a single line; U4 new 20-point rank.
+// Gameplay balance values (SPEED/GAP/thrust mapping/hitbox) all kept at their original values, unchanged.
 // ---------------------------------------------------------------------------
 #include "apps/game/app_game.h"
 
@@ -43,7 +43,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "lvgl.h"
-#include "display/lv_display_private.h" /* canary:inv_p 越界破坏监测 */
+#include "display/lv_display_private.h" /* canary: detects inv_p out-of-bounds corruption */
 
 #include <atomic>
 #include <cstdio>
@@ -58,74 +58,74 @@ namespace {
 constexpr char kTag[] = "app_game";
 
 // ---------------------------------------------------------------------------
-// 调参区(改这里就能试手感;括号内是回退值)
+// Tuning section (edit here to try the feel; values in parentheses are the rollback values)
 // ---------------------------------------------------------------------------
 
-// 响度→推力映射:实测安静房间 EMA ≈ 60,正常说话数百~一千多,吹气/喊话 >2500。
-// 低于 FLOOR 不给推力(自然下落),达到 FULL 满推力;结束日志带本局峰值便于再调。
-// 环境吵 → 调高 FLOOR;叫不动 → 调低 FULL。(原值 150 / 2500)
+// Loudness → thrust mapping: measured quiet-room EMA ≈ 60, normal speech a few hundred to over a thousand, blowing/shouting >2500.
+// Below FLOOR gives no thrust (natural fall), FULL gives full thrust; the end-of-round log includes the round's peak for re-tuning.
+// Noisy environment → raise FLOOR; can't get it to climb → lower FULL. (original 150 / 2500)
 constexpr uint16_t kVolFloor = 150;
 constexpr uint16_t kVolFull = 2500;
 
 constexpr uint32_t kFrameMs = 33;
 
-// 音效总开关。置 0 即完全回到"无声版"(game_sfx 不再建任务)。
+// Master sound switch. Set to 0 to go back to the "silent version" entirely (game_sfx creates no task).
 constexpr bool kSfxEnabled = true;
 
-// 狗嘴:静音 2px → 满声 8px(原值一致)。
+// Dog mouth: silent 2px → full volume 8px (same as original).
 constexpr int kMouthMinH = 2;
 constexpr int kMouthMaxH = 8;
 constexpr int kMouthW = 7;
 constexpr int kTongueX = 14;
 constexpr int kTongueYBase = 8;
 
-// 气泡阈值(推力 0..255):>60 出"Woof!",≥180 升级"Woof woof!"(原值一致)。
+// Bubble thresholds (thrust 0..255): >60 shows "Woof!", ≥180 upgrades to "Woof woof!" (same as original).
 constexpr int kBarkSoft = 60;
 constexpr int kBarkLoud = 180;
 
-// 得分闪白时长(帧)。6 ≈ 200ms。
+// Score flash duration (frames). 6 ≈ 200ms.
 constexpr int kScoreFlashFrames = 6;
 
-// 死亡演出:坠落 ~300ms(9 帧 × 7px),随后面板滑入 ~230ms(7 帧)。
-// 回退:把 kDeathFallFrames 设 0 即为"立刻弹结算"的原行为。
+// Death sequence: fall ~300ms (9 frames × 7px), then the panel slides in ~230ms (7 frames).
+// Rollback: set kDeathFallFrames to 0 for the original "show results immediately" behavior.
 constexpr int kDeathFallFrames = 9;
 constexpr int kDeathFallPx = 7;
 constexpr int kPanelAnimFrames = 7;
 constexpr int kPanelShownY = 86;
 constexpr int kPanelHiddenY = 340;
 
-// 左侧实时音量条:让玩家看见"麦克风听到多少",声控游戏最重要的输入可见性。
+// Live volume bar on the left: lets the player see "how much the mic hears", the most important input visibility in a voice-controlled game.
 constexpr int kVuX = 4;
 constexpr int kVuY = 34;
 constexpr int kVuW = 6;
-constexpr int kVuH = 244;    // 34..278,不压到草地(GC_GROUND_Y=284)
-constexpr int kVuStep = 6;   // 高度量化步长,减少无意义的重绘
+constexpr int kVuH = 244;    // 34..278, doesn't overlap the grass (GC_GROUND_Y=284)
+constexpr int kVuStep = 6;   // height quantization step, reduces pointless redraws
 
-// 提示语(单行,不换行 —— 原来 13 个汉字宽 221px 超过 216 会折成两行压在草地上)
+// Hint text (single line, no wrapping - the original 13 Chinese characters were 221px wide, over 216, and wrapped onto two lines over the grass)
 constexpr char kHintPlay[] = "Bark to rise · OK: Jump";
 constexpr char kHintDead[] = "OK: Again · Hold OK: Back";
 constexpr char kHintReady[] = "OK: Start · Hold OK: Back";
 
 // ---------------------------------------------------------------------------
-// 配色(沿用整机像素风色板)
+// Colors (reusing the system pixel-art palette)
 // ---------------------------------------------------------------------------
 #define kInk (UI_INK)
 #define kPaper (UI_PAPER)
-constexpr uint32_t kDogBody = 0xE6A13B;  // 柴犬金黄毛色
-constexpr uint32_t kDogEar = 0xAA6518;   // 褐色耳朵
-constexpr uint32_t kDogWhite = 0xFFF3D6; // 脸颊浅白
-constexpr uint32_t kMouthBg = 0x551111;  // 深暗红嘴腔
-constexpr uint32_t kTongue = 0xFF6B8B;   // 粉舌头
-#define kGrass (UI_ACCENT)    // 管道主体
-#define kGrassD (UI_BORDER)   // 管道口/描边
+constexpr uint32_t kDogBody = 0xE6A13B;  // Shiba golden coat
+constexpr uint32_t kDogEar = 0xAA6518;   // brown ears
+constexpr uint32_t kDogWhite = 0xFFF3D6; // light cheeks
+constexpr uint32_t kMouthBg = 0x551111;  // dark red mouth
+constexpr uint32_t kTongue = 0xFF6B8B;   // pink tongue
+#define kGrass (UI_ACCENT)    // pipe body
+#define kGrassD (UI_BORDER)   // pipe lip/outline
 
 // ---------------------------------------------------------------------------
-// 文本缓存 —— 本次优化的核心
+// Text cache - the core of this optimization
 // ---------------------------------------------------------------------------
 
-// lv_label_set_text() 内部没有"和当前文本相同就直接返回"的短路:每次调用都会
-// lv_free 旧串 → lv_malloc 新串 → 全文重新排版 → invalidate。原来"Woof!"气泡每帧
-// 无条件调用一次(30 次/秒),既制造堆碎片又反复触发布局。这里在调用前先比对。
+// lv_label_set_text() has no internal "same as current text, return early" short-circuit: every call does
+// lv_free old string → lv_malloc new string → full relayout → invalidate. The "Woof!" bubble used to call it every frame
+// unconditionally (30 times/s), fragmenting the heap and retriggering layout. So compare before calling.
 struct TextCache {
     char text[48];
     void reset() { text[0] = '\0'; }
@@ -133,53 +133,53 @@ struct TextCache {
 
 bool set_text_cached(lv_obj_t *label, TextCache &cache, const char *text) {
     if (!label || !text) return false;
-    if (std::strcmp(cache.text, text) == 0) return false;  // 没变:一次都不碰 LVGL
+    if (std::strcmp(cache.text, text) == 0) return false;  // unchanged: don't touch LVGL at all
     std::snprintf(cache.text, sizeof(cache.text), "%s", text);
     lv_label_set_text(label, cache.text);
     return true;
 }
 
 // ---------------------------------------------------------------------------
-// 状态
+// State
 // ---------------------------------------------------------------------------
 std::atomic<bool> s_active{false};
 lv_obj_t *s_screen = nullptr;
 lv_timer_t *s_timer = nullptr;
 
-lv_obj_t *s_dog = nullptr;               // 容器 22x18
-lv_obj_t *s_dog_ear = nullptr;           // 可摆动后耳
-lv_obj_t *s_dog_mouth = nullptr;         // 动态拉伸嘴腔
-lv_obj_t *s_dog_tongue = nullptr;        // 吐舌头
-lv_obj_t *s_bark_lbl = nullptr;          // 实时“汪！”气泡
+lv_obj_t *s_dog = nullptr;               // container 22x18
+lv_obj_t *s_dog_ear = nullptr;           // swinging back ear
+lv_obj_t *s_dog_mouth = nullptr;         // dynamically stretched mouth
+lv_obj_t *s_dog_tongue = nullptr;        // tongue sticking out
+lv_obj_t *s_bark_lbl = nullptr;          // live "Woof!" bubble
 lv_obj_t *s_score_lbl = nullptr;
 ui_pixel_battery_t s_battery{};
 int64_t s_battery_us = 0;
 lv_obj_t *s_hint_lbl = nullptr;
-lv_obj_t *s_vu_fill = nullptr;           // 音量条填充(轨道是它的兄弟,不需句柄)
+lv_obj_t *s_vu_fill = nullptr;           // volume bar fill (the track is its sibling, no handle needed)
 lv_obj_t *s_dead_panel = nullptr;
 lv_obj_t *s_dead_score = nullptr;
 lv_obj_t *s_dead_best = nullptr;
-lv_obj_t *s_dead_rating = nullptr;       // 抽象段位评级
+lv_obj_t *s_dead_rating = nullptr;       // silly rank rating
 
-// 渲染缓存:值没变就不写 LVGL。lv_obj_set_x/y 本身有相同值短路,但
-// set_size / set_style / set_text 没有,统一在这里挡一层最省心。
+// Render cache: don't write to LVGL when values haven't changed. lv_obj_set_x/y already short-circuit on equal values, but
+// set_size / set_style / set_text don't, so one guard layer here is simplest.
 int s_last_dog_y = -1;
 int s_last_mouth_h = -1;
 int s_last_ear_y = -1;
 int s_last_vu_h = -1;
 uint32_t s_last_vu_color = 0;
-int s_dog_y = 0;                          // 最近一次渲染用的狗 y(死亡坠落起点)
+int s_dog_y = 0;                          // dog y used by the latest render (start of the death fall)
 
-// 管道池:每根 = 上身/上口/下口/下身 4 个对象,循环复用
+// Pipe pool: each pipe = 4 objects (upper body/upper lip/lower lip/lower body), recycled
 lv_obj_t *s_pipe_obj[GC_PIPES][4];
-int s_pipe_last_h[GC_PIPES][2];      // 上身/下身缓存高度,-1 强制首次刷新
-bool s_pipe_shown[GC_PIPES];         // 上一帧是否在屏内(避免离屏管道反复被搬家)
+int s_pipe_last_h[GC_PIPES][2];      // cached upper/lower body heights, -1 forces the first refresh
+bool s_pipe_shown[GC_PIPES];         // whether it was on-screen last frame (avoids repeatedly moving off-screen pipes)
 
-// 演出 / 计分 / 统计
+// Effects / scoring / stats
 int s_score_cache = -1;
 int s_score_flash = 0;
-int s_dying = 0;        // >0:正在演坠落;0:可重开
-int s_panel_anim = 0;   // >0:结算面板正在滑入
+int s_dying = 0;        // >0: fall animation playing; 0: can restart
+int s_panel_anim = 0;   // >0: result panel sliding in
 int s_best = 0;
 uint16_t s_peak_level = 0;
 uint32_t s_frame = 0;
@@ -187,17 +187,17 @@ uint32_t s_frame = 0;
 TextCache s_bark_cache;
 TextCache s_hint_cache;
 
-// 掉帧统计(放到文件作用域,start_run 能清零,避免跨局残留)
+// Dropped-frame stats (file scope so start_run can reset them, avoiding carry-over between rounds)
 int64_t s_last_tick_us = 0;
 int32_t s_max_tick_ms = 0;
 int s_slow_frames = 0;
 int s_stat_frames = 0;
 
-// 呼吸浮动表(READY 态):±6px,周期约 1s
+// Breathing bob table (READY state): ±6px, period about 1s
 const int8_t kBob[16] = {0, 2, 4, 5, 6, 5, 4, 2, 0, -2, -4, -5, -6, -5, -4, -2};
 
 // ---------------------------------------------------------------------------
-// 构件 —— 统一前缀 px_*,和整机像素风一致
+// Building blocks - common px_* prefix, matching the system pixel-art style
 // ---------------------------------------------------------------------------
 lv_obj_t *px_block(lv_obj_t *parent, int x, int y, int w, int h, uint32_t color,
                    int radius) {
@@ -209,7 +209,7 @@ lv_obj_t *px_block(lv_obj_t *parent, int x, int y, int w, int h, uint32_t color,
     lv_obj_set_style_border_width(o, 0, 0);
     lv_obj_set_style_pad_all(o, 0, 0);
     lv_obj_set_style_bg_color(o, lv_color_hex(color), 0);
-    // 显式不透明:省掉每次绘制的 alpha 混合,纯色块是本机最便宜的图元。
+    // Explicitly opaque: skips alpha blending on every draw; solid blocks are the cheapest primitive on this device.
     lv_obj_set_style_bg_opa(o, LV_OPA_COVER, 0);
     return o;
 }
@@ -225,7 +225,7 @@ lv_obj_t *px_label(lv_obj_t *parent, const char *text, const lv_font_t *font,
 }
 
 // ---------------------------------------------------------------------------
-// 构建
+// Build
 // ---------------------------------------------------------------------------
 void build_dog(lv_obj_t *parent) {
     s_dog = lv_obj_create(parent);
@@ -236,25 +236,25 @@ void build_dog(lv_obj_t *parent) {
     lv_obj_set_style_border_width(s_dog, 0, 0);
     lv_obj_set_style_pad_all(s_dog, 0, 0);
 
-    // 1. 头身主体(金黄, 4px 圆角)
+    // 1. Head/body (golden, 4px radius)
     px_block(s_dog, 2, 2, 17, 13, kDogBody, 4);
-    // 2. 左耳朵(后耳, 飞行动画微晃)
+    // 2. Left ear (back ear, wiggles while flying)
     s_dog_ear = px_block(s_dog, 0, 1, 5, 7, kDogEar, 2);
-    // 3. 右耳朵(前耳)
+    // 3. Right ear (front ear)
     px_block(s_dog, 6, 0, 5, 6, kDogEar, 2);
-    // 4. 浅色脸颊/口鼻区
+    // 4. Light cheek/muzzle area
     px_block(s_dog, 10, 6, 10, 8, kDogWhite, 2);
-    // 5. 黑鼻头
+    // 5. Black nose
     px_block(s_dog, 18, 5, 4, 3, kInk, 1);
-    // 6. 呆萌眼睛(大白底 + 黑瞳孔)
+    // 6. Goofy eyes (big white + black pupil)
     px_block(s_dog, 9, 3, 5, 5, 0xFFFFFF, 2);
     px_block(s_dog, 11, 4, 2, 2, kInk, 1);
-    // 7. 动态嘴腔(暗红, 初始高 2)
+    // 7. Dynamic mouth (dark red, initial height 2)
     s_dog_mouth = px_block(s_dog, 13, 9, kMouthW, kMouthMinH, kMouthBg, 1);
-    // 8. 舌头(粉色, 初始附在嘴里)
+    // 8. Tongue (pink, starts inside the mouth)
     s_dog_tongue = px_block(s_dog, kTongueX, kTongueYBase + kMouthMinH, 5, 2, kTongue, 1);
 
-    // 9. 狗叫冒泡气泡标签 (显示在头顶上方)
+    // 9. Bark bubble label (shown above the head)
     s_bark_lbl = px_label(parent, "", &buddy_font_16,
         ui_theme_get() == UI_THEME_PLAYFUL ? UI_WARNING : 0xFFE066, LV_TEXT_ALIGN_LEFT);
     lv_obj_set_pos(s_bark_lbl, GC_BIRD_X + GC_BIRD_W + 2, 134);
@@ -274,7 +274,7 @@ void build_pipes(lv_obj_t *parent) {
     }
 }
 
-// 音量条:轨道 + 填充。填充初始透明,update_vu() 按推力点亮。
+// Volume bar: track + fill. The fill starts transparent; update_vu() lights it by thrust.
 void build_vu(lv_obj_t *parent) {
     px_block(parent, kVuX, kVuY, kVuW, kVuH, UI_SURFACE_ALT, 0);
     s_vu_fill = px_block(parent, kVuX, kVuY, kVuW, kVuH, UI_YELLOW, 0);
@@ -282,7 +282,7 @@ void build_vu(lv_obj_t *parent) {
 }
 
 void build_dead_panel(lv_obj_t *parent) {
-    // 纸底 + 墨描边,宽 190, 高 122(几何与优化前完全一致,只加了滑入动画)
+    // Paper base + ink outline, width 190, height 122 (geometry identical to before the optimization, only the slide-in animation added)
     lv_obj_t *panel = px_block(parent, 12, kPanelHiddenY, 216, 140, kPaper, 0);
     s_dead_panel = panel;
     lv_obj_set_style_border_width(panel, 1, 0);
@@ -313,7 +313,7 @@ void build_dead_panel(lv_obj_t *parent) {
 }
 
 // ---------------------------------------------------------------------------
-// HUD —— 全部"脏检查"驱动
+// HUD - everything driven by "dirty checks"
 // ---------------------------------------------------------------------------
 void set_dog_y(int y) {
     if (y == s_last_dog_y) return;
@@ -322,7 +322,7 @@ void set_dog_y(int y) {
     lv_obj_set_y(s_dog, y);
 }
 
-// 气泡:只有文本真正变化时才 lv_label_set_text;非空时跟着狗走(并避开顶栏)。
+// Bubble: lv_label_set_text only when the text really changes; when non-empty it follows the dog (and avoids the top bar).
 void update_bark(const char *text, int dog_y) {
     set_text_cached(s_bark_lbl, s_bark_cache, text);
     if (text[0] == '\0') return;
@@ -331,7 +331,7 @@ void update_bark(const char *text, int dog_y) {
     lv_obj_set_y(s_bark_lbl, y);
 }
 
-// 音量条:高度量化后再比较,静音时整体透明(不用 HIDDEN —— 见 sync_pipes 注释)。
+// Volume bar: compare after quantizing the height; fully transparent when silent (no HIDDEN - see the sync_pipes comment).
 void update_vu(int thrust) {
     int h = (thrust * kVuH) / 255;
     h = (h / kVuStep) * kVuStep;
@@ -343,7 +343,7 @@ void update_vu(int thrust) {
     } else {
         if (s_last_vu_h <= 0) lv_obj_set_style_bg_opa(s_vu_fill, LV_OPA_COVER, 0);
         lv_obj_set_size(s_vu_fill, kVuW, h);
-        lv_obj_set_y(s_vu_fill, kVuY + (kVuH - h));   // 从底部往上长
+        lv_obj_set_y(s_vu_fill, kVuY + (kVuH - h));   // grows upward from the bottom
         const uint32_t c = (thrust < 85) ? UI_GRASS
                                          : (thrust < kBarkLoud ? UI_YELLOW : UI_RED);
         if (c != s_last_vu_color) {
@@ -363,9 +363,9 @@ void sync_pipes() {
         const bool visible = px > -(GC_PIPE_W + 10) && px < 240;
         lv_obj_t **o = s_pipe_obj[i];
         if (!visible) {
-            /* 不用 HIDDEN 标志:LVGL 9.3 取消隐藏路径在本机触发过 inv_p 死循环
-               (见 tick 金丝雀),与结算面板同款"移出屏幕"方案。
-               加 s_pipe_shown 缓存后,离屏期间一次都不用再写 LVGL。 */
+            /* No HIDDEN flag: the LVGL 9.3 unhide path has triggered an inv_p infinite loop on this device
+               (see the tick canary); same "move off-screen" approach as the result panel.
+               With the s_pipe_shown cache, nothing is written to LVGL at all while off-screen. */
             if (s_pipe_shown[i]) {
                 for (int k = 0; k < 4; ++k) lv_obj_set_pos(o[k], -40, 0);
                 s_pipe_shown[i] = false;
@@ -383,7 +383,7 @@ void sync_pipes() {
         lv_obj_set_pos(o[3], px, gap_bot + GC_PIPE_LIP);
 
         const int top_h = gap_top - GC_TOP;
-        if (s_pipe_last_h[i][0] != top_h) {          // 高度只在回收时变化,按需 set
+        if (s_pipe_last_h[i][0] != top_h) {          // height only changes on recycle, set on demand
             lv_obj_set_size(o[0], GC_PIPE_W, top_h);
             s_pipe_last_h[i][0] = top_h;
         }
@@ -396,7 +396,7 @@ void sync_pipes() {
 }
 
 // ---------------------------------------------------------------------------
-// 最高纪录(NVS)
+// High score (NVS)
 // ---------------------------------------------------------------------------
 void load_best(int *best) {
     *best = 0;
@@ -416,11 +416,11 @@ void save_best(int best) {
 }
 
 // ---------------------------------------------------------------------------
-// 一局的开始 / 结束
+// Start / end of a round
 // ---------------------------------------------------------------------------
 void start_run() {
-    /* 进 app 直接起飞 / 死后一键重开:不再有待机的 READY 静止页,
-       否则进场看到的是"原地浮动+空屏",像没运行(用户反馈过)。 */
+    /* Entering the app takes off immediately / one press restarts after death: no more idle READY page,
+       otherwise on entry you see "bobbing in place + empty screen", which looks like it's not running (user feedback). */
     s_score_cache = -1;
     s_score_flash = 0;
     s_dying = 0;
@@ -435,7 +435,7 @@ void start_run() {
     lv_obj_set_style_text_color(s_score_lbl, lv_color_hex(UI_YELLOW), 0);
     if (s_dead_panel) lv_obj_set_y(s_dead_panel, kPanelHiddenY);
 
-    // 渲染缓存全部置无效,保证新一局第一帧把狗/嘴/耳/音量条刷成初始态
+    // Invalidate all render caches so the new round's first frame resets dog/mouth/ears/volume bar to their initial state
     s_last_dog_y = -1;
     s_last_mouth_h = -1;
     s_last_ear_y = -1;
@@ -447,7 +447,7 @@ void start_run() {
     for (int i = 0; i < GC_PIPES; ++i) {
         s_pipe_last_h[i][0] = -1;
         s_pipe_last_h[i][1] = -1;
-        s_pipe_shown[i] = true;   // 下一帧 sync_pipes 会按真实可见性纠正
+        s_pipe_shown[i] = true;   // sync_pipes corrects this to real visibility on the next frame
     }
 
     gc_start((uint32_t)esp_timer_get_time() & 0x7fffffffu);
@@ -468,7 +468,7 @@ void on_dead() {
     std::snprintf(line, sizeof(line), "Best %d", s_best);
     lv_label_set_text(s_dead_best, line);
 
-    // 抽象段位评级(沿用原四档,补一档 20 分彩蛋,强化成就感)
+    // Silly rank rating (keeps the original four tiers, adds a 20-point easter-egg tier for a sense of achievement)
     const char *rating = "Too quiet. Try again";
     if (score >= 20) rating = "Every dog nearby joins in";
     else if (score >= 10) rating = "A legendary hound!";
@@ -476,17 +476,17 @@ void on_dead() {
     else if (score >= 2) rating = "Lone dog, full of spirit";
     if (s_dead_rating) lv_label_set_text(s_dead_rating, rating);
 
-    // 死亡演出:先张嘴"呜"着往下坠,结算面板等坠完再滑入(内容已填好)
+    // Death sequence: mouth opens "awoo" while falling; the result panel slides in after the fall (content already filled)
     s_dying = kDeathFallFrames;
     s_panel_anim = 0;
     if (s_dead_panel) lv_obj_set_y(s_dead_panel, kPanelHiddenY);
     lv_obj_set_size(s_dog_mouth, kMouthW, kMouthMaxH);
     lv_obj_set_pos(s_dog_tongue, kTongueX, kTongueYBase + kMouthMaxH);
     s_last_mouth_h = kMouthMaxH;
-    lv_obj_set_y(s_dog_ear, 3);      // 耳朵彻底耷拉
+    lv_obj_set_y(s_dog_ear, 3);      // ears fully droop
     s_last_ear_y = 3;
     update_bark("Awoo!!", s_dog_y);
-    set_hint(kHintDead); /* 明确告诉玩家怎么继续,免得以为死机 */
+    set_hint(kHintDead); /* tell the player clearly how to continue, so they don't think it froze */
     if (kSfxEnabled) game_sfx_play(new_best ? GS_BEST : GS_DEAD);
 
     static const char *const kReason[] = {"none", "ground", "pipe-top", "pipe-bottom"};
@@ -498,10 +498,10 @@ void on_dead() {
 }
 
 // ---------------------------------------------------------------------------
-// 每帧三段循环
+// Three-part per-frame loop
 // ---------------------------------------------------------------------------
 void ready_tick() {
-    // 悬浮呼吸;顺便每秒打一条响度采样,便于校准声控阈值
+    // Hover/bob; also log a loudness sample every second to help calibrate voice thresholds
     const int bob = kBob[(s_frame >> 1) & 15];
     const int dog_y = ((GC_TOP + GC_GROUND_Y) / 2 - GC_BIRD_H / 2) + bob - 3;
     set_dog_y(dog_y);
@@ -512,7 +512,7 @@ void ready_tick() {
 }
 
 void playing_tick() {
-    app_registry_keep_awake(); /* 纯声控操作,进行中必须抑制息屏 */
+    app_registry_keep_awake(); /* voice-only control, so suppress screen sleep while playing */
     const uint16_t level = game_mic_level();
     if (level > s_peak_level) s_peak_level = level;
     int thrust = ((int)level - kVolFloor) * 255 / (kVolFull - kVolFloor);
@@ -524,7 +524,7 @@ void playing_tick() {
     const int dog_y = (int)(gc_bird_y_q4() >> 4);
     set_dog_y(dog_y);
 
-    // 嘴巴随声音动态张开(P2:高度不变就不写 LVGL)
+    // Mouth opens dynamically with sound (P2: don't write LVGL if the height is unchanged)
     const int mouth_h = kMouthMinH + thrust * (kMouthMaxH - kMouthMinH) / 255;
     if (mouth_h != s_last_mouth_h) {
         lv_obj_set_size(s_dog_mouth, kMouthW, mouth_h);
@@ -532,14 +532,14 @@ void playing_tick() {
         s_last_mouth_h = mouth_h;
     }
 
-    // 耳朵晃动:上升时耳朵微翘,下落时下垂(只在翻转的那一帧写)
+    // Ear wiggle: ears perk up when rising, droop when falling (only written on the frame it flips)
     const int ear_y = (gc_bird_vy_q4() < 0) ? 0 : 2;
     if (ear_y != s_last_ear_y) {
         lv_obj_set_y(s_dog_ear, ear_y);
         s_last_ear_y = ear_y;
     }
 
-    // 叫声弹幕气泡(P1:只在跨档位时改文本,不再每帧 malloc+重排)
+    // Bark bubble (P1: only change text when crossing a level, no more per-frame malloc+relayout)
     const char *bark = "";
     if (thrust >= kBarkLoud) bark = "Woof woof!";
     else if (thrust > kBarkSoft) bark = "Woof!";
@@ -553,7 +553,7 @@ void playing_tick() {
         char text[12];
         std::snprintf(text, sizeof(text), "%d", s_score_cache);
         lv_label_set_text(s_score_lbl, text);
-        // 得分闪白 ~200ms:让"过了一根"这件事在余光里也能看见
+        // Score flash ~200ms: makes "passed a pipe" visible even in peripheral vision
         lv_obj_set_style_text_color(s_score_lbl, lv_color_hex(UI_TEXT), 0);
         s_score_flash = kScoreFlashFrames;
         if (kSfxEnabled) game_sfx_play(GS_SCORE);
@@ -566,7 +566,7 @@ void playing_tick() {
 }
 
 void dead_tick() {
-    if (s_panel_anim > 0) {                        // 结算面板滑入
+    if (s_panel_anim > 0) {                        // result panel slides in
         --s_panel_anim;
         const int done = kPanelAnimFrames - s_panel_anim;
         const int y = kPanelHiddenY +
@@ -574,7 +574,7 @@ void dead_tick() {
         lv_obj_set_y(s_dead_panel, y);
         return;
     }
-    if (s_dying > 0) {                             // 狗继续往下坠(纯视觉,逻辑已停)
+    if (s_dying > 0) {                             // dog keeps falling (visual only, logic already stopped)
         --s_dying;
         int y = s_dog_y + kDeathFallPx;
         const int floor_y = GC_GROUND_Y - GC_BIRD_H;
@@ -600,8 +600,8 @@ void tick(lv_timer_t *) {
     }
     s_last_tick_us = now;
 
-    // P3:s_frame 原来只在 READY 分支自增,而游戏进场即起飞、READY 永不进入 →
-    // s_frame 恒为 0 → 下面的金丝雀检测每帧都跑。改为每帧自增。
+    // P3: s_frame used to increment only in the READY branch, but the game takes off on entry and READY is never entered →
+    // s_frame stayed 0 → the canary check below ran every frame. Now incremented every frame.
     ++s_frame;
 
     switch (gc_phase()) {
@@ -612,7 +612,7 @@ void tick(lv_timer_t *) {
 
     const int64_t spent_ms = (esp_timer_get_time() - now) / 1000;
     if (spent_ms > s_max_tick_ms) s_max_tick_ms = (int32_t)spent_ms;
-    if (++s_stat_frames >= 30) { /* ~1s 汇总:只在掉帧异常时才出日志,平时安静 */
+    if (++s_stat_frames >= 30) { /* ~1s summary: only log when frames drop abnormally, quiet otherwise */
         if (s_slow_frames >= 5) {
             ESP_LOGW(kTag, "frame drops: %d/%d max_tick=%ldms", s_slow_frames,
                      s_stat_frames, (long)s_max_tick_ms);
@@ -622,8 +622,8 @@ void tick(lv_timer_t *) {
         s_max_tick_ms = 0;
     }
 
-    /* 金丝雀:LVGL 9.3 lv_inv_area 里 uint16 i 对 uint32 inv_p,inv_p 一旦被
-       OOB 写坏成 >65535,i 回绕 → 死循环(真机 WDT 抓到过现场)。只在异常时告警。 */
+    /* Canary: in LVGL 9.3 lv_inv_area, uint16 i is compared against uint32 inv_p; once inv_p is
+       corrupted by an OOB write to >65535, i wraps → infinite loop (caught in the act by WDT on real hardware). Only warns on anomaly. */
     if ((s_frame & 31) == 0) {
         lv_display_t *disp = lv_display_get_default();
         if (disp && disp->inv_p > LV_INV_BUF_SIZE) {
@@ -633,7 +633,7 @@ void tick(lv_timer_t *) {
 }
 
 // ---------------------------------------------------------------------------
-// 界面
+// UI
 // ---------------------------------------------------------------------------
 void build_ui() {
     s_screen = lv_obj_create(nullptr);
@@ -656,9 +656,9 @@ void build_ui() {
     build_vu(s_screen);
     build_dog(s_screen);
 
-    // 提示语:纸胶囊(设计系统同款方角 + 墨描边)。
-    // 原来是纯白字直接压在草地上,白/草绿对比只有约 2.2:1,看不清;
-    // 换成纸底 + UI_SUB 后约 6:1,同时和整机其它 App 的提示胶囊一致。
+    // Hint: paper capsule (square corners + ink outline, same as the design system).
+    // It used to be plain white text directly over the grass; white/grass-green contrast was only about 2.2:1, hard to read;
+    // with a paper base + UI_SUB it's about 6:1, and matches the hint capsules in other apps.
     s_hint_lbl = px_label(s_screen, "", &buddy_font_16, UI_SUB, LV_TEXT_ALIGN_CENTER);
     lv_obj_set_width(s_hint_lbl, 216);
     lv_obj_set_style_bg_color(s_hint_lbl, lv_color_hex(kPaper), 0);
@@ -675,7 +675,7 @@ void build_ui() {
     s_frame = 0;
     s_peak_level = 0;
     s_hint_cache.reset();
-    start_run(); /* 进入即起飞,页面立刻是"往前飞"的动态 */
+    start_run(); /* takes off on entry, so the page immediately shows "flying forward" motion */
 }
 
 }  // namespace
@@ -687,12 +687,12 @@ static void game_init(void) {}
 static void game_start(void) {
     if (s_active.load()) return;
     s_active.store(true);
-    /* F3:先起采音再建屏 —— 麦克风有 ~160ms 的上电瞬态要丢,和建 40 个 lv_obj
-       的时间重叠掉,进场第一帧就不会因为"电平还没出来"而先往下沉一截。 */
+    /* F3: start mic capture before building the screen - the mic has a ~160ms power-up transient to drop, which overlaps
+       with building 40 lv_obj, so the first frame doesn't sink first because "the level isn't ready yet". */
     game_mic_start();
     if (kSfxEnabled) game_sfx_start();
     bsp_lvgl_lock(-1);
-    build_ui();                       // 建屏必须持锁:start 跑在输入任务上下文
+    build_ui();                       // building the screen must hold the lock: start runs in the input task context
     lv_screen_load(s_screen);
     s_timer = lv_timer_create(tick, kFrameMs, nullptr);
     bsp_lvgl_unlock();
@@ -710,13 +710,13 @@ static bool game_prepare_stop(void) {
 
 static void game_stop(void) {
     s_active.store(false);
-    // 音效任务先收(它可能在阻塞写 I2S),再收采音,最后拆屏 —— 顺序不能反。
+    // Stop the sfx task first (it may be blocked writing I2S), then mic capture, then tear down the screen - the order matters.
     if (kSfxEnabled) game_sfx_stop();
-    // 2026-09-13 修复(B2):删屏原来写在 if (s_timer) 里面 —— 堆紧张时
-    // lv_timer_create 返回 NULL,整个分支被跳过,screen 与全部子对象永不释放。
-    // 现在定时器与界面分开处理,屏幕**无条件**删。
+    // 2026-09-13 fix (B2): deleting the screen used to be inside if (s_timer) - when the heap was tight
+    // lv_timer_create returned NULL, the whole branch was skipped, and the screen and all children were never freed.
+    // Now the timer and the UI are handled separately and the screen is deleted **unconditionally**.
     bsp_lvgl_lock(-1);
-    if (s_timer) {              // 先删定时器,防止 tick 撕屏途中再进来
+    if (s_timer) {              // delete the timer first so tick can't re-enter while the screen is being torn down
         lv_timer_del(s_timer);
         s_timer = nullptr;
     }
@@ -742,29 +742,29 @@ static void game_on_key(uint8_t btn, app_btn_event_t event, uint16_t mv) {
     if (!s_active.load() || !s_screen || event != BTN_EVT_CLICK) return;
     if (btn != BSP_BTN_OK && btn != BSP_BTN_UP) return;
 
-    /* 本回调跑在输入任务:set_hint 等 lv_* 调用必须持锁。开局瞬间无锁
-       invalidate 与渲染任务竞态,会把 disp->inv_p 写坏成 >65535,
-       lv_inv_area 的 uint16 循环变量回绕 → LVGL 死循环(真机 WDT 抓到过)。
-       (LVGL 的 lv_timer 回调同样持这把锁,所以 tick 与本函数天然互斥,
-       下面这些非原子状态不需要额外加锁。) */
+    /* This callback runs in the input task: lv_* calls such as set_hint must hold the lock. An unlocked
+       invalidate at game start races with the render task and corrupts disp->inv_p to >65535;
+       lv_inv_area's uint16 loop variable then wraps → LVGL infinite loop (caught by WDT on real hardware).
+       (LVGL's lv_timer callbacks hold the same lock, so tick and this function are naturally mutually exclusive,
+       and the non-atomic state below needs no extra locking.) */
     if (!bsp_lvgl_lock(-1)) return;
     if (s_timer) lv_timer_set_period(s_timer, kFrameMs);
 
     switch (gc_phase()) {
     case GC_READY:
-        start_run(); /* 理论上不再进入 READY,兜底直接起飞 */
+        start_run(); /* READY should no longer be entered; fallback: take off directly */
         break;
     case GC_PLAYING:
         gc_flap();
         break;
     case GC_DEAD:
         if (s_dying > 0) {
-            /* 还在演坠落:这一下 OK 当作"快进",直接进结算,而不是重开 ——
-               否则连按两下就瞬间重开,玩家根本来不及看到自己几分。 */
+            /* Still playing the fall: treat this OK as "fast-forward" straight to results instead of restarting -
+               otherwise two quick presses restart instantly and the player never gets to see their score. */
             s_dying = 0;
             s_panel_anim = kPanelAnimFrames;
         } else {
-            start_run(); /* 死亡面板上按 OK 立刻再来一局 */
+            start_run(); /* OK on the death panel starts another round immediately */
         }
         break;
     }

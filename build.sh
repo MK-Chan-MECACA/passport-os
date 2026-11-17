@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# 在 WSL 中编译 passport-os。
+# Build passport-os in WSL.
 #
-# 用法:
-#   bash build.sh          编译本地官方 Jollybot 形象版
-#   bash build.sh clean    先清掉 CMake 缓存再全量编译（换 IDF 版本或路径变了才需要）
-#   bash build.sh release  用官网发布配置独立构建官方 Jollybot 版并校验
-#   bash build.sh diag     内存诊断版(堆任务追踪 + 申请峰值),输出到 build-diag,不可发布
+# Usage:
+#   bash build.sh          build the local official Jollybot edition
+#   bash build.sh clean    clear the CMake cache first, then full rebuild (only needed when the IDF version or path changed)
+#   bash build.sh release  standalone build of the official Jollybot edition with the website release config, then verify
+#   bash build.sh diag     memory diagnostic build (heap task tracking + allocation peak), output to build-diag, not for release
 #
-# 注意:ESP-IDF 装在 WSL 的 /opt/esp-idf,Windows 侧没有工具链,所以编译必须在 WSL 里跑。
-# 烧录走 Windows 的 COM3,WSL 默认看不到,需要 usbipd 绑定,或直接在 Windows 上用 esptool。
+# Note: ESP-IDF is installed in WSL at /opt/esp-idf; there is no toolchain on the Windows side, so builds must run in WSL.
+# Flashing goes through Windows COM3, which WSL cannot see by default: bind it with usbipd, or use esptool directly on Windows.
 set -u
 
 PROJECT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"

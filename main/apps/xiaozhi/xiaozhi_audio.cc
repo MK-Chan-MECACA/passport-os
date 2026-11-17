@@ -26,36 +26,36 @@ void publish_level(const uint8_t *pcm, size_t bytes, unsigned gain = 100) {
     const uint8_t level = face::pcm_level(reinterpret_cast<const int16_t *>(pcm), bytes / 2, gain);
     s_visual_level.store((visual_time() << 8) | level, std::memory_order_relaxed);
 }
-constexpr int kEncodeRate = 16000;      // 编码固定 16kHz（与官方固件一致）
+constexpr int kEncodeRate = 16000;      // Encoding fixed at 16kHz (same as the official firmware)
 constexpr int kChannels = 1;
 constexpr int kBitsPerSample = 16;
 
-// 有界等待上界：卡住了也必须能收尾，这些是兜底而非期望路径。
+// Upper bounds for bounded waits: cleanup must finish even if something is stuck; these are fallbacks, not the expected path.
 constexpr uint32_t kWorkIdleTimeoutMs = 1500;
 constexpr uint32_t kPlaybackDrainTimeoutMs = 2000;
 constexpr uint32_t kPlaybackAbortTimeoutMs = 800;
 constexpr uint32_t kPlaybackEnqueueWaitMs = 300;
 
-// 小智的 TTS 包由 WebSocket 突发下发。没有预缓冲时，网络任务稍有抖动，60ms
-// PCM 播完后 I2S 就会短暂断粮，听起来像连续的电流爆音。先积累 3 帧（约 180ms）
-// 再开播；若中途耗尽，也重新积累，宁可有很短的停顿，不把断续噪声送进功放。
+// Xiaozhi TTS packets arrive in WebSocket bursts. Without pre-buffering, any jitter in the network task means that after 60ms
+// of PCM plays out I2S briefly starves, which sounds like continuous electrical popping. Accumulate 3 frames (about 180ms) first
+// before starting playback; if it runs dry midway, re-accumulate. A very short pause is better than feeding choppy noise to the amp.
 constexpr size_t kPlaybackPrebufferFrames = 3;
 
 // TTS follows the user's master volume without a hidden 70% ceiling. Recording
 // and idle paths still request 0%, which the BSP now applies as a real mute.
 constexpr uint8_t kXiaozhiPlaybackVolume = 100;
 
-constexpr size_t kRingHdr = 2;          // 每条记录 2 字节长度前缀
+constexpr size_t kRingHdr = 2;          // 2-byte length prefix per record
 
 // Half-duplex codecs reuse the fixed auxiliary area. Their large states never
 // depend on session heap fragmentation; only the small ESP encoder wrapper
 // remains allocated while recording. Capacity is checked by the factory.
 
-// 常驻工作线程栈。Opus 编解码器的临时缓冲开在栈上：编码（clt_mdct_forward_c /
-// silk_NSQ_c）实测需 ~19KB，解码（quant_all_bands）>6KB。20KB 版本在真机连续
-// 对话中最低只剩约 0.8KB，22KB 即可保留约 2.8KB 的安全余量，同时减少连续块申请门槛。
-// 栈来自与收音机共用的固定工作区，不在切换后碎片化的堆里临时申请。
-// 工作任务退出并由所有者删除后才能让下一个应用使用该区。
+// Resident worker thread stack. The Opus codecs put their temporary buffers on the stack: encoding (clt_mdct_forward_c /
+// silk_NSQ_c) measured at ~19KB, decoding (quant_all_bands) >6KB. The 20KB version dropped to about 0.8KB free in continuous
+// conversation on device; 22KB keeps about 2.8KB of safety margin while lowering the contiguous-block requirement.
+// The stack comes from the fixed work area shared with the radio, not allocated on the heap, which fragments after app switches.
+// The next app may use that area only after the worker task has exited and been deleted by its owner.
 constexpr size_t kWorkerStack = 22 * 1024;
 static_assert(kWorkerStack <= audio_workspace::kRealtimeBytes);
 } // namespace
@@ -78,7 +78,7 @@ size_t AudioService::RingUsed(const Ring &r) {
 }
 
 size_t AudioService::RingFree(const Ring &r) {
-    return r.cap - RingUsed(r) - 1;   // 留 1 字节区分满/空
+    return r.cap - RingUsed(r) - 1;   // Keep 1 byte to tell full from empty
 }
 
 size_t AudioService::RingCount(const Ring &r) {
@@ -300,7 +300,7 @@ bool AudioService::Deinit() {
         audio_workspace::release(audio_workspace::Owner::Xiaozhi);
     }
 
-    // 编解码器必须在这里显式关掉：编码器现在是常驻的（StopRecording 不再关），
+    // The codecs must be closed explicitly here: the encoder is now resident (StopRecording no longer closes it),
     // Close the small ESP wrapper before returning the shared codec area.
     if (opus_enc_handle_ != nullptr) {
         esp_opus_enc_close(opus_enc_handle_);
@@ -350,8 +350,8 @@ bool AudioService::EnsureEncoder() {
     opus_dec_handle_ = nullptr;
     opus_dec_rate_ = 0;
 
-    // CELT(APPLICATION_AUDIO)：与官方 xiaozhi-esp32 语音链路一致，也是改造前能在
-    // 官方后台跑通的配置（SILK/20ms 的尝试会导致服务端完全不回应，已回退）。
+    // CELT (APPLICATION_AUDIO): matches the official xiaozhi-esp32 voice pipeline, and is also the config that worked on the
+    // official backend before the rework (trying SILK/20ms made the server not respond at all, so it was reverted).
     esp_opus_enc_config_t enc_cfg = ESP_OPUS_ENC_CONFIG_DEFAULT();
     enc_cfg.sample_rate = kEncodeRate;
     enc_cfg.channel = ESP_AUDIO_MONO;
@@ -359,10 +359,10 @@ bool AudioService::EnsureEncoder() {
     enc_cfg.bitrate = 32000;
     enc_cfg.frame_duration = ESP_OPUS_ENC_FRAME_DURATION_60_MS;
     enc_cfg.application_mode = ESP_OPUS_ENC_APPLICATION_AUDIO;
-    enc_cfg.complexity = 0;      // C3 单核 160MHz，复杂度 0 保实时
+    enc_cfg.complexity = 0;      // C3 single core at 160MHz; complexity 0 keeps it real-time
     enc_cfg.enable_fec = false;
-    // DTX 关掉：按下说话时静音抑制只有坏处 —— 一旦判定静音就一个包都不发，
-    // 服务端收不到音频干脆不回应，表现出来正是"对话之后没有返回"。
+    // DTX off: silence suppression only hurts push-to-talk - once it decides it's silence it sends no packets at all,
+    // the server gets no audio and simply doesn't respond, which looks exactly like "no reply after talking".
     enc_cfg.enable_dtx = false;
     enc_cfg.enable_vbr = true;
 
@@ -463,7 +463,7 @@ bool AudioService::StartRecording() {
         return true;
     }
 
-    // 半双工：录音前必须停掉播放（lifecycle_lock_ 是递归锁，同任务直接调用安全）
+    // Half-duplex: playback must stop before recording (lifecycle_lock_ is a recursive lock, so calling directly from the same task is safe)
     if (is_playing_ || work_ == Work::Play) {
         AbortPlayback();
     }
@@ -523,13 +523,13 @@ void AudioService::StopRecording() {
         return;
     }
 
-    is_recording_ = false;                 // 录音循环的唯一退出条件
+    is_recording_ = false;                 // The only exit condition of the recording loop
     s_visual_level.store(0, std::memory_order_relaxed);
     const bool idle = (work_ != Work::Record) || WaitWorkIdle(kWorkIdleTimeoutMs, "StopRecording");
 
     // Keep the encoder for another recording turn. Playback can close its small
     // wrapper and reinitialize the same fixed state once this worker is idle.
-    // 用户已经停止说话，队列里剩下的半帧没必要再发
+    // The user has stopped speaking; no need to send the half frame left in the queue
     RingReset(tx_ring_);
 
     if (worker_task_ != nullptr) {
@@ -544,8 +544,8 @@ void AudioService::StopRecording() {
 
 void AudioService::RecordSection() {
     while (is_recording_ && opus_enc_handle_ != nullptr && !s_cancel_requested.load()) {
-        // bsp_audio_read 是 portMAX_DELAY 阻塞读（见 bsp_audio.h）；正常 60ms 一块
-        // 必然返回，因此 is_recording_ 的检查点足够密集。
+        // bsp_audio_read is a portMAX_DELAY blocking read (see bsp_audio.h); normally a 60ms block
+        // always returns, so is_recording_ is checked often enough.
         if (bsp_audio_read(pcm_scratch_, kEncPcmFrameBytes) != ESP_OK) {
             s_visual_level.store(0, std::memory_order_relaxed);
             vTaskDelay(pdMS_TO_TICKS(10));
@@ -565,7 +565,7 @@ void AudioService::RecordSection() {
 
         const esp_audio_err_t res = esp_opus_enc_process(opus_enc_handle_, &in_f, &out_f);
         if (res == ESP_AUDIO_ERR_OK && out_f.encoded_bytes > 0) {
-            // 只入队，不发送：网络 IO 交给控制任务
+            // Enqueue only, don't send: network I/O is left to the control task
             if (!RingPush(tx_ring_, opus_scratch_, out_f.encoded_bytes)) {
                 ESP_LOGW(TAG, "TX ring full, dropping a frame");
             }
@@ -636,7 +636,7 @@ bool AudioService::StartPlayback() {
         return true;
     }
 
-    // 半双工：播放前必须停掉录音（递归锁，同任务直接调用安全）。
+    // Half-duplex: recording must stop before playback (recursive lock, so calling directly from the same task is safe).
     // An idle encoder alone is not a reason to discard its outgoing queue.
     if (is_recording_) {
         StopRecording();
@@ -658,7 +658,7 @@ bool AudioService::StartPlayback() {
         return false;
     }
 
-    // 服务端重新下发过采样率就换掉旧解码器（此时录音已停、worker 空闲）
+    // If the server sends a new sample rate, replace the old decoder (recording is stopped and the worker is idle at this point)
     if (opus_dec_handle_ != nullptr && opus_dec_rate_ != playback_rate_) {
         ESP_LOGI(TAG, "Decoder sample rate %d -> %d; reopening", opus_dec_rate_, playback_rate_);
         /* caller-owned decoder state; no heap free */
@@ -675,13 +675,13 @@ bool AudioService::StartPlayback() {
         return false;
     }
 
-    // 严格半双工：走到这里时 StopRecording() 已经等待录音 worker 回到空闲；
-    // 编解码状态共享固定区，codec 从 16kHz 录音切换为服务端播放采样率。
-    // 先静音再切格式，避免 codec close/open 的瞬态进入功放。每个 App 仍必须声明
-    // 自己的逻辑音量；播放音量由整机设置控制，不再叠加隐藏的 70% 上限。
+    // Strict half-duplex: by the time we get here StopRecording() has already waited for the recording worker to go idle;
+    // codec state shares the fixed area, and the codec switches from 16kHz recording to the server's playback sample rate.
+    // Mute before switching format so codec close/open transients don't reach the amp. Each app must still declare
+    // its own logical volume; playback volume is controlled by the system setting, with no hidden 70% cap on top.
     bsp_audio_set_volume(0);
-    // 对齐官方 folo-ai-passport-xiaozhi: 直接以原生采样率（24000Hz）驱动 ES8311，
-    // 不再做 48kHz 升采样，消除时钟与插值失真，同时释放 2.9KB 堆内存。
+    // Matches the official folo-ai-passport-xiaozhi: drive the ES8311 directly at the native sample rate (24000Hz),
+    // no more 48kHz upsampling, which removes clock and interpolation distortion and frees 2.9KB of heap.
     if (bsp_audio_set_format((uint32_t)playback_rate_, kBitsPerSample, kChannels) != ESP_OK) {
         ESP_LOGE(TAG, "Playback codec format switch failed");
         xSemaphoreGiveRecursive(lifecycle_lock_);
@@ -713,8 +713,8 @@ void AudioService::StopPlayback() {
         return;
     }
 
-    // 软停：播完缓冲里剩余音频再退出（正常 tts stop，尾音不被切断）。
-    // 这里刻意不把 is_playing_ 置 false —— 播放循环用它决定是否继续写 codec。
+    // Soft stop: play out the remaining buffered audio, then exit (normal tts stop, the tail is not cut off).
+    // is_playing_ is deliberately not set to false here - the playback loop uses it to decide whether to keep writing to the codec.
     play_drain_ = true;
     xSemaphoreGive(work_signal_);
 
@@ -762,7 +762,7 @@ void AudioService::AbortPlayback() {
     }
 
     is_playing_ = false;
-    play_stop_ = true;          // 立刻退出，不等缓冲
+    play_stop_ = true;          // Exit immediately, don't wait for the buffer
     play_drain_ = false;
     bsp_audio_set_volume(0);
     RingReset(play_ring_);
@@ -797,12 +797,12 @@ void AudioService::PlaySection() {
 
         const size_t got = RingPop(play_ring_, opus_scratch_, kOpusFrameMaxBytes);
         if (got == 0) {
-            // 收到软停且缓冲已排空 → 正常收尾（尾音已全部写进 codec）
+            // Soft stop received and the buffer is drained → normal finish (the tail has all been written to the codec)
             if (play_drain_ && !HasPendingPlayback()) break;
             vTaskDelay(pdMS_TO_TICKS(5));
             starve_ticks += 5;
-            // 仅当严重断流（超过 200ms 无任何数据）时才重新标记未预缓冲，
-            // 避免日常网络微抖动反复重置预缓冲，导致底层 DMA 播空而产生爆音。
+            // Only mark as not pre-buffered again on a severe dropout (no data for more than 200ms),
+            // so everyday network jitter doesn't keep resetting pre-buffering and make the underlying DMA run dry and pop.
             if (starve_ticks >= 200) {
                 primed = false;
                 starve_ticks = 0;
@@ -837,10 +837,10 @@ void AudioService::PlaySection() {
 void AudioService::PushIncomingAudio(const uint8_t *opus_data, size_t len) {
     if (opus_data == nullptr || len == 0 || len > kOpusFrameMaxBytes) return;
 
-    // TTS 服务端可能以高于实时播放的速度突发下发。旧逻辑 2KB 队列一满就直接
-    // 丢 Opus 帧，真机日志已确认长回复中连续丢包，听感正是滋滋/爆裂声。
-    // 现在先用更大的队列吸收突发；仍满时在 websocket 接收任务上短暂等待，利用
-    // TCP 背压让发送端降速。300ms 小于保活/协议超时量级，也不会长期卡住回调。
+    // The TTS server may burst audio faster than real-time playback. The old logic dropped Opus frames as soon as the 2KB queue
+    // was full; device logs confirmed consecutive drops on long replies, which is exactly the hissing/crackling heard.
+    // Now a larger queue absorbs bursts first; if still full, wait briefly on the websocket receive task and use
+    // TCP backpressure to slow the sender. 300ms is below keepalive/protocol timeout scale and won't stall the callback for long.
     const TickType_t wait_started = xTaskGetTickCount();
     const TickType_t wait_ticks = pdMS_TO_TICKS(kPlaybackEnqueueWaitMs);
     while (!RingPush(play_ring_, opus_data, len)) {
@@ -853,7 +853,7 @@ void AudioService::PushIncomingAudio(const uint8_t *opus_data, size_t len) {
         vTaskDelay(pdMS_TO_TICKS(5));
     }
     playback_progress_.fetch_add(1);
-    // 立刻唤醒工作线程（信号量无句柄，天然无"刚读到句柄任务就自删"竞态）
+    // Wake the worker thread immediately (a semaphore has no handle, so there is no "task deletes itself right after its handle was read" race)
     if (work_signal_ != nullptr) xSemaphoreGive(work_signal_);
 }
 
@@ -865,7 +865,7 @@ void AudioService::WorkerEntry(void *arg) {
     static_cast<AudioService *>(arg)->WorkerLoop();
 }
 
-// 常驻：平时停在 work_signal_ 上不占 CPU，收到信号才按模式干活。
+// Resident: normally parked on work_signal_ using no CPU; works in the requested mode only when signaled.
 void AudioService::WorkerLoop() {
     ESP_LOGI(TAG, "Audio worker running (stack %u bytes)", (unsigned)kWorkerStack);
 
@@ -878,7 +878,7 @@ void AudioService::WorkerLoop() {
         } else if (work_ == Work::Play) {
             PlaySection();
         }
-        // 无论哪种模式结束，都回报"已停"，让控制任务安全地关闭句柄
+        // Whichever mode ended, report "stopped" so the control task can close handles safely
         s_visual_level.store(0, std::memory_order_relaxed);
         is_recording_ = false;
         is_playing_ = false;

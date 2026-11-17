@@ -3,7 +3,7 @@
 #include "apps/home/home_profile.h"
 #include "esp_http_server.h"
 #include "esp_log.h"
-#include <esp_random.h>      // esp_fill_random():每次开启上传窗口换一个一次性 token
+#include <esp_random.h>      // esp_fill_random(): new one-time token each time the upload window opens
 #include "wifi_manager.h"
 #include "passport_muse.h"
 #include "ui/ui_palette.h"
@@ -31,13 +31,13 @@ static const char *TAG = "home_upload";
 static httpd_handle_t s_server;
 static char s_url[32];
 
-// 2026-09-13 修复(B8):上传接口原先完全无鉴权,同一局域网任何人都能 POST
-// /api/profile 或 /api/avatar 改写名片与人像。现在每次开启上传窗口生成一个
-// 一次性 token,页面里通过 window.__T 带上,三个 /api/* 接口都校验 ?t=。
-// 这不是强认证(设备没有账号体系),但足以挡住"随手扫一下端口就能改"的滥用。
+// 2026-09-13 fix (B8): the upload API used to have no auth at all; anyone on the same LAN could POST
+// /api/profile or /api/avatar to overwrite the card and portrait. Now each upload window generates a
+// one-time token that the page carries via window.__T; all three /api/* endpoints check ?t=.
+// This is not strong auth (the device has no accounts), but it stops "just scan the port and edit" abuse.
 static uint32_t s_token = 0;
 
-// 从 req->uri 的 query 里取 t= 并比对。URL 形如 /api/profile?t=123456
+// Extract t= from the req->uri query and compare. URL looks like /api/profile?t=123456
 static bool token_ok(httpd_req_t *req) {
     if (s_token == 0) return false;
     char query[96], token[16];
@@ -66,7 +66,7 @@ static std::mutex s_network_mutex;
 static std::vector<SsidItem> s_saved_networks;
 
 // ---------------------------------------------------------------------------
-// 处理器
+// Handlers
 // ---------------------------------------------------------------------------
 
 static esp_err_t send_json(httpd_req_t *req, int status, const char *json) {
@@ -93,8 +93,8 @@ static esp_err_t handler_index(httpd_req_t *req) {
     httpd_resp_set_type(req, "text/html; charset=utf-8");
     httpd_resp_set_hdr(req, "Cache-Control", "no-store, max-age=0");
     httpd_resp_set_hdr(req, "Content-Encoding", "gzip");
-    // 页面在 flash 中已 gzip,无法再原样注入;一次性 token 改由 cookie 交给页面脚本
-    // (页面读出后仍走 t= 参数鉴权,cookie 本身不参与鉴权,不引入 CSRF)。
+    // The page is stored gzipped in flash and cannot be injected into as-is; the one-time token reaches the page script via a cookie instead
+    // (the page reads it and still authenticates with the t= parameter; the cookie itself is not used for auth, so no CSRF).
     char cookie[48];
     std::snprintf(cookie, sizeof(cookie), "pt=%lu; Path=/; SameSite=Strict",
                   (unsigned long)s_token);
@@ -158,7 +158,7 @@ static esp_err_t handler_profile_post(httpd_req_t *req) {
     cJSON *root = cJSON_Parse(body);
     if (!root) return send_json(req, 400, "{\"error\":\"json\"}");
 
-    // 只接受网页会填的字段;缺省按空串处理,等于允许清空资料
+    // Accept only the fields the web page fills; missing ones are treated as empty strings, which allows clearing the profile
     home_profile_t in = {};
     const auto grab = [&](const char *key, char *dst, size_t cap) {
         const cJSON *item = cJSON_GetObjectItemCaseSensitive(root, key);
@@ -266,8 +266,8 @@ static esp_err_t handler_avatar_post(httpd_req_t *req) {
         return send_avatar_upload_error(req, "avatar_size", ESP_ERR_INVALID_SIZE);
     }
 
-    // httpd_req_recv 的缓冲是 char*,而落盘接口要 uint8_t*;在调用处做一次转换,
-    // 比把整个缓冲声明成 uint8_t 再在 recv 上强转更安全(C++ 下 recv 不会接受 uint8_t*)。
+    // httpd_req_recv takes a char* buffer while the storage API wants uint8_t*; convert once at the call site,
+    // which is safer than declaring the buffer uint8_t and casting at recv (in C++ recv won't accept uint8_t*).
     char chunk[512];
     size_t remaining = total;
     bool first = true;
@@ -285,9 +285,9 @@ static esp_err_t handler_avatar_post(httpd_req_t *req) {
             return send_avatar_upload_error(req, "avatar_recv", n == HTTPD_SOCK_ERR_TIMEOUT
                 ? ESP_ERR_TIMEOUT : ESP_FAIL);
         }
-        // 2026-09-13 修复(B3):原来直接 remaining -= n。若对端发来超过剩余
-        // 长度的字节(异常/分块编码/代理行为),size_t 下溢成巨大值 →
-        // while 死循环,永久占住这个 httpd 会话与 6KB 栈任务。
+        // 2026-09-13 fix (B3): this used to do remaining -= n directly. If the peer sent more bytes than
+        // remain (malformed/chunked encoding/proxy behavior), size_t underflowed to a huge value →
+        // an endless while loop, permanently holding this httpd session and its 6KB-stack task.
         if ((size_t)n > remaining) {
             ESP_LOGW(TAG, "Avatar oversized: got %d, only %u left; truncating",
                      n, (unsigned)remaining);
@@ -551,12 +551,12 @@ esp_err_t home_upload_start(void) {
     s_saved_networks = SsidManager::GetInstance().GetSsidList();
     s_had_saved = !s_saved_networks.empty();
 
-    // 每个上传窗口换一个 token(见 token_ok 注释)。用 esp_fill_random 而非
-    // esp_random():后者在同批 IDF 头文件组合下出现过未声明的编译问题,
-    // 而 xiaozhi 侧已稳定使用 esp_fill_random。
+    // New token per upload window (see the token_ok comment). Use esp_fill_random rather than
+    // esp_random(): the latter hit an undeclared-identifier build error with this combination of IDF headers,
+    // while the Xiaozhi side already uses esp_fill_random reliably.
     esp_fill_random(&s_token, sizeof(s_token));
     s_token &= 0x7fffffffu;
-    if (s_token == 0) s_token = 1;   /* 0 被 token_ok 当作"未启用" */
+    if (s_token == 0) s_token = 1;   /* token_ok treats 0 as "disabled" */
 
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.stack_size = 6144;
@@ -593,8 +593,8 @@ esp_err_t home_upload_start(void) {
     const httpd_uri_t muse_get = {"/api/muse", HTTP_GET, handler_muse_get, NULL};
     const httpd_uri_t muse_post = {"/api/muse", HTTP_POST, handler_muse_post, NULL};
     const httpd_uri_t captive_uri = {"/*", HTTP_GET, handler_captive, NULL};
-    // 2026-09-13 修复(B8):注册返回值必须检查。原来四个 handler 全丢返回值,
-    // 注册失败时页面直接 404 且日志里一行痕迹都没有。
+    // 2026-09-13 fix (B8): registration return values must be checked. All four handlers used to ignore them,
+    // so a failed registration gave a plain 404 with no trace in the log.
     struct { const httpd_uri_t *uri; const char *name; } routes[] = {
         {&index_uri, "/"}, {&cities_uri, "GET /api/cities"}, {&profile_get, "GET /api/profile"},
         {&profile_post, "POST /api/profile"}, {&avatar_post, "POST /api/avatar"}, {&avatar_get, "GET /api/avatar"},
@@ -624,7 +624,7 @@ esp_err_t home_upload_start(void) {
 
 void home_upload_stop(void) {
     if (!s_server) return;
-    httpd_stop(s_server); // 内部 join 处理器任务后释放
+    httpd_stop(s_server); // Joins the handler task internally, then frees
     home_profile_abort_avatar_upload();
     home_profile_abort_card_upload();
     s_server = NULL;
@@ -632,7 +632,7 @@ void home_upload_stop(void) {
     for (auto &item : s_saved_networks) std::fill(item.password.begin(), item.password.end(), '\0');
     s_saved_networks.clear();
     s_finish_at = 0;
-    s_token = 0;          // 窗口关闭即作废,旧链接立刻失效
+    s_token = 0;          // Invalidated when the window closes; old links stop working immediately
     ESP_LOGI(TAG, "Upload server stopped");
 }
 

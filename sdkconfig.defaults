@@ -98,15 +98,15 @@ CONFIG_BT_NIMBLE_NVS_PERSIST=y
 # MTU 256 keeps provisioning chunks within Android's GATT write limit.
 CONFIG_BT_NIMBLE_ATT_PREFERRED_MTU=256
 
-# main 任务栈:Home 应用在主任务里走 LVGL TJPEG decoder_info(文件源),
-# 其栈上 workb[TJPGD_WORKBUFF_SIZE] ~3.1KB,3584 必爆(2026-09-13 真机
-# Stack protection fault 崩溃循环,addr2line 定位 lv_tjpgd.c:82)。
+# main task stack: the Home app runs LVGL TJPEG decoder_info (file source) on the main task,
+# which puts workb[TJPGD_WORKBUFF_SIZE] ~3.1KB on the stack; 3584 always overflows (2026-09-13 on device:
+# Stack protection fault crash loop, addr2line points to lv_tjpgd.c:82).
 CONFIG_ESP_MAIN_TASK_STACK_SIZE=8192
 
-# SRAM 预算:C3 无 PSRAM,IRAM 与 DRAM 共用 321KB SRAM,IRAM 每省 1 字节即多 1 字节堆。
-# -Os 与以下 flash 放置合计释放约 40KB 堆(IRAM .text 86.5KB -> 46.6KB),且固件小约 230KB。
-# 前提:工程内无 IRAM ISR(无 IRAM_ATTR / ESP_INTR_FLAG_IRAM),ringbuf 仅在任务中使用。
-# 不开 SPI_FLASH_AUTO_SUSPEND:XMC 颗粒 suspend 风险高,故 LOG/timer 等仍留在 IRAM。
+# SRAM budget: C3 has no PSRAM; IRAM and DRAM share 321KB SRAM, so every byte saved in IRAM is one more byte of heap.
+# -Os plus the flash placements below free about 40KB of heap (IRAM .text 86.5KB -> 46.6KB) and shrink the firmware by about 230KB.
+# Precondition: no IRAM ISRs in the project (no IRAM_ATTR / ESP_INTR_FLAG_IRAM), and ringbuf is only used from tasks.
+# SPI_FLASH_AUTO_SUSPEND stays off: suspend is risky on XMC chips, so LOG/timer etc. stay in IRAM.
 CONFIG_COMPILER_OPTIMIZATION_SIZE=y
 CONFIG_RINGBUF_PLACE_FUNCTIONS_INTO_FLASH=y
 CONFIG_SPI_MASTER_ISR_IN_IRAM=n
@@ -114,7 +114,7 @@ CONFIG_HEAP_PLACE_FUNCTION_INTO_FLASH=y
 CONFIG_FREERTOS_PLACE_FUNCTIONS_INTO_FLASH=y
 CONFIG_ESP_EVENT_POST_FROM_IRAM_ISR=n
 CONFIG_LIBC_LOCKS_PLACE_IN_IRAM=n
-# 量产颗粒为 XMC(走 generic 驱动),保留 GD 作备选;换料到其他厂商需重新打开对应驱动。
+# Production flash is XMC (generic driver); GD is kept as a fallback. Switching to another vendor requires re-enabling its driver.
 CONFIG_SPI_FLASH_SUPPORT_ISSI_CHIP=n
 CONFIG_SPI_FLASH_SUPPORT_MXIC_CHIP=n
 CONFIG_SPI_FLASH_SUPPORT_WINBOND_CHIP=n

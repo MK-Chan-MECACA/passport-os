@@ -1,5 +1,5 @@
-// main/app_types.h —— 纯 C 共享类型:状态机/事件/动作/UI 快照。
-// 不 include 任何 ESP-IDF 头,保证可在宿主机上直接编译测试。
+// main/app_types.h - shared pure-C types: state machine / events / actions / UI snapshot.
+// Includes no ESP-IDF headers, so it compiles directly on the host for tests.
 #pragma once
 
 #include <stdbool.h>
@@ -9,85 +9,85 @@
 extern "C" {
 #endif
 
-// ---------------- 按键动作(下行注入,由 PC client 执行) ----------------
+// ---------------- Key actions (injected downstream, executed by the PC client) ----------------
 typedef enum {
-    APP_KEY_ENTER = 0,   // 输入框回车(提交)
-    APP_KEY_CLEAR,       // 清空输入框全部文字
+    APP_KEY_ENTER = 0,   // Enter in the input box (submit)
+    APP_KEY_CLEAR,       // clear all text in the input box
 } app_key_action_t;
 
-// ---------------- 状态 ----------------
-// 注意:命名为 app_stage_t 而非 app_state_t —— 后者是 app_state.h 里的完整状态结构体。
+// ---------------- States ----------------
+// Note: named app_stage_t rather than app_state_t - the latter is the full state struct in app_state.h.
 typedef enum {
-    APP_ST_HOME = 0,        // 待机主页
-    APP_ST_READY,           // 工作流就绪(可 PTT)
-    APP_ST_LISTENING,       // 录音中(PTT 按住)
-    APP_ST_TRANSCRIBING,    // 兼容名:语音完成，等待 DOWN=Enter 发送
-    APP_ST_AGENT_RUNNING,   // Agent 执行中
-    APP_ST_APPROVAL,        // 待物理审批
+    APP_ST_HOME = 0,        // idle home page
+    APP_ST_READY,           // workflow ready (PTT available)
+    APP_ST_LISTENING,       // recording (PTT held)
+    APP_ST_TRANSCRIBING,    // legacy name: voice done, waiting for DOWN=Enter to send
+    APP_ST_AGENT_RUNNING,   // Agent running
+    APP_ST_APPROVAL,        // waiting for physical approval
     APP_ST_COUNT,
 } app_stage_t;
 
-// ---------------- 按键 ----------------
-// 物理键语义(2026-08-29):UP(音量加)= 按下即录、松开发送(按住说话);
-// DOWN(音量减)= 单击回车 / 长按 0.5s 清空输入框;OK = 单击导航·批准 /
-// 长按 0.5s 锁屏解锁。同一颗键上只放"单击 + 长按",不放双击(见 app_state.c)。
+// ---------------- Keys ----------------
+// Physical key semantics (2026-08-29): UP (volume up) = press to record, release to send (push to talk);
+// DOWN (volume down) = click for Enter / long-press 0.5s to clear the input box; OK = click to navigate·approve /
+// long-press 0.5s to lock/unlock. Each key only has "click + long-press", no double-click (see app_state.c).
 typedef enum {
     APP_BTN_UP = 0,
     APP_BTN_DOWN,
     APP_BTN_OK,
 } app_btn_t;
 
-// ---------------- 提示音 ----------------
+// ---------------- Prompt tones ----------------
 typedef enum {
-    APP_TONE_START = 0,     // 440Hz/80ms  录音就绪
-    APP_TONE_SEND,          // 880Hz/60ms  语音已发送
-    APP_TONE_APPROVAL,      // 587+880/150ms 审批提醒
-    APP_TONE_SUCCESS,       // 660→880/200ms 完成
-    APP_TONE_REJECT,        // 220Hz/120ms 拒绝
-    APP_TONE_ERROR,         // 180Hz/100ms 离线/非法操作
+    APP_TONE_START = 0,     // 440Hz/80ms  recording ready
+    APP_TONE_SEND,          // 880Hz/60ms  voice sent
+    APP_TONE_APPROVAL,      // 587+880/150ms approval alert
+    APP_TONE_SUCCESS,       // 660→880/200ms done
+    APP_TONE_REJECT,        // 220Hz/120ms reject
+    APP_TONE_ERROR,         // 180Hz/100ms offline/invalid action
     APP_TONE_COUNT,
 } app_tone_t;
 
-// ---------------- 事件 ----------------
+// ---------------- Events ----------------
 typedef enum {
     APP_EV_KEY_PRESS = 0,
     APP_EV_KEY_RELEASE,
     APP_EV_KEY_CLICK,
     APP_EV_KEY_DOUBLE,
-    APP_EV_KEY_LONG,        // 长按达阈值瞬间(UP 键 0.5s → 说话开始)
-    APP_EV_KEY_LONG_UP,     // 长按超时后松开(长按态不再报 RELEASE;UP 键 → 说话结束)
+    APP_EV_KEY_LONG,        // the instant a long press reaches the threshold (UP key 0.5s -> start talking)
+    APP_EV_KEY_LONG_UP,     // release after the long-press timeout (long-press state no longer reports RELEASE; UP key -> stop talking)
     APP_EV_AGENT_STATUS,
     APP_EV_APPROVAL_REQUEST,
     APP_EV_TRANSCRIPT,
     APP_EV_AUDIO_DROP_START,
     APP_EV_AUDIO_DROP_END,
-    // 2026-09-13 重命名(D2):通道已从 BLE 迁到 Wi-Fi UDP,但事件名还叫 BLE,
-    // 读代码的人会以为还在走蓝牙。改为 LINK_* 表示"链路",与通道无关。
-    APP_EV_LINK_UP,         // 链路通:对端已就绪(PTT 可用的充分条件)
-    APP_EV_LINK_DOWN,       // 链路断(连接断开或对端失联)
-    APP_EV_LINK_DROP,       // 事件行因断连/未就绪被丢弃(UI toast 反馈)
-    APP_EV_AUDIO_ERROR,     // 采集硬件错误
+    // Renamed 2026-09-13 (D2): the channel moved from BLE to Wi-Fi UDP, but the events were still named BLE,
+    // making readers think Bluetooth was still in use. Renamed to LINK_* meaning "link", independent of the channel.
+    APP_EV_LINK_UP,         // link up: peer is ready (sufficient condition for PTT)
+    APP_EV_LINK_DOWN,       // link down (disconnected or peer lost)
+    APP_EV_LINK_DROP,       // event line dropped because of disconnect/not ready (UI toast feedback)
+    APP_EV_AUDIO_ERROR,     // capture hardware error
     APP_EV_INIT_FAILED,     // Local transport/pipeline startup failed; re-enter to retry
-    APP_EV_TONE_DONE,       // START 提示音播放完成(异步开流的信号,见 design)
-    APP_EV_TICK,            // 100ms 心跳,驱动超时/息屏
-    // ---- USB 有线通道(USB-Serial-JTAG,见 design.md)----
-    APP_EV_USB_CONNECTED,   // USB 会话通(收到 PC 握手 ping;link_up 的 USB 侧充分条件)
-    APP_EV_USB_DISCONNECTED, // USB 会话断(拔线:is_connected 翻转)
-    APP_EV_TIME_SET,         // 校时下行(epoch 秒 UTC;双通道共用:CTRL time.set 行 + SYS time set)
+    APP_EV_TONE_DONE,       // START tone finished playing (signal for async stream start, see design)
+    APP_EV_TICK,            // 100ms heartbeat, drives timeouts/screen-off
+    // ---- USB wired channel (USB-Serial-JTAG, see design.md) ----
+    APP_EV_USB_CONNECTED,   // USB session up (PC handshake ping received; USB-side sufficient condition for link_up)
+    APP_EV_USB_DISCONNECTED, // USB session down (unplugged: is_connected flipped)
+    APP_EV_TIME_SET,         // time-set downlink (epoch seconds UTC; shared by both channels: CTRL time.set line + SYS time set)
     APP_EV_PC_STATUS,        // Hotkey forwarder capability heartbeat (not ASR status)
 } app_event_type_t;
 
-// ---------------- 链路通道(双通道常开架构,2026-08-28) ----------------
-// 旧互斥模式(BLE=0/USB=2, NVS 持久化 + 重启切换)已整体退役:BLE 广播常驻,
-// USB 数据通道插线即用(usb_link 待命,主机出现自动接入)。会话路由按
-// link_channel 取值:状态机里最近连接/使用的通道,音频与 voice.* 上行跟随它。
+// ---------------- Link channel (dual always-on channel architecture, 2026-08-28) ----------------
+// The old exclusive mode (BLE=0/USB=2, NVS-persisted + switch on reboot) is fully retired: BLE advertising is always on,
+// the USB data channel works on plug-in (usb_link on standby, auto-attaches when a host appears). Session routing follows
+// link_channel: the most recently connected/used channel in the state machine; audio and voice.* uplink follow it.
 typedef enum {
-    APP_CHAN_BLE = 0,       // BLE(无线):EVENT 特征订阅即通
-    APP_CHAN_USB = 2,       // USB(有线):PC ping 握手即通
-    APP_CHAN_NONE = 0xFF,   // 双通道均断(link_up=false)
+    APP_CHAN_BLE = 0,       // BLE (wireless): up once the EVENT characteristic is subscribed
+    APP_CHAN_USB = 2,       // USB (wired): up after the PC ping handshake
+    APP_CHAN_NONE = 0xFF,   // both channels down (link_up=false)
 } app_chan_t;
 
-// Agent 状态(与协议字符串互转在 app_protocol.c)
+// Agent status (conversion to/from protocol strings in app_protocol.c)
 typedef enum {
     APP_AGENT_READY = 0,
     APP_AGENT_THINKING,
@@ -97,13 +97,13 @@ typedef enum {
     APP_AGENT_COUNT,
 } app_agent_state_t;
 
-// 注入方式(协议兼容保留:Mac 端注入,设备不再消费;UI 显示转写)
+// Injection mode (kept for protocol compatibility: the Mac side injects, the device no longer consumes it; UI shows the transcript)
 typedef enum {
-    APP_INJECT_TYPE = 0,    // 旧:HID 逐字键入(退役,仅字段保留)
-    APP_INJECT_PASTE,       // 旧:粘贴 Cmd+V(退役,仅字段保留)
+    APP_INJECT_TYPE = 0,    // old: HID types character by character (retired, field kept only)
+    APP_INJECT_PASTE,       // old: paste with Cmd+V (retired, field kept only)
 } app_inject_mode_t;
 
-// 审批风险等级
+// Approval risk level
 typedef enum {
     APP_RISK_LOW = 0,
     APP_RISK_MEDIUM,
@@ -111,29 +111,29 @@ typedef enum {
     APP_RISK_COUNT,
 } app_risk_t;
 
-// 审批动作
+// Approval action
 typedef enum {
     APP_ACTION_APPROVE = 0,
     APP_ACTION_REJECT,
     APP_ACTION_DETAILS,
 } app_approval_decision_t;
 
-// 文本长度上限(Mac 端按条下发,设备仅显示)
+// Text length limits (sent by the Mac per item, device only displays)
 #define APP_TRANSCRIPT_MAX    128
 #define APP_TASK_ID_MAX       32
 #define APP_TITLE_MAX         64
 #define APP_TARGET_MAX        64
 #define APP_DIFF_MAX          64
-// 显示通道:须 ≥ APP_TRANSCRIPT_MAX,保证 relay 按 128B 切分的转写行完整落屏
+// Display channel: must be ≥ APP_TRANSCRIPT_MAX so transcript lines split by relay at 128B land on screen intact
 #define APP_AGENT_MSG_MAX     APP_TRANSCRIPT_MAX
 #define APP_TOAST_MAX         64
 
-// 事件(定长结构,入队拷贝,union 保小)
+// Event (fixed-size struct, copied into the queue, union kept small)
 typedef struct {
     app_event_type_t type;
     union {
-        // mv = 回调时刻 bsp_button_read_mv()(mV):真实按压 3-5,假按(射频
-        // 腐蚀)2890=松开电平 —— app_state 据此区分真假 LONG(见 READY 态)
+        // mv = bsp_button_read_mv() (mV) at callback time: a real press reads 3-5, a fake press (RF
+        // corrosion) reads 2890 = released level - app_state uses this to tell real from fake LONG (see the READY state)
         struct { uint8_t btn; uint16_t mv; } key;       // KEY_*
         struct {
             uint8_t state;                              // app_agent_state_t
@@ -148,40 +148,40 @@ typedef struct {
         } approval;                                     // APPROVAL_REQUEST
         struct {
             char text[APP_TRANSCRIPT_MAX];
-            uint8_t inject_mode;                        // app_inject_mode_t(协议兼容保留)
-            bool final;                                 // false=预览态(未定稿);true=定稿落定
+            uint8_t inject_mode;                        // app_inject_mode_t (kept for protocol compatibility)
+            bool final;                                 // false = preview (not final); true = final
         } transcript;                                   // TRANSCRIPT
-        struct { int64_t epoch; } time_set;             // TIME_SET(UTC 秒,int64 对齐 8,union 仍 ≤228B)
+        struct { int64_t epoch; } time_set;             // TIME_SET (UTC seconds; int64 aligns to 8, union still ≤228B)
         struct { bool audio_ready; bool hotkey_ready; } pc_status;
     } u;
 } app_event_t;
 
-// ---------------- 动作 ----------------
+// ---------------- Actions ----------------
 typedef enum {
     APP_ACT_NONE = 0,
     APP_ACT_UI_REFRESH,
     APP_ACT_UI_SCREEN_OFF,
     APP_ACT_UI_SCREEN_ON,
-    APP_ACT_UI_PANEL_OFF,   // 面板 SLPIN 断电(60s 无操作级)
-    APP_ACT_UI_PANEL_ON,    // 面板 SLPOUT 上电(唤醒)
+    APP_ACT_UI_PANEL_OFF,   // panel SLPIN power-off (60s idle level)
+    APP_ACT_UI_PANEL_ON,    // panel SLPOUT power-on (wake)
     APP_ACT_SEND_VOICE_START,
     APP_ACT_SEND_VOICE_END,
-    APP_ACT_SEND_KEY_ACTION,   // 上行按键动作(enter/clear,PC client 执行注入)
+    APP_ACT_SEND_KEY_ACTION,   // upstream key action (enter/clear, injected by the PC client)
     APP_ACT_SEND_AGENT_ACTION,
     APP_ACT_STREAM_START,
     APP_ACT_STREAM_STOP,
-    APP_ACT_STREAM_CANCEL,   // 取消/断链:停采集 + 清空 ring + 丢弃在途帧(与 STOP 区别:不排空发送)
+    APP_ACT_STREAM_CANCEL,   // cancel/disconnect: stop capture + clear ring + discard in-flight frames (differs from STOP: no drain of sends)
     APP_ACT_PLAY_TONE,
-    APP_ACT_TIME_SET,        // time_sync_set_epoch(校时落地)
+    APP_ACT_TIME_SET,        // time_sync_set_epoch (apply time set)
 } app_action_type_t;
 
-// 单事件最多产出的动作数。emit() 满了就静默丢弃,所以这个值必须 ≥ 最长的
-// 那一条归约路径,否则丢的是尾部动作 —— 4 → 6(2026-08-29):息屏/断电态按
-// 音量加开录音是最长路径,唤醒三连(UI_PANEL_ON + UI_SCREEN_ON + UI_REFRESH)
-// 之后还有 PLAY_TONE + SEND_VOICE_START = 5 条,第 5 条正好被丢 —— 结果是
-// 滴声照响、采集照开,而 Mac 侧从没收到 voice.start(整段话进不了 ASR)。
-// 同长的还有"息屏 + 音量减长按清空"(唤醒三连 + SEND_KEY_ACTION + PLAY_TONE)
-// 与离线 PTT(唤醒三连 + PLAY_TONE(ERROR) + UI_REFRESH)。取 6 留一条余量。
+// Maximum actions produced per event. emit() silently drops when full, so this must be ≥ the longest
+// reduction path, otherwise trailing actions are lost - 4 -> 6 (2026-08-29): pressing volume up to record from the
+// screen-off/powered-off state is the longest path; after the wake triple (UI_PANEL_ON + UI_SCREEN_ON + UI_REFRESH)
+// come PLAY_TONE + SEND_VOICE_START = 5 actions, and the 5th was exactly the one dropped - the result was
+// the beep played and capture started, but the Mac never got voice.start (the whole utterance never reached ASR).
+// Equally long are "screen off + volume-down long-press clear" (wake triple + SEND_KEY_ACTION + PLAY_TONE)
+// and offline PTT (wake triple + PLAY_TONE(ERROR) + UI_REFRESH). 6 leaves one spare.
 #define APP_ACT_MAX 6
 
 typedef struct {
@@ -197,48 +197,48 @@ typedef struct {
     } u;
 } app_action_t;
 
-// ---------------- UI 快照 ----------------
+// ---------------- UI snapshot ----------------
 typedef struct {
     app_stage_t    state;
-    bool           link_up;       // false → OFFLINE(link_name DISCONNECTED)横幅 + 禁 PTT;true = 通道已通
+    bool           link_up;       // false -> OFFLINE (link_name DISCONNECTED) banner + PTT disabled; true = channel up
     bool           pc_ready;      // Fresh PC audio + hotkey readiness, separate from UDP discovery
     bool           init_failed;
     bool           screen_on;
-    bool           panel_on;      // 面板供电(SLPIN 断电后 false)
-    bool           net_busy;      // 音频丢帧中 → BUSY 横幅
-    bool           ble_connected; // BLE 连接是否建立(未订阅时图标灰色)
-    char           link_name[8];  // 当前链路通道名:"BLE"/"USB"(断线横幅按此渲染)
+    bool           panel_on;      // panel power (false after SLPIN power-off)
+    bool           net_busy;      // audio dropping frames -> BUSY banner
+    bool           ble_connected; // whether the BLE connection is established (icon grey while not subscribed)
+    char           link_name[8];  // current link channel name: "BLE"/"USB" (the disconnect banner renders from this)
     bool           battery_available;
     uint8_t        battery_soc;   // 0..100
     bool           wifi_connected;
     int8_t         wifi_rssi;     // Actual station signal, independent of PC discovery.
     char           agent_message[APP_AGENT_MSG_MAX];
-    bool           transcript_final; // false → 当前 agent_message 是转写预览(未定稿,UI 加光标感)
+    bool           transcript_final; // false -> the current agent_message is a transcript preview (not final, UI adds a cursor feel)
     char           agent_state_name[16];
     char           task_id[APP_TASK_ID_MAX];
     char           approval_title[APP_TITLE_MAX];
     char           approval_target[APP_TARGET_MAX];
     char           approval_diff[APP_DIFF_MAX];
     uint8_t        approval_risk;   // app_risk_t
-    uint32_t       elapsed_ms;      // 当前状态已持续时长(主循环在快照时补)
+    uint32_t       elapsed_ms;      // how long the current state has lasted (filled in by the main loop at snapshot time)
     char           toast[APP_TOAST_MAX];
 } app_ui_snapshot_t;
 
-// ---------------- 超时常量 ----------------
-#define APP_IDLE_BACKLIGHT_OFF_MS   20000u   // 无按键 → 关背光(息屏,渲染跳过)
-#define APP_IDLE_PANEL_OFF_MS       60000u   // 无按键 → 面板 SLPIN 断电(μA 级)
-#define APP_TRANSCRIBE_TIMEOUT  30000u   // 转写等待超时
-#define APP_AGENT_RUN_TIMEOUT   90000u   // Agent 执行超时
-#define APP_TICK_MS             100u     // 应用任务心跳
-// S3:START 音后未收 TONE_DONE 的最大等待(兜底开流)。500 → 200(2026-08-29):
-// 滴声本身只有 80ms,500ms 的余量是给"声音任务被挤住"留的,可它同时也是 PTT 最
-// 坏延迟 —— 真机抓到过一次按下到开录 622ms(= 本值 + APP_TICK_MS 粒度),用户已
-// 在说话而设备还没开录。降到 200 仍有 2.5 倍余量;代价是滴声真被拖慢时会与采集
-// 重叠(前几帧录进 440Hz),只发生在退化路径,可接受。兜底触发在串口留痕
-// (main.c 心跳里辨认 STREAM_START),下次再慢可直接看日志而不是猜。
+// ---------------- Timeout constants ----------------
+#define APP_IDLE_BACKLIGHT_OFF_MS   20000u   // no key press -> backlight off (screen off, rendering skipped)
+#define APP_IDLE_PANEL_OFF_MS       60000u   // no key press -> panel SLPIN power-off (μA level)
+#define APP_TRANSCRIBE_TIMEOUT  30000u   // transcription wait timeout
+#define APP_AGENT_RUN_TIMEOUT   90000u   // Agent run timeout
+#define APP_TICK_MS             100u     // app task heartbeat
+// S3: maximum wait for TONE_DONE after the START tone (fallback stream start). 500 -> 200 (2026-08-29):
+// the beep itself is only 80ms; the 500ms margin was for "the sound task getting starved", but it is also the worst-case
+// PTT latency - real hardware once caught 622ms from press to recording (= this value + APP_TICK_MS granularity), with the user already
+// talking while the device had not started recording. 200 still leaves 2.5× margin; the cost is that if the beep really is delayed it overlaps
+// capture (the first frames record the 440Hz), only on the degraded path, which is acceptable. The fallback firing leaves a trace on the serial log
+// (recognize STREAM_START in the main.c heartbeat), so next time it is slow, read the log instead of guessing.
 #define APP_TONE_PENDING_TIMEOUT_MS 200u
-// PTT 最长单次说话保护上限: 放宽至 10 分钟 (600秒)，支持长时间连续自然语音输入，
-// 同时防止极端物理按键卡死耗尽电池。
+// Maximum single PTT utterance guard: raised to 10 minutes (600 s) to allow long continuous natural speech input,
+// while still preventing a physically stuck key from draining the battery.
 #define APP_PTT_MAX_TALK_MS     600000u
 
 #ifdef __cplusplus
